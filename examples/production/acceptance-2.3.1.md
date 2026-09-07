@@ -44,4 +44,4 @@ python3 scripts/validate_prompt.py examples/production/30s-fight-t2v.prompt.md -
 
 ## 调研如何影响修复
 
-官方PDF重新核对锁定任务、素材限制、负向及时间控制；Higgsfield用于补起始站位、光学/物理/声音和明确切点，而非照搬其全部样例约束。第一手导演/编剧资料支持角色声音、听与回应、排练核对和有动机的镜头，不支持本地旧配额。链接及具体采用范围见 `../../references/screenwriting-traditions.md`、`../../references/director-lenses.md` 与来源账本。
+官方PDF重新核对锁定任务、素材限制、负向及时间控制；Higgsfield用于补起始站位、光学/物理/声音和明确切点，而非照搬其全部样例约束。第一手导演/编剧资料支持角色声音、听与回应、排练核对和有动机的镜头，不支持本地旧配额。链接及具体采用范围见 `../../references/director-lenses.md`、来源账本及创意侧（film-creative）的编剧传统资料。

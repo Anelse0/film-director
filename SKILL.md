@@ -18,55 +18,60 @@ description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词�
 ## 工作边界
 
 - **做**：表演外化（含情绪提示词）、导演与分镜、参考资产计划、Seedance 2.5 Prompt 编译（参考生为主；文生 / 关键帧 / 宫格 / 首尾帧 / 编辑 / 延长）、连续性与质量检查、成片问题定位。
-- **不做**：不创作概念、故事与剧本，不代写或润色台词（创意工作由 film-creative 承担；剧本缺口只登记，不代补）；不调用模型 API，不生成图片（只产出图像简报）；不虚构模型参数；不替用户决定与任务无关的美术风格。
+- **不做**：不创作概念、故事与剧本，不代写或润色台词（创意工作由 film-creative skill 承担；剧本缺口只登记，不代补）；不调用模型 API，不生成图片（只产出图像简报）；不虚构模型参数；不替用户决定与任务无关的美术风格。
 - **事实分级**（写任何模型能力时必须带标签）：`[官方]` 火山方舟指南原文 · `[第三方]` 有出处的外部经验 · `[推论]` 本 Skill 的设计推论 · `[未验证]` 未核实假设。能力表见 `references/seedance-2.5-capabilities.md`。
 
 完整生产到 S5b–S7 时读取 `references/production-workflow.md`。该接口把既有素材、任务参数、上游版本和审阅记录绑定到每条 clip；文本草稿不冒充可提交生产包。
 
 ## 输入与交接
 
-- **接受的输入**：剧本场景文本（`03_script/scene-XX.md` 格式或任何来源的等价场景稿）、场景参数卡、`ip.md` / 人物外观与地点描述、已有分镜卡、既有 Prompt 与成片反馈、表演测试请求。输入不要求来自 film-creative；用户直接给一段场景文本同样有效。
-- **材料按内容判断**：文本里有台词不等于剧本已完成；材料成熟度只影响登记与缺口清单，不触发代写。剧本层缺口（缺场景、缺台词、故事不成立）登记后交回用户或 film-creative，不在本 skill 内补写。
+- **接受的输入**：剧本场景文本（`03_script/scene-XX.md` 格式或任何来源的等价场景稿）、场景参数卡、`ip.md` / 人物外观与地点描述、已有分镜卡或镜头表、既有 Prompt 与成片反馈、表演测试请求。输入不要求来自 film-creative；用户直接给一段场景文本同样有效。
+- **剧本层缺口只登记不代写**：缺场景、缺台词、故事不成立时列缺口交回用户或 film-creative；用户说"台词就这样"时锁定台词，只补表演。
 - **锁定**：输入剧本中已确认的台词与场景是锁定内容，编译与外化不得擅改（硬规则 7）；表演目的需要的嘴部状态、动作标注是新增外化信息，不是改台词。
 
 ## 流水线
 
 ```
-S1 资源读取 → S2 需求识别 → S4 表演外化 → S5 导演与分镜（含 S5b 参考资产）→ S6 Prompt 编译 → S7 检查
+S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 ▮（含 S5b 参考资产）→ S6 Prompt 编译 → S7 检查
 ```
 
-▮ = 停靠点（等用户决定）。生产走稳定步骤；表演测试走上方优先路由。
+▮ = 停靠点（等用户决定）。
 
 | 阶段 | 读什么 | 产出什么 | 停靠 |
 |---|---|---|---|
-| S1 资源读取 | `references/stage-1-intake.md` | 资产登记（按保存契约）+ 缺口清单 | |
-| S2 需求识别 | 同上 §需求识别 ＋ `references/scene-parameters.md` §一 | 任务类型（performance / production / raw）· 锁定项 · 目标终点与排除项 · 自主执行 / 用户确认 / 文件保存 · clip 数 · **场景参数卡** | |
+| S1 资源读取 | `references/stage-1-intake.md` | 资产登记 + 缺口清单 | |
+| S2 任务识别 | 同上 §任务识别 ＋ `references/scene-parameters.md` §一 | 任务类型 · 运行模式 · 入口阶段 · clip 数 · 锁定判定 · **场景参数卡** | |
 | S4 表演外化 | `references/stage-4-performance.md` ＋ `references/emotion-performance.md` | 有序表演块（C 层）及内部核对记录 | |
 | S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` | `04_shots/scene-XX-clipYY.md` 分镜卡（五层） | ▮（与 S5b 一起） |
 | S5b 参考资产 | `references/stage-5b-reference-assets.md` | `05_assets/asset-plan.md`：资产清单 + 图像简报 + 上传顺序 | 等用户回填 |
 | S6 Prompt 编译 | `references/stage-6-prompt-compiler.md` ＋ `templates/prompt-templates.md` | `06_prompts/scene-XX-clipYY.prompt.md` | |
 | S7 检查 | `references/stage-7-qa-continuity.md` ＋ `scripts/validate_prompt.py` | `07_qa/…`；有成片时追加 `references/validation-log.md` | |
 
-**只读当前阶段需要的文件。** 执行契约判断一次后复用，后续不重复推导保存与范围。
-**按类型叠加**：基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇时，S4–S5 加读 `references/genre-packs.md` 对应一包（该文件也覆盖创意阶段用法，与 film-creative 共用同一份内容）。
-表演检查状态推进/持续与同步部位关系时读 `references/causal-chain.md`；机械感诊断读 `references/anti-mechanical.md`。表演测试以状态衔接替代剧情链，不为填表增加故事。
+**只读当前阶段需要的文件。**
+**按类型叠加**：基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇时，S4–S5 加读 `references/genre-packs.md` 对应一包。
+表演检查状态推进/持续与同步部位关系时读 `references/causal-chain.md`；机械感诊断读 `references/anti-mechanical.md`。表演测试以状态衔接替代剧情因果链，不为填表增加故事。
 
-## 需求识别与执行
+## 交付原则：对话是默认，落盘是显式动作
 
-**S2 先读 `references/execution-contract.md`，它是范围、自主执行、用户确认、文件保存的唯一决策源。** 结合本次原文、历史授权及材料成熟度确定目标终点、排除项和入口；不依靠触发词重新裁决。同一任务换种说法不应扩大交付。复杂请求按 `templates/execution-record.json` 记录，用 `scripts/route_check.py` 的 `--record` 接口检查内部一致性；脚本不验证语义理解。
+任何阶段的产物先在对话里交付。写文件只在两种情况发生：(a) 停靠点用户确认后，写该阶段产物；(b) 用户明确说"存 / 落盘 / 写进项目"。因此"直接出一个 prompt 看看"、"跑到分镜看看"都不需要特殊模式——它们只是把范围跑到某一阶段并在对话里交付，不落盘。"直接出"不等于"落盘"。
 
-| 用户意图 | 成果与入口 |
-|---|---|
-| 进入生产 | 已有剧本进 S4/S5；分镜转 Prompt 补资产后进 S6；到达所需成果即停 |
-| 表演测试 | 原文、强度、弧线、定时测试走独立路由，不补故事 |
-| 只拆分镜 | S4 → S5，终点 S5，排除 S6 |
-| 成片修正 | S7 定位问题 → 回 S5/S6 修对应镜头卡与 Prompt |
-| 想故事 / 写剧本 / 局部改写台词 | 不在本 skill 范围：交由 film-creative 承接后再回来 |
-| 只保存 | 保存指定现有文本，不启动新的生产 |
+## 运行模式与停靠点
 
-场景、镜头、clip 分别约束叙事范围、摄影和生成预算，不互相推导。用户要"一场戏"不等于一个 clip，也不等于要 Prompt。
+运行模式只回答两件事：**范围**（跑到哪一阶段）和**自主度**（停不停）。落盘由交付原则决定，不属于模式。默认停靠式：在需要用户选择的地方停，不替用户选，停下时只问一个问题。
 
-对话交付默认不落盘；本次明确保存要求或已有项目保存约定决定写盘。确认内容不自动建立保存约定，自主推进不自动确认。停靠由用户需要的选择与不可替代缺口决定，不按阶段增加审批。生产 S5/S5b 的成本决策与素材回填按既有约定执行，已有授权不重复询问。
+| 模式 | 触发词 | 范围与停靠 | 落盘（按交付原则） |
+|---|---|---|---|
+| **单阶段** | 用户指定某阶段（拆分镜、补表演、做资产计划、转 Prompt、查成片） | 只跑该阶段，停 | 该阶段产物（确认后） |
+| **停靠式**（默认） | 有剧本/场景稿，要完整生产 Prompt | S4 → S5+S5b ▮ → S6 → S7 | 停靠点确认后落盘 |
+| **单 clip** | "一个 clip 就行 / 一个镜头" | S5 单卡 ▮ → S6 | 同上 |
+| **全流程** | 一次跑完、不用问我、全部落盘 | S1 → S7 不停 | 用户预先批准了所有停靠，全部落盘 |
+| **看一眼**（范围任意） | 看下 / 看看效果 / 试一下 / 先出一个 …… 看 | 跑到用户指定的阶段（缺省到 S6），中途不停 | 不落盘，不强制追问；纯表演走优先路由 |
+
+停靠规则（只适用于默认停靠式；全流程、看一眼、单阶段及表演优先路由按上表执行）：
+
+- **S5 后必停**：分镜卡是最后一个人类可读的决策层；资产清单随分镜一起确认。
+- 其余停靠只问"按此继续？或改哪里"。
+- **每个停靠点第一行回显场景参数卡**（`references/scene-parameters.md`：强度 · 方向 · 信息 · 权力 · 进场温度 · 密度），让用户在早期纠正。
 
 ## 五层分离（贯穿 S5–S7）
 
@@ -85,21 +90,20 @@ S1 资源读取 → S2 需求识别 → S4 表演外化 → S5 导演与分镜�
 ```
 <workspace>/<ip-slug>/
   ip.md                    世界观 · 人物总表 · 地点总表 · 视觉声音总则（跨故事共享）
-  assets/assets.md         参考资产登记表（稳定资产 ID，上传编号按 clip 映射）+ 文件
+  assets/assets.md         参考资产登记表（编号 = 上传顺序）+ 文件
   <story-slug>/            一个故事 / 一条先导 / 一集
-    00_brief.md · 01_concept.md · 02_story.md · 03_script/scene-XX.md   ← 创意侧输入（film-creative 或用户提供）
+    00_brief.md · 01_concept.md · 02_story.md · 03_script/scene-XX.md   ← 创意侧输入（film-creative 或用户提供），只读不写
     04_shots/scene-XX-clipYY.md
     05_assets/asset-plan.md
     06_prompts/scene-XX-clipYY.prompt.md
     07_qa/scene-XX-clipYY.qa.md
-    project-state.json       当前版本、确认快照、依赖、未决项（保存项目按需）
 ```
 
-用户已有目录时沿用；00–03 层文件本 skill 只读不写。已保存项目的版本、快照、恢复、正典和 `.production.json` 位置见 `references/project-state.md`；只读检查用 `scripts/project_check.py`。模板在 `templates/`：`ip.md` · `script-scene.md`（输入格式参照）· `shot-card.md` · `reference-asset-brief.md` · `asset-registry.md` · `prompt-templates.md`。
+用户已有目录时沿用。模板在 `templates/`：`ip.md` · `script-scene.md`（输入格式参照）· `shot-card.md` · `reference-asset-brief.md` · `asset-registry.md` · `prompt-templates.md`。
 
 一个 **clip = 一次 Seedance 2.5 生成 ≤ 30 秒**。clip 衔接策略在 S5 决定（延长 / 尾帧接首帧 / 独立）。
 
-示例：`examples/example-01-kitchen-keys.md`（完整走查）· `examples/example-02-one-scene-three-lenses.md`（透镜对照）· `examples/example-03-yogurt-comedy.md`（喜剧语域）。示例展示流程，不提供答案，禁止复用其中的台词与镜头设计。
+示例：`examples/example-01-kitchen-keys.md`（完整走查）· `examples/example-02-one-scene-three-lenses.md`（透镜对照）· `examples/example-03-yogurt-comedy.md`（喜剧语域）· `examples/example-04-parameters-fight.md`（参数对照）。示例展示流程，不提供答案，禁止复用其中的台词与镜头设计。
 
 ## 硬规则
 
@@ -113,15 +117,16 @@ S1 资源读取 → S2 需求识别 → S4 表演外化 → S5 导演与分镜�
 8. **每个镜头写景别、清晰可执行的运镜与起止状态。** 冷门术语"术语 + 描述"。`[官方]` 复合运镜说明同步或先后；单一运镜只是降低复杂度的本地建议。
 9. **每个 clip 的 Prompt 自足。** 外观锁、空间、光源、声音在每个 clip 重写。`[推论]`
 10. **手法服务需求。** 复用、重复、持续或创新按本次目标判断，不以配额或词频裁决。导演名字不作为风格捷径进入 Prompt；通用技术名如希区柯克变焦可配可见描述使用，透镜不覆盖锁定表演。
-11. **S6 后分层校验**：production 默认 `python3 scripts/validate_prompt.py <prompt.md>`；片段加 `--artifact performance --duration N`，原文加 `--artifact raw --entry-id N`。可选记录接口见 `references/performance-record.md`。完整生产包另按 `references/production-workflow.md` 执行 `--production-record … --require-ready`，不得把基础 CLI 的零错误称为生产就绪。未落盘可用临时文件检查，不强制保存产物。ERROR 修复；WARN 审阅；脚本通过不等于表演/成片通过。
-12. **需求参数优先于默认美学。** 场景强度、角色情绪强度、克制、方向与台词密度分别判断；高强度可以内收且无台词，不自动套预设。
-13. **状态与因果连贯。** 表演检查状态推进/持续；删除测试不能删识别性细节；同步多部位不等于多个无关任务（`references/causal-chain.md`）。
+11. **生产审阅看具体表现**：表演检查高光、衔接、可见性与保真，不要求每片都有反转或固定手法。
+12. **S6 后分层校验**：production 默认 `python3 scripts/validate_prompt.py <prompt.md>`；片段加 `--artifact performance --duration N`，原文加 `--artifact raw --entry-id N`。可选记录接口见 `references/performance-record.md`。完整生产包另按 `references/production-workflow.md` 执行 `--production-record … --require-ready`，不得把基础 CLI 的零错误称为生产就绪。未落盘可用临时文件检查，不强制保存产物。ERROR 修复；WARN 审阅；脚本通过不等于表演/成片通过。
+13. **需求参数优先于默认美学。** 场景强度、角色情绪强度、克制、方向与台词密度分别判断；高强度可以内收且无台词，不自动套预设。
+14. **状态与因果连贯。** 表演检查状态推进/持续；删除测试不能删识别性细节；同步多部位不等于多个无关任务（`references/causal-chain.md`）。
 
 ## 默认输出契约
 
 停靠点交付摘要与必要的选择问题。performance/raw 按表演模块交付；production 到达 S6 交付：
 
-1. 需求识别结果（一行：意图 / 任务类型 / 运行模式 / clip 数 / 锁定判定）。
+1. 任务识别结果（一行：任务类型 / 运行模式 / clip 数 / 锁定判定）。
 2. 实际保存的产物路径（未落盘不虚构路径）。
 3. 每个 clip 的最终 Prompt（代码块）+ 参数建议表（content.role / ratio / duration / 输出格式）+ 校验结果摘要。
 4. 未验证假设与抽卡风险点（来自 S7）。
@@ -129,11 +134,16 @@ S1 资源读取 → S2 需求识别 → S4 表演外化 → S5 导演与分镜�
 
 ## 快速路由
 
-- "只拆分镜，不要 Prompt"：S4 → S5，终点 S5，排除 S6；按已有素材需要附资产缺口。
-- "不保存，直接出 Prompt"：到 S6，对话交付，临时文件可做既有校验。
-- "给这段剧本出 Prompt"：任何来源的场景文本按输入契约登记后进 S4。
-- "一场 90 秒戏"：一个叙事场景，镜数与 clip 数另定。
-- "只保存已有稿"：保存动作，不启动新的生产。
-- "帮我想故事 / 改台词"：交由 film-creative，产出剧本后回本 skill。
+| 用户说 | 入口 |
+|---|---|
+| "原文 / 憋哭 / 调强度 / 害羞到笑 / N 秒表演测试" | 表演优先路由，直接交付 |
+| "这是剧本，帮我拆分镜" | S1 → S4 → S5+S5b ▮ → S6 |
+| "这是分镜 / 镜头表，转成 Prompt" | S1 → S5b（补资产计划）→ S6 |
+| "参考图怎么准备" | 单阶段 S5b |
+| "这个成片第 X 秒不对" | S7 定位 → 回 S5 / S6 修正 |
+| "把 @视频1 延长 / 改台词 / 换人" | S2 编辑-延长分支 → S6 |
+| "先出一个 prompt 看看效果" | 看一眼：跑到 S6，不落盘；纯表演走优先路由 |
+| "一次跑完 / 全部落盘" | 全流程 |
+| "构思 / 想故事 / 写剧本 / 改台词" | 越界项：交由 film-creative，产出剧本后回本 skill |
 
-具体状态与异常判断统一见 `references/execution-contract.md`。不确定且结果会实质不同时只问必要问题，否则写明假设并推进已授权工作。
+不确定入口且结果会实质不同时，只问一个简短问题；否则按最保守解读推进并写明假设。
