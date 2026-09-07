@@ -1,0 +1,113 @@
+# film-director
+
+版本 **1.0.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+
+创意前端（概念、故事、剧本、台词创作与改写）由独立的 [film-creative](https://github.com/Anelse0/film-creative) Skill 承担。本 Skill 派生自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) 2.6.0-alpha.3（commit 0436abd）的生产后端。
+
+## 一句话
+
+先做导演决策，再把决策翻译成模型能看见的东西，最后才写 Prompt。
+
+## 流水线
+
+```
+S1 资源读取 → S2 需求识别 → S4 表演外化 → S5 分镜与参考资产 → S6 Prompt → S7 检查
+```
+
+输入是已成形的剧本场景（任何来源）、分镜或表演需求。纯表演测试走共用 S4 模块，不强制故事、参考图或停靠；可直接说"10秒，从愤怒到委屈，最后忍住眼泪"或"原文直出 Crying"。范围、自主、确认与保存统一见 `references/execution-contract.md`。默认对话交付；明确保存要求或已有项目约定才写文件。
+
+## 文件地图
+
+| 文件 | 何时读 |
+|---|---|
+| `SKILL.md` | 入口：表演优先路由、五层分离、硬规则、输出契约、输入契约 |
+| `references/seedance-2.5-capabilities.md` | 写任何模型能力/参数前；事实分级表 |
+| `references/execution-contract.md` | S2 唯一决策源：范围 / 自主 / 确认 / 保存 |
+| `references/stage-1-intake.md` | S1 / S2：资产登记、任务树（R2V 核心）、clip 估算、画幅时长、项目目录 |
+| `references/emotion-performance.md` | 原文/微调/重组，强度与克制独立，高光时间编排及保真 |
+| `references/performance-record.md` | 可选编译前记录与自动检查接口 |
+| `references/stage-4-performance.md` | S4 表演外化与台词的模型执行约束 |
+| `references/stage-5-directing-storyboard.md` | S5 导演与分镜 |
+| `references/director-lenses.md` | S5 透镜：按意图选择，不覆盖锁定表演 |
+| `references/camera-vocabulary.md` | 运镜词汇："术语 + 描述" |
+| `references/stage-5b-reference-assets.md` | S5b 参考资产清单与图像简报（图 + 文核心） |
+| `references/stage-6-prompt-compiler.md` | S6 编译规范 |
+| `references/stage-7-qa-continuity.md` | S7 检查与成片反馈 |
+| `references/production-workflow.md` | 完整生产包：素材绑定、参数、上游版本、审阅记录 |
+| `references/validation-log.md` | 成片验证记录与标签变更登记 |
+| `references/scene-parameters.md` | 场景参数卡：六参数在表演 / 分镜 / 模型执行中的取值 |
+| `references/externalization-lexicon.md` | 外化词典（可选写法） |
+| `references/anti-mechanical.md` | 机械感诊断 |
+| `references/causal-chain.md` | 表演状态推进/持续与同步部位关系 |
+| `references/genre-packs.md` | 基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇时叠加（与 film-creative 共用内容） |
+| `references/source-analysis.md` | 审计 / 更新来源时 |
+| `references/project-state.md` + `scripts/project_check.py` | 已保存项目：版本、恢复、依赖失效、生产记录位置 |
+| `templates/*` | 分镜卡 / Prompt / 资产简报 / 登记表 / 生产记录骨架 |
+| `scripts/emotion_library.py` | 按编号或关键词读取完整条目，`--list` 查看索引 |
+| `scripts/validate_prompt.py` | S6 之后必跑 |
+| `scripts/route_check.py` | S2 结构化决策校验；不解释自然语言，旧自由文本 CLI 返回 2 |
+| `scripts/baseline_snapshot.py` | Git / 非 Git 版本目录的归档与完整性检查 |
+| `examples/example-01-kitchen-keys*.md` | 完整走查 + 通过校验的 Prompt |
+| `examples/example-02-one-scene-three-lenses.md` | 同一场戏三个透镜的对照，含一版通过校验的 Prompt |
+| `examples/example-03-yogurt-comedy*.md` | 喜剧走查（三拍 + 反讽落差），通过校验 |
+| `examples/example-04-parameters-fight*.md` | 同一套规则，参数卡不同：高强度外放吵架，与示例 01 对照 |
+| `examples/performance/acceptance.md` | 五组验收 Demo、取材/改动说明及成片观察点 |
+
+## 校验脚本
+
+```bash
+cd <实际安装的Skill目录>
+python3 scripts/validate_prompt.py <prompt.md> [--duration N] [--json]
+python3 scripts/validate_prompt.py <fragment.md> --artifact performance --duration 10
+python3 scripts/validate_prompt.py <fragment.md> --artifact performance --record <record.json>
+python3 scripts/validate_prompt.py <original.txt> --artifact raw --entry-id 6
+```
+
+退出码 0 只代表无确定性错误，不代表表演或视频质量通过。多文件默认按连续片段做提示，独立 A/B 对照加 `--batch independent`。Python 3.9+，基础脚本仅用标准库；真实媒体预检另需 PATH 中的 ffprobe（测试另用 ffmpeg）。
+
+完整生产预检：
+
+```bash
+python3 scripts/validate_prompt.py <prompt.md> --production-record <production.json> --require-ready --json
+```
+
+接口与参数适配见 `references/production-workflow.md`。生产侧验收和 30 秒对照见 `examples/production/acceptance-2.3.1.md`；可直接测试 `examples/production/30s-fight-t2v.prompt.md`。R2V 案例需补真实素材；不会把虚构图号当就绪。
+
+路由自检：
+
+```bash
+python3 scripts/route_check.py --record <语义判断记录.json> --json
+```
+
+## 项目目录约定
+
+```
+<workspace>/<ip-slug>/ip.md · assets/ · <story-slug>/{00_brief, 01_concept, 02_story, 03_script/, 04_shots/, 05_assets/, 06_prompts/, 07_qa/}
+```
+
+00–03 层是创意侧输入（film-creative 或用户提供），本 Skill 只读不写。
+
+## 事实来源
+
+- `[官方]` 火山方舟《Doubao Seedance 2.5 提示词指南》（2026 版，38 页）
+- `[第三方]` Higgsfield、fal.ai、rundiffusion、runware、the-decoder、mindstudio 等（见 `references/source-analysis.md`）
+- 分辨率各来源不一致（480p/720p/1080p/4K），Skill 内标为"以平台为准"。
+
+## 版本管理
+
+- 语义化版本，记录在 `VERSION` 与 `CHANGELOG.md`。
+- 每次改动跑 `bash tests/run_tests.sh`（含原文完整性、表演记录、时间和验收 Demo 回归）；GitHub Actions 在 push 与 PR 时自动跑。
+- 生产/表演核心文件由 `tests/test_protected_zone.py` 哈希锁定（1.0.0 基线）；有意变更属于独立的生产版本发布，需同步更新哈希并在 CHANGELOG 说明。
+- 模型能力标签变更必须同时登记在 `references/validation-log.md` 的"标签变更登记"表。
+
+## 维护
+
+- 模型能力更新 → 只改 `references/seedance-2.5-capabilities.md`，并保留事实标签。
+- 新任务类型 → 更新对应模板与路由；脚本只增加可确定核对的契约，不通过累积情绪关键词或固定动作组合模拟语义判断。
+- 校验脚本回归：`bash tests/run_tests.sh`。
+
+## 安装
+
+```bash
+git clone https://github.com/Anelse0/film-director.git <skills目录>/film-director
+```
