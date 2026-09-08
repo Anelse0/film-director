@@ -51,7 +51,7 @@ class PacingTests(unittest.TestCase):
         self.assertEqual(len(codes(r, 'W22')), 1)
 
     def test_voiceover_and_single_shot_clip_are_exempt(self):
-        vo = '镜头2（3-11s）：【全景，俯拍，缓推】〔空镜〕校园。旁白（Lena，3-10s，英语）："This is the school."；画面无人说话。'
+        vo = '镜头2（3-11s）：【全景，俯拍，缓推】〔空镜〕校园。旁白（A，3-10s，英语）："This is the school."；画面无人说话。'
         r = run(prompt([shot(1, 0, 3), vo], 11))
         self.assertEqual(codes(r, 'W22'), [])
         one = prompt([shot(1, 0, 20, '中景，正面，固定', ['One long take.'])], 20)

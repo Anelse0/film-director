@@ -1,8 +1,14 @@
 # film-director
 
-版本 **1.3.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+版本 **1.3.1**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
 
 创意前端（概念、故事、剧本、台词创作与改写）由独立的 [film-creative](https://github.com/Anelse0/film-creative) Skill 承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
+
+## 1.3.1 更新
+
+- `references/dialogue-pacing.md` 新增 §4b：台词设计表各列 → 〔说法〕/〔情绪〕/【整体情绪弧线】/ 反应镜 / S4 表演块 / 末镜收尾 的映射表；有表时不重推情绪层。
+- `scripts/ledger_view.py`：账本模式下按镜号范围把 xlsx 读成 Markdown（与 film-creative 同文）。
+- 测试夹具中的人名改为泛称。
 
 ## 1.3.0 更新（对白节奏 · 亮相 · 与 film-creative 的协作契约 · 账本模式）
 
@@ -55,6 +61,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `scripts/emotion_library.py` | 按编号或关键词读取完整条目，`--list` 查看索引 |
 | `scripts/validate_prompt.py` | S6 之后必跑 |
 | `scripts/ledger_check.py` | 分镜 / 台词表（xlsx）改动后：时间连续、长镜含台词、机位单调、台词窗口 |
+| `scripts/ledger_view.py` | 账本模式开工前：按镜号范围把表读成 Markdown |
 | `examples/example-01-kitchen-keys*.md` | 完整走查 + 通过校验的 Prompt |
 | `examples/example-02-one-scene-three-lenses.md` | 同一场戏三个透镜的对照，含一版通过校验的 Prompt |
 | `examples/example-03-yogurt-comedy*.md` | 喜剧走查（三拍 + 反讽落差），通过校验 |
@@ -79,6 +86,7 @@ python3 scripts/validate_prompt.py <original.txt> --artifact raw --entry-id 6
 
 ```bash
 python3 scripts/ledger_check.py <分镜与台词.xlsx> [--sheet 分镜总表] [--lines-sheet 台词与表演] [--long 7] [--very-long 10] [--json]
+python3 scripts/ledger_view.py <分镜与台词.xlsx> --from 30 --to 40 [--cols 镜号,入点,出点,景别,台词]
 ```
 
 完整生产预检：

@@ -56,8 +56,8 @@ class LedgerTests(unittest.TestCase):
 
     def test_long_dialogue_shot_flags_but_voiceover_and_placeholder_do_not(self):
         r = self.run_check(book([
-            shot('01', '00:00:00', '00:00:08', lines='Lena（旁白） 00:02–00:08\n“This is…”'),
-            shot('02', '00:00:08', '00:00:16', '中景，固定', lines='Sloane 00:08–00:15\n“Welcome.”'),
+            shot('01', '00:00:00', '00:00:08', lines='A（旁白） 00:02–00:08\n“This is…”'),
+            shot('02', '00:00:08', '00:00:16', '中景，固定', lines='B 00:08–00:15\n“Welcome.”'),
             shot('03', '00:00:16', '00:00:40', '〔待定〕', lines='〔待定〕', scene='【待重写·留空】'),
             shot('04', '00:00:40', '00:00:51', '全景，固定', lines='无台词'),
         ]))

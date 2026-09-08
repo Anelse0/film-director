@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.1 — 2026-09-08
+
+- `references/dialogue-pacing.md` §4b：台词设计表 → Prompt 的逐列映射（说法 → 〔说法〕；目的动词 + 递进 → 〔情绪〕；全场阶梯 → 【整体情绪弧线】；听者反应 → 句末嘴部状态与反应镜；目的动词 → S4 手 / 视线 / 距离；收尾标记 → 末镜停留或硬切）。台词逐字不动，只新增外化信息。
+- `scripts/ledger_view.py` + `tests/test_ledger_view.py`（stdlib，与 film-creative 同文）。
+- `tests/test_pacing.py`、`tests/test_ledger.py` 夹具人名改为 A / B。
+- 受保护文件字节不变；89 个 unittest 与 shell 回归 + CI 预检通过。
+
 ## 1.3.0 — 2026-09-08
 
 面向实际协作返工的版本：把两天生产里反复出现的四类返工（一段发言装进长镜、连续同机位、修订只给 diff、正典改了旧分镜还在表里）和一个断掉的接口（创作侧 1.2.0 起不再逐句给说法，生产侧 W20 却需要〔说法〕）收进规则与工具。
