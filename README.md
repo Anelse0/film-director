@@ -92,10 +92,10 @@ python3 scripts/validate_prompt.py <prompt.md> --production-record <production.j
 ## 项目目录约定
 
 ```
-<workspace>/<ip-slug>/ip.md · assets/ · <story-slug>/{00_brief, 01_concept, 02_story, 03_script/, 04_shots/, 05_assets/, 06_prompts/, 07_qa/}
+<workspace>/<ip-slug>/ip.md · assets/ · <story-slug>/{00_brief, 01_concept, 02_story, 03_script/, production-profile.md, 04_shots/, 05_assets/, 06_prompts/, 07_qa/}
 ```
 
-00–03 层是创意侧输入（film-creative 或用户提供），本 Skill 只读不写。
+00–03 层是创意侧输入（film-creative 或用户提供），本 Skill 只读不写。 项目主表是分镜 / 台词 xlsx 时按 `references/handoff-contract.md` §二 的账本模式工作。
 
 ## 事实来源
 
