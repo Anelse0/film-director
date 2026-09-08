@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prompt format/fidelity checks for film-seedance-director.
+"""Prompt format/fidelity checks for film-director.
 Usage: validate_prompt.py FILE... [--duration N] [--json]
        [--artifact production|performance|raw] [--record RECORD.json]
        [--entry-id N] [--batch sequence|independent]
@@ -10,8 +10,10 @@ W14 reviews identical adjacent complete blocks; W18 is retired.
 W20 flags a production prompt missing the emotion-arc block or per-shot emotion
 tags (structural presence only, not an acting-quality judgement).
 W22 flags a dialogue-carrying shot of 7s or more (dialogue scenes cut per line by
-local convention [推论]); W23 flags three consecutive shots sharing the same shot
-size word in the header tag (camera monotony). Both are review hints, not limits.
+local convention [推论]); quoted acting annotations (重读/轻读/一词/word …) are not
+lines. W23 flags three consecutive shots sharing the same header tag (camera
+monotony). W04's shot-count hint applies only when the average shot is under 2s,
+so it does not contradict the one-line-per-cut convention. All are review hints.
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
 """
@@ -262,8 +264,8 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         short = [no for no, s, e, _ in shots if e - s < 1.5]
         if short:
             warn("W04", f"单镜 < 1.5s：镜头 {short}（2.5 抗拒快切 [第三方]）")
-        if len(shots) > 8 and end <= 30:
-            warn("W04", f"30s 内 {len(shots)} 镜 > 8（剧情类建议 ≤ 8 [推论]）")
+        if len(shots) > 8 and end <= 30 and end / len(shots) < 2.0:
+            warn("W04", f"30s 内 {len(shots)} 镜 > 8 且平均镜长 {end / len(shots):.1f}s < 2s（剧情类建议 ≤ 8 镜或平均 ≥ 2s [推论]；对白场按 2–4s 一句一切不在此列）")
     elif task not in {"edit", "motion", "transition"} and artifact == "production":
         warn("W08", "未识别到「镜头N（a-bs）」格式的分镜段落")
 
@@ -287,7 +289,9 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     if artifact == "production" and len(shots) >= 2:
         long_dialogue = []
         for no, s, e, body in shots:
-            n_quotes = len(QUOTE_RE.findall(body))
+            # Same exemption as W21: a quoted word followed by an acting annotation is not a line.
+            n_quotes = sum(1 for q in QUOTE_RE.finditer(body)
+                           if not re.match(r"\s*(?:重读|轻读|之后|停住|一词|word)", body[q.end():q.end() + 12], re.I))
             if not n_quotes or re.search(r"旁白|画外|V\.?O\.?|voice.?over|narrat", body, re.I):
                 continue
             if (e - s >= 7 and n_quotes == 1) or e - s >= 9:

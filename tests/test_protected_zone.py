@@ -22,7 +22,12 @@ W20 stays a WARN-level review hint). See CHANGELOG 1.1.1.
 no validation/code change. See CHANGELOG 1.2.0.
 
 1.3.0 rebaselines validate_prompt.py: adds W22 (dialogue-carrying long shot) and W23 (three
-consecutive identical shot tags), WARN-level pacing hints for dialogue scenes. See CHANGELOG 1.3.0."""
+consecutive identical shot tags), WARN-level pacing hints for dialogue scenes. See CHANGELOG 1.3.0.
+
+1.3.2 rebaselines validate_prompt.py: W22 no longer counts quoted acting annotations
+(重读/轻读/一词/word …) as lines; W04's ">8 shots in 30s" hint applies only when the average
+shot is under 2s (it contradicted the 1.3.0 one-line-per-cut convention); docstring names
+film-director. No new codes. See CHANGELOG 1.3.2."""
 import hashlib
 import unittest
 from pathlib import Path
@@ -51,7 +56,7 @@ PROTECTED = {
     'templates/shot-card.md': '2c59e1022197bc88fa3539cbe7dcc2c61ee4bd60c1586c380995ef9623005f30',
     'templates/reference-asset-brief.md': 'adc6b7c7c52c169d31ee7ba83111293496e7133572a7bedc08bf4a08d251df0b',
     'templates/asset-registry.md': '996818cda8aa55796820ae96c808c56459198f8f465b4e4924196d7ed8cc2943',
-    'scripts/validate_prompt.py': '08015c5b854a4ac8ad069fb3df65d038b1fb30d238bf5536372d8a54608cd46a',
+    'scripts/validate_prompt.py': '27d33ad1106ad51a9dbaea26f07915fbc6d174028df443a7fae4acb46f57f74e',
     'scripts/prompt_structure.py': 'd9f73020e41eec19edee56b7ad8a45f9b973c28db9c93e451274ab6d1a0b60bf',
     'scripts/production_contract.py': '963653540c39519d99a731749736e96b39bed17005305af1082c857af5426bfa',
     'scripts/production_preflight.py': '80379ec01b3f952ee82cc1611e38b555ad41838bd0bb6f0ac52ddb5453605702',

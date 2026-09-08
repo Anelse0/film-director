@@ -70,6 +70,24 @@ class PacingTests(unittest.TestCase):
         r = run(text, artifact='performance')
         self.assertEqual(codes(r, 'W22') + codes(r, 'W23'), [])
 
+    def test_quoted_acting_annotation_is_not_a_line_for_w22(self):
+        body = '镜头2（3-10s）：【近景，侧面，微推】〔A：紧〕A 走向门，"钥匙" 一词重读之后停住；B 闭着嘴。'
+        r = run(prompt([shot(1, 0, 3), body], 10))
+        self.assertEqual(codes(r, 'W22'), [])
+
+    def test_w04_count_hint_only_when_average_shot_under_two_seconds(self):
+        # 10 × 3s = 30s: one-line-per-cut pacing must not trip the ">8 shots" hint.
+        ten = [shot(i + 1, 3 * i, 3 * i + 3, tag=('中景' if i % 2 else '近景') + '，正面，固定') for i in range(10)]
+        r = run(prompt(ten, 30))
+        self.assertFalse(any('镜 > 8' in w for w in codes(r, 'W04')), codes(r, 'W04'))
+        # 12 shots in 23s (average 1.9s) still gets the hint.
+        bounds = [0]
+        for i in range(12):
+            bounds.append(bounds[-1] + (1 if i == 11 else 2))
+        twelve = [shot(i + 1, bounds[i], bounds[i + 1], tag=('中景' if i % 2 else '近景') + '，正面，固定') for i in range(12)]
+        r = run(prompt(twelve, bounds[-1]))
+        self.assertTrue(any('镜 > 8' in w for w in codes(r, 'W04')), codes(r, 'W04'))
+
     def test_pacing_codes_are_warnings_not_errors(self):
         r = run((ROOT / 'examples/bad-example-3-lazy-long-take.prompt.md').read_text(encoding='utf-8'))
         self.assertEqual(r['errors'], [])

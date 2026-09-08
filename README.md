@@ -1,8 +1,15 @@
 # film-director
 
-版本 **1.3.1**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+版本 **1.3.2**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
 
 创意前端（概念、故事、剧本、台词创作与改写）由独立的 [film-creative](https://github.com/Anelse0/film-creative) Skill 承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
+
+## 1.3.2 更新（容错修复）
+
+- xlsx 读取：缺 `r` 属性的行 / 单元格按位置读；Excel 锁文件与损坏文件报 `ValueError` 而非追溯。`ledger_view` 只把时间列的小数显示为 mm:ss。
+- `ledger_check` L03 与 `validate_prompt` W22 同口径（单句 ≥7s 或多句 ≥9s，新参数 `--long-dialogue`）。
+- `validate_prompt`：W22 不把"重读 / 一词"标注的引号当台词；W04 的 >8 镜提示只在平均镜长 <2s 时给出，不再与一句一切约定冲突。
+- 新增与 film-creative 同文文件的一致性测试；修正 run_tests 里一条恒真断言。
 
 ## 1.3.1 更新
 
@@ -85,7 +92,7 @@ python3 scripts/validate_prompt.py <original.txt> --artifact raw --entry-id 6
 账本检查（项目主表为分镜 / 台词 xlsx 时）：
 
 ```bash
-python3 scripts/ledger_check.py <分镜与台词.xlsx> [--sheet 分镜总表] [--lines-sheet 台词与表演] [--long 7] [--very-long 10] [--json]
+python3 scripts/ledger_check.py <分镜与台词.xlsx> [--sheet 分镜总表] [--lines-sheet 台词与表演] [--long 7] [--long-dialogue 9] [--very-long 10] [--json]
 python3 scripts/ledger_view.py <分镜与台词.xlsx> --from 30 --to 40 [--cols 镜号,入点,出点,景别,台词]
 ```
 

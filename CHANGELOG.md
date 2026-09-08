@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.2 — 2026-09-08
+
+容错修复（对两个 skill 的脚本、测试与文档做一次审查后发现的问题；无新功能、无新警告码）。
+
+- `scripts/xlsx_lite.py`：`<row>` / `<c>` 缺 `r` 属性（OOXML 允许，部分生成器省略）时按隐式位置读，不再 `TypeError`；非 zip 或缺 `xl/workbook.xml` 的文件（如 Excel 打开主表时留下的 `~$…xlsx` 锁文件）抛 `ValueError` 并带文件名，不再是 `BadZipFile` 追溯。
+- `scripts/ledger_view.py`：只有表头含 入点 / 出点 / 起 / 止 / 时间 / time / start / end 的列才把 0–1 之间的小数当 Excel 时间显示；其他列的小数（词/秒等）原样输出（此前 0.5 会显示成 `720:00`）。
+- `scripts/ledger_check.py`：L03 与 validate_prompt W22 同口径——≥ `--long`（7s）且只有一句、或 ≥ `--long-dialogue`（9s，新参数）含对白才提示；两句以上的 7–8s 镜不再误报；台词格里数不出引号时仍按一句处理（保守）。
+- `scripts/validate_prompt.py`（受保护文件，同一提交重算哈希）：W22 不再把带 重读 / 轻读 / 之后 / 停住 / 一词 / word 标注的引号当台词计数（与 W21 同一豁免）；W04 的"30s 内 > 8 镜"提示只在平均镜长 < 2s 时给出——此前它与 1.3.0 的"对白场一句一切、对白镜 2–4s"约定互相矛盾（30s 对白场按约定切出 9–12 镜必触发 W04，反过来引导把台词塞回长镜）；文档字符串改为 film-director。`references/dialogue-pacing.md` §6 同步口径。
+- `tests/run_tests.sh`：W14/W18 断言此前误用账本夹具的输出变量（恒真），改回对 example-04 输出断言；账本夹具加"8s 两句不报 L03"。
+- 新增 `tests/test_shared_files.py`：与 film-creative 同目录安装时，`handoff-contract.md` / `xlsx_lite.py` / `ledger_view.py` 三个同文文件逐字节一致（此前只有 film-creative 侧检查契约一份）。
+- 测试：`test_ledger.py` +3、`test_pacing.py` +2、`test_shared_files.py` +1；shell 回归与 CI 预检通过。
+
 ## 1.3.1 — 2026-09-08
 
 - `references/dialogue-pacing.md` §4b：台词设计表 → Prompt 的逐列映射（说法 → 〔说法〕；目的动词 + 递进 → 〔情绪〕；全场阶梯 → 【整体情绪弧线】；听者反应 → 句末嘴部状态与反应镜；目的动词 → S4 手 / 视线 / 距离；收尾标记 → 末镜停留或硬切）。台词逐字不动，只新增外化信息。

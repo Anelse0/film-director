@@ -52,15 +52,19 @@ import sys; sys.path.insert(0, 'scripts')
 from xlsx_lite import write_workbook
 H = ['镜号', '段', '入点', '出点', '时长', '场景', '景别与运镜', '画面', '英语台词', '声音', '连续性', '情绪']
 rows = [['01', '1', '00:00:00', '00:00:03', '', '厅', '中景，固定', '看', 'A 00:00–00:03\n"Hi."', '', '', ''],
-        ['02', '1', '00:00:03', '00:00:12', '', '厅', '近景，微推', '说', 'B 00:03–00:11\n"Long."', '', '', '']]
+        ['02', '1', '00:00:03', '00:00:12', '', '厅', '近景，微推', '说', 'B 00:03–00:11\n"Long."', '', '', ''],
+        ['03', '1', '00:00:12', '00:00:20', '', '厅', '特写，固定', '答', 'A 00:12–00:15\n"One."\nB 00:16–00:19\n"Two."', '', '', '']]
 write_workbook(sys.argv[1], {'分镜总表': [['t'], [], [], [], H] + rows})
 PY
 out=$($L "$tmpl/ledger.xlsx"); rc=$?
 check "ledger fixture exits 0" $rc "$out"
-echo "$out" | grep -q "L03"; check "ledger flags 9s dialogue shot (L03)" $? "$out"
+echo "$out" | grep -q "L03 镜02"; check "ledger flags 9s single-line shot (L03)" $? "$out"
+echo "$out" | grep -q "L03 镜03"; rc=$?
+[ "$rc" -ne 0 ]; check "ledger does not flag 8s two-line shot (W22 口径)" $? "$out"
 rm -rf "$tmpl"
 
 # 2.3: these are varying states and reusable body cues, not prohibited copying.
+out=$($V examples/example-04-parameters-fight.prompt.md)
 echo "$out" | grep -q 'W14\|W18'; rc=$?
 [ "$rc" -ne 0 ]; check "body-part reuse no longer emits W14/W18" $? "$out"
 
