@@ -28,6 +28,13 @@ description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词�
 - **接受的输入**：剧本场景文本（`03_script/scene-XX.md` 格式或任何来源的等价场景稿）、场景参数卡、`ip.md` / 人物外观与地点描述、已有分镜卡或镜头表、既有 Prompt 与成片反馈、表演测试请求。输入不要求来自 film-creative；用户直接给一段场景文本同样有效。
 - **剧本层缺口只登记不代写**：缺场景、缺台词、故事不成立时列缺口交回用户或 film-creative；用户说"台词就这样"时锁定台词，只补表演。
 - **锁定**：输入剧本中已确认的台词与场景是锁定内容，编译与外化不得擅改（硬规则 7）；表演目的需要的嘴部状态、动作标注是新增外化信息，不是改台词。
+- **台词设计表**（film-creative 的交接物，每句：目的动词 · 潜台词 · 说法 · 听者反应 · 情绪递进 · 收尾标记）：有表时 S4/S6 直接映射为每句〔说法〕、每镜〔情绪〕与【整体情绪弧线】，不重新推导；无表时在对话里补出并标"生产侧补写、待创作侧确认"。两个 skill 之间谁交给谁什么、正典改了怎么同步、台词超长怎么回传，统一见 `references/handoff-contract.md`。
+
+## 项目常量与账本
+
+- **生产档案**：同一项目反复重申的常量（画幅、Prompt/台词语言、每人每场一张造型图的素材绑定约定、调色段、声音与旁白策略、一句一切的节奏约定、字幕、首帧策略、台词预算口径）写在 `<story-slug>/production-profile.md`（`references/production-profile.md`，模板 `templates/production-profile.md`）。S1 每条 clip 先读，不再逐条重问；没有档案时从 `ip.md` §视觉声音总则与用户已明确的要求提炼草稿回显一次。
+- **账本模式**：项目主表是分镜 / 台词表（xlsx）时，它就是时间线正典：开工先读目标镜前后段与连续性页，写回只动生产侧列（景别与运镜 · 画面与有序表演 · 光源与声音 · 连续性 · 情绪与拍摄重点），改表后跑 `python3 scripts/ledger_check.py <表.xlsx>`（时间连续 · 长镜含台词 · 机位单调 · 台词窗口；只查可确定项）。
+- **正典变了**（人设 / 引擎 / 造型 / 删角色）：不 patch 旧镜头。按 `references/handoff-contract.md` §三，等 film-creative 在 `ip.md` 正典变更表登记并扫过漂移后，对波及 clip 重编译或标"待重写"。
 
 ## 流水线
 
@@ -39,10 +46,10 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 
 | 阶段 | 读什么 | 产出什么 | 停靠 |
 |---|---|---|---|
-| S1 资源读取 | `references/stage-1-intake.md` | 资产登记 + 缺口清单 | |
+| S1 资源读取 | `references/stage-1-intake.md` ＋ 已有 `production-profile.md`（`references/production-profile.md`） | 资产登记 + 缺口清单（+ 生产档案回显） | |
 | S2 任务识别 | 同上 §任务识别 ＋ `references/scene-parameters.md` §一 | 任务类型 · 运行模式 · 入口阶段 · clip 数 · 锁定判定 · **场景参数卡** | |
 | S4 表演外化 | `references/stage-4-performance.md` ＋ `references/emotion-performance.md` | 有序表演块（C 层）及内部核对记录 | |
-| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` | `04_shots/scene-XX-clipYY.md` 分镜卡（五层） | ▮（与 S5b 一起） |
+| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md`；对白场 / 亮相加读 `references/dialogue-pacing.md` | `04_shots/scene-XX-clipYY.md` 分镜卡（五层） | ▮（与 S5b 一起） |
 | S5b 参考资产 | `references/stage-5b-reference-assets.md` | `05_assets/asset-plan.md`：资产清单 + 图像简报 + 上传顺序 | 等用户回填 |
 | S6 Prompt 编译 | `references/stage-6-prompt-compiler.md` ＋ `templates/prompt-templates.md` | `06_prompts/scene-XX-clipYY.prompt.md` | |
 | S7 检查 | `references/stage-7-qa-continuity.md` ＋ `scripts/validate_prompt.py` | `07_qa/…`；有成片时追加 `references/validation-log.md` | |
@@ -93,13 +100,14 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
   assets/assets.md         参考资产登记表（编号 = 上传顺序）+ 文件
   <story-slug>/            一个故事 / 一条先导 / 一集
     00_brief.md · 01_concept.md · 02_story.md · 03_script/scene-XX.md   ← 创意侧输入（film-creative 或用户提供），只读不写
+    production-profile.md    生产档案（本 skill 维护；一个项目只说一次的常量）
     04_shots/scene-XX-clipYY.md
     05_assets/asset-plan.md
     06_prompts/scene-XX-clipYY.prompt.md
     07_qa/scene-XX-clipYY.qa.md
 ```
 
-用户已有目录时沿用。模板在 `templates/`：`ip.md` · `script-scene.md`（输入格式参照）· `shot-card.md` · `reference-asset-brief.md` · `asset-registry.md` · `prompt-templates.md`。
+用户已有目录时沿用；主表是分镜 / 台词表的项目按「项目常量与账本」的账本模式工作，不强制补建 04_shots。模板在 `templates/`：`ip.md` · `script-scene.md`（输入格式参照）· `shot-card.md` · `reference-asset-brief.md` · `asset-registry.md` · `prompt-templates.md` · `production-profile.md`。
 
 一个 **clip = 一次 Seedance 2.5 生成 ≤ 30 秒**。clip 衔接策略在 S5 决定（延长 / 尾帧接首帧 / 独立）。
 
@@ -121,6 +129,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 12. **S6 后分层校验**：production 默认 `python3 scripts/validate_prompt.py <prompt.md>`；片段加 `--artifact performance --duration N`，原文加 `--artifact raw --entry-id N`。可选记录接口见 `references/performance-record.md`。完整生产包另按 `references/production-workflow.md` 执行 `--production-record … --require-ready`，不得把基础 CLI 的零错误称为生产就绪。未落盘可用临时文件检查，不强制保存产物。ERROR 修复；WARN 审阅；脚本通过不等于表演/成片通过。
 13. **需求参数优先于默认美学。** 场景强度、角色情绪强度、克制、方向与台词密度分别判断；高强度可以内收且无台词，不自动套预设。
 14. **状态与因果连贯。** 表演检查状态推进/持续；删除测试不能删识别性细节；同步多部位不等于多个无关任务（`references/causal-chain.md`）。
+15. **对白场一句一切、逐镜变化、亮相介绍先行。** `[推论]` 一句台词一个切点，对白镜默认 2–4s，相邻镜至少改变景别 / 角度 / 运镜 / 拍谁之一；含台词的单镜 ≥7s（一句）或 ≥9s 触发 W22，三镜同标注触发 W23，均为 WARN——有意长镜与有意重复在 QA 写理由，不为消警告删台词。台词超预算回传 film-creative 精简，不拉长镜头承载。人物亮相按 stage-5 5.1d 与 `references/dialogue-pacing.md` §4：介绍先行、他人反应赋予地位、特写作揭示。
 
 ## 默认输出契约
 
@@ -128,7 +137,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 
 1. 任务识别结果（一行：任务类型 / 运行模式 / clip 数 / 锁定判定）。
 2. 实际保存的产物路径（未落盘不虚构路径）。
-3. 每个 clip 的最终 Prompt（代码块）+ 参数建议表（content.role / ratio / duration / 输出格式）+ 校验结果摘要。production 必含情绪三件套：【整体情绪弧线】块、每镜〔情绪〕、每句台词〔说法〕，均锚定可见证据、不替代表演正文（本 skill 约定的必备产出 `[推论]`，非官方结构；校验 W20 为 WARN 级本地审阅提示，只提示不拦；见 stage-6 §6.0）。
+3. 每个 clip 的最终 Prompt **全文**（代码块；每次修订同样给全文，不以 diff 或改动说明代替）+ 参数建议表（content.role / ratio / duration / 输出格式；回显本次用到的生产档案行）+ 校验结果摘要。production 必含情绪三件套：【整体情绪弧线】块、每镜〔情绪〕、每句台词〔说法〕，均锚定可见证据、不替代表演正文（本 skill 约定的必备产出 `[推论]`，非官方结构；校验 W20 为 WARN 级本地审阅提示，只提示不拦；见 stage-6 §6.0）。
 4. 未验证假设与抽卡风险点（来自 S7）。
 5. 下一步：用户需要提供什么（参考图回填 / 确认 / 成片反馈）。
 
@@ -145,5 +154,9 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | "先出一个 prompt 看看效果" | 看一眼：跑到 S6，不落盘；纯表演走优先路由 |
 | "一次跑完 / 全部落盘" | 全流程 |
 | "构思 / 想故事 / 写剧本 / 改台词" | 越界项：交由 film-creative，产出剧本后回本 skill |
+| "宣布 / 演讲 / 群戏点名 / 人物亮相 / 出场" | S5 加读 `references/dialogue-pacing.md`：一句一切、他人反应、特写作揭示 |
+| "分镜表改了，帮我检查 / 同步" | 账本模式：读表 → `scripts/ledger_check.py` → 只改生产侧列；正典变了先等创作侧登记与扫描 |
+| "台词装不进 30s / 太长" | 回传台词预算（`references/handoff-contract.md` §四）给 film-creative 精简，不拉长镜头、不擅自删词 |
+| "节奏太慢 / 拆细 / 不要一大段" | 回 S5 按 `references/dialogue-pacing.md` 重切；交付完整 Prompt 全文 |
 
 不确定入口且结果会实质不同时，只问一个简短问题；否则按最保守解读推进并写明假设。

@@ -9,6 +9,9 @@ F01-F06 concern record/schema/text fidelity; E20 concerns performance timing.
 W14 reviews identical adjacent complete blocks; W18 is retired.
 W20 flags a production prompt missing the emotion-arc block or per-shot emotion
 tags (structural presence only, not an acting-quality judgement).
+W22 flags a dialogue-carrying shot of 7s or more (dialogue scenes cut per line by
+local convention [推论]); W23 flags three consecutive shots sharing the same shot
+size word in the header tag (camera monotony). Both are review hints, not limits.
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
 """
@@ -275,6 +278,35 @@ def validate(path, duration_override=None, artifact="production", record=None, e
                     if not re.search(r"〔[^〕]{1,40}〕|\bEMO[:：]", body[:120])]
         if untagged:
             warn("W20", f"镜头 {untagged} 段首未标〔情绪〕（逐镜情绪须与可见证据并存、不替代表演正文；确为无表演空镜可在 QA 注明）")
+
+    # W22/W23 dialogue pacing (production only). Local convention [推论]: a
+    # dialogue scene cuts once per line and changes shot size / angle / move
+    # shot by shot. Both are WARN-level review hints. W22 skips single-shot
+    # clips (a deliberate one-take) and voice-over shots (narration over an
+    # establishing shot is not a stretched line).
+    if artifact == "production" and len(shots) >= 2:
+        long_dialogue = []
+        for no, s, e, body in shots:
+            n_quotes = len(QUOTE_RE.findall(body))
+            if not n_quotes or re.search(r"旁白|画外|V\.?O\.?|voice.?over|narrat", body, re.I):
+                continue
+            if (e - s >= 7 and n_quotes == 1) or e - s >= 9:
+                long_dialogue.append(f"镜头{no}({e - s:g}s/{n_quotes}句)")
+        if long_dialogue:
+            warn("W22", f"含台词的长镜：{', '.join(long_dialogue)}（对白场默认一句一切、拆镜换机位；有意长镜请在 QA 写理由 [推论]）")
+        tags = []
+        for no, s, e, body in shots:
+            tag = re.search(r"【([^】]{2,60})】|\[([^\]]{2,80})\]", body[:80])
+            tag_txt = (tag.group(1) or tag.group(2)) if tag else ""
+            tags.append((no, re.sub(r"[\s，,、/·;；]+", "", tag_txt).lower()))
+        run = 1
+        for i in range(1, len(tags)):
+            if tags[i][1] and tags[i][1] == tags[i - 1][1]:
+                run += 1
+                if run == 3:
+                    warn("W23", f"镜头{tags[i - 2][0]}–{tags[i][0]} 连续 3 镜【景别/角度/运镜】标注完全相同（对白场约定逐镜变化；有意重复请在 QA 注明 [推论]）")
+            else:
+                run = 1
 
     # Explicit dialogue settings only; emotional intensity is independent.
     ZH_RATE, EN_RATE, SPEECH_CAP = speech_parameters(metadata_text)

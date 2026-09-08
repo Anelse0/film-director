@@ -19,7 +19,10 @@ W20 stays a WARN-level review hint). See CHANGELOG 1.1.1.
 
 1.2.0 rebaselines stage-5-directing-storyboard.md: adds the reusable directing rule "引荐与亮相
 的顺序（介绍先行，特写作揭示）" under 5.1d plus a matching 5.9 troubleshooting row. Guidance only —
-no validation/code change. See CHANGELOG 1.2.0."""
+no validation/code change. See CHANGELOG 1.2.0.
+
+1.3.0 rebaselines validate_prompt.py: adds W22 (dialogue-carrying long shot) and W23 (three
+consecutive identical shot tags), WARN-level pacing hints for dialogue scenes. See CHANGELOG 1.3.0."""
 import hashlib
 import unittest
 from pathlib import Path
@@ -48,7 +51,7 @@ PROTECTED = {
     'templates/shot-card.md': '2c59e1022197bc88fa3539cbe7dcc2c61ee4bd60c1586c380995ef9623005f30',
     'templates/reference-asset-brief.md': 'adc6b7c7c52c169d31ee7ba83111293496e7133572a7bedc08bf4a08d251df0b',
     'templates/asset-registry.md': '996818cda8aa55796820ae96c808c56459198f8f465b4e4924196d7ed8cc2943',
-    'scripts/validate_prompt.py': '068c21beb9955cc125b3465b1b6a56ed6f711ea109c2fb95152d8e0eff37842f',
+    'scripts/validate_prompt.py': '08015c5b854a4ac8ad069fb3df65d038b1fb30d238bf5536372d8a54608cd46a',
     'scripts/prompt_structure.py': 'd9f73020e41eec19edee56b7ad8a45f9b973c28db9c93e451274ab6d1a0b60bf',
     'scripts/production_contract.py': '963653540c39519d99a731749736e96b39bed17005305af1082c857af5426bfa',
     'scripts/production_preflight.py': '80379ec01b3f952ee82cc1611e38b555ad41838bd0bb6f0ac52ddb5453605702',
