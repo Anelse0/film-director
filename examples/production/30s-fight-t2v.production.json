@@ -2,7 +2,7 @@
   "version": 1,
   "adapter": "ark-seedance-2.5-guide",
   "task": "t2v",
-  "prompt_sha256": "b328e46b8422e98b921ce2b3a4fe4dbae90c58682cf596f0d107d27d04d314ed",
+  "prompt_sha256": "686c2a6c0894ee403136135d1d880c6d1808366407c5cc11e24181d8fb6d9d83",
   "parameters": {
     "ratio": "16:9",
     "duration": 30,
@@ -16,7 +16,7 @@
     },
     {
       "path": "../example-04-parameters-fight.prompt.md",
-      "sha256": "eda19b683cdbb8617a007a4d60cf381f217b6eceef895b7716e45098eb360fdf"
+      "sha256": "0a8f0ee144d4d2ef03225e380b2f66b55b4addae11d924acda1e54afd2323620"
     }
   ],
   "reviews": [

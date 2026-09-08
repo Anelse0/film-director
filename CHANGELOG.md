@@ -12,7 +12,7 @@
 - `templates/prompt-templates.md`：头部加情绪三件套契约；T1/T2/英文骨架加【整体情绪弧线】块、〔情绪〕与〔说法〕槽位。
 - `templates/shot-card.md`：C 层加"本镜情绪〔情绪〕"与台词〔说法〕字段，新增"clip 整体情绪弧线"字段。
 - `SKILL.md`：默认输出契约声明 production 必含情绪三件套。
-- 示例：`example-01/02/03` 与 `examples/performance/06-production-rage-hurt` 补全情绪三件套并保持 0 警告；`example-04-parameters-fight` 及其 `examples/production/30s-fight-t2v` 生产包为 sha 锁定的 2.3.1 冻结基线，不改，其现在会正常提示 W20 作为审阅引导。
+- 示例：`example-01/02/03`、`example-04-parameters-fight`、`examples/performance/06-production-rage-hurt` 与 `examples/production/30s-fight-t2v` 全部补全情绪三件套并保持原有警告面（01/02/03/06 为 0 警告；04 与 30s-fight 保留既有 2×W05）。CI 的 `--require-ready` 预检直接跑 30s-fight 生产包，故同步在 `30s-fight-t2v.production.json` 重算 `prompt_sha256` 及 `example-04-parameters-fight.prompt.md` 的 upstream 哈希，使预检仍 `passed`（W20 已消除，仅余两条已登记的 W05）。
 - 测试：`test_production.py` 加 `EmotionLayerTests`（W20 触发/清除、中英文、performance 不触发、W20 是 WARN 非 ERROR）；`run_tests.sh` 的 bad-1 断言加 W20；`prompt()` 夹具与 RealMedia 夹具补情绪层以通过 preflight。
 - 协议：按 `test_protected_zone.py` 约定，同一提交内重算并更新四个受保护文件（validate_prompt.py、stage-6、prompt-templates、shot-card）的基线哈希。
 
