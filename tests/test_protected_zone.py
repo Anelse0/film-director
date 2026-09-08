@@ -15,7 +15,11 @@ See CHANGELOG 1.1.0.
 
 1.1.1 rebaselines stage-6-prompt-compiler.md and prompt-templates.md again: the mandatory
 emotion layer is labelled `[推论]` (a local skill convention, not official Seedance structure;
-W20 stays a WARN-level review hint). See CHANGELOG 1.1.1."""
+W20 stays a WARN-level review hint). See CHANGELOG 1.1.1.
+
+1.2.0 rebaselines stage-5-directing-storyboard.md: adds the reusable directing rule "引荐与亮相
+的顺序（介绍先行，特写作揭示）" under 5.1d plus a matching 5.9 troubleshooting row. Guidance only —
+no validation/code change. See CHANGELOG 1.2.0."""
 import hashlib
 import unittest
 from pathlib import Path
@@ -27,7 +31,7 @@ PROTECTED = {
     'references/emotion-performance.md': 'a150f6047b6a484a6ab858a93773d9c28fab022ac274bcc358dd20684468d8d0',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': 'ade55ddb33655042f6360bdde1bd5a0d4e149a479b1b407f142d510b696338a0',
-    'references/stage-5-directing-storyboard.md': '49980af3b95bdd4e2eca0288a915293c7dada4ddfb4c45ef54fc7daf23aec16d',
+    'references/stage-5-directing-storyboard.md': '69fb453c6cce9d91fbcf7c33909562bc1256a54fc20e2a4c4ade2318007235f1',
     'references/stage-5b-reference-assets.md': '167fee36b688f32f5a8796be58098e043eb3ae0d27af3624ce7ed75ff7adc2d0',
     'references/stage-6-prompt-compiler.md': '012c548ef99538c283ec05fd2d8c58782058f4f2723cbf4346bc9315572de707',
     'references/stage-7-qa-continuity.md': '7957aca66d6cda61e4c2de9a69464b61f96abdd0e1a595fe36ff82d37e9e2f68',
