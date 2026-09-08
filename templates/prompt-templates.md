@@ -5,6 +5,8 @@ T1–T9 是按任务裁剪的本地生产骨架，基于官方的素材指代、
 
 **不以导演、影片、摄影师名字代替可执行描述；通用技术名可配说明使用**（校验 W13）。透镜只写在文末 E 层参数表的「透镜」行，供多文件校验用。
 
+**情绪三件套为 production 必备**（校验 W20）：①【整体情绪弧线】块（clip 走向 + 每角色逐镜递进）；②每镜段首〔情绪〕标；③每句台词括注〔说法〕（交付情绪）。三者是与可见证据正文（眼神/身姿/口型/节奏/走位）**并存**的定位标签，**不得用标签替代或省略表演正文**（呼应硬规则 7 与 SKILL 首段：标签定位意图、不替代证据）。performance/raw 片段按表演模块交付，不套本节。
+
 ---
 
 ## P 表演片段（不要求素材）
@@ -26,8 +28,9 @@ raw 原文直接交付所选完整正文，不套 P 骨架。production 可在�
 【总述】…
 【画面基调】…（与图3光线一致）
 【起始状态】图1的{角色A}在画面…
-【分镜时间线】…
-【贯穿要求】{角色A}外观与图1、图2一致，补充：{外观锁中图里看不出的项}；…；不要字幕。
+【整体情绪弧线】{clip 走向一句话}；- {角色A}：{起态}（镜X，{可见落点}）→ {末态}（镜Z，{可见落点}）；- {角色B}：…
+【分镜时间线】…（每镜段首带〔情绪〕、每句台词带〔说法〕，见 T1）
+【贯穿要求】{角色A}外观与图1、图2一致，补充：{外观锁中图里看不出的项}；情绪连贯：{各角色逐镜递进，以可见证据体现，不靠空标签}；…；不要字幕。
 ```
 
 ## T1 文生视频（无素材）—— 兜底，仅当 S5b 判定无资产且用户接受不一致风险
@@ -37,12 +40,15 @@ raw 原文直接交付所选完整正文，不套 P 骨架。production 可在�
 【总述】{时长}秒{画幅}，{媒介/题材}，{地点+时刻}，{主体}{一句话事件}，{特殊运镜或无}。
 【画面基调】{媒介与质感}；主光源：{光源+方向+质地}；{色调}；{景深/镜头质感}；{颗粒或无}。
 【起始状态】{A 外观锁}在画面{左/右}，面朝{方向}，手里{持物}；{B 外观锁}在画面{左/右}…；机位{景别+角度}；{空间陈设两项}。
+【整体情绪弧线】（{clip 情绪总走向一句话}；每角色逐镜递进，每步锚定可见证据，不堆形容词）
+- {A}：{起态}（镜1，{可见落点}）→ {发展}（镜X，{可见落点}）→ {末态}（镜N，{可见落点}）
+- {B}：{起态}（镜…，{可见落点}）→ …
 【分镜时间线】
-镜头1（0-{a}s）：【{景别}，{角度}，{运镜}，{构图位置}】{动作链}。视线：{…}。表情：{部位描述}。台词（{角色}，{台词起}-{台词止}s，{语言}）："{逐字}"（{音量/语速/停顿}）；此时{另一角色}闭着嘴，{听者动作}。声音：{环境/动作音}。
-镜头2（{a}-{b}s）：…
+镜头1（0-{a}s）：【{景别}，{角度}，{运镜}，{构图位置}】〔{A·情绪词}｜{B/全场情绪}〕{动作链}。视线：{…}。表情：{部位描述}。台词（{角色}，{台词起}-{台词止}s，{语言}）："{逐字}"（说法：{交付情绪}｜{音量/语速/停顿}）；此时{另一角色}闭着嘴，{听者可观察反应}。声音：{环境/动作音}。
+镜头2（{a}-{b}s）：【…】〔{本镜情绪}〕…
 …
-镜头N（{…}-{时长}s）：…结束时{结束状态}。
-【贯穿要求】{A 外观锁}；{B 外观锁}；{人物空间与屏幕方向，随已确认走位更新}；主光源始终来自{方向}；{物件恒定属性及分段状态，不与动作矛盾}；{声音策略：无 bgm，只生成环境音、动作音与台词}；不要字幕。
+镜头N（{…}-{时长}s）：【…】〔{本镜情绪}〕…结束时{结束状态}。
+【贯穿要求】{A 外观锁}；{B 外观锁}；{人物空间与屏幕方向，随已确认走位更新}；情绪连贯：{各角色逐镜递进，以眼神/身姿/口型/节奏/走位等可见证据体现，不靠空标签}；主光源始终来自{方向}；{物件恒定属性及分段状态，不与动作矛盾}；{声音策略：无 bgm，只生成环境音、动作音与台词}；不要字幕。
 ```
 
 ## T3 动作 / 运镜参考
@@ -134,10 +140,11 @@ REFERENCES: Image1 = {Character A} appearance (face, hair, wardrobe only; ignore
 OVERVIEW: {duration}-second {aspect} {medium}, {location + time}, {one-line event}.
 LOOK: {medium/texture}; key light: {source + direction + quality}; {palette}; {depth of field/lens feel}.
 OPENING STATE: {A lock} stands frame-left facing {…}, holding {…}; {B lock} frame-right…; camera {shot size + angle}; {two set details}.
+EMOTION ARC: {one-line clip trajectory}; - {A}: {onset} (Shot 1, {visible cue}) → {end} (Shot N, {visible cue}); - {B}: …
 TIMELINE:
-Shot 1 (0-{a}s): [{shot size}, {angle}, {one move}, {frame position}] {action chain}. Eyeline: {…}. Face: {part-level}. {A} says (English, {speech_start}-{speech_end}s, {volume/pace/pause}): "{exact line}"; {B}'s mouth stays closed, {listener action}. Sound: {…}.
-Shot 2 ({a}-{b}s): …
-GLOBAL RULES: {A lock}; {B lock}; {screen direction follows the confirmed blocking}; key light always from {direction}; {prop state}; no music, only room tone, action sounds and dialogue; no subtitles.
+Shot 1 (0-{a}s): [{shot size}, {angle}, {one move}, {frame position}] [EMO: {A·emotion} | {B/room emotion}] {action chain}. Eyeline: {…}. Face: {part-level}. {A} says (English, {speech_start}-{speech_end}s): "{exact line}" (delivery: {delivered emotion | volume/pace/pause}); {B}'s mouth stays closed, {listener action}. Sound: {…}.
+Shot 2 ({a}-{b}s): [ … ] [EMO: {this-shot emotion}] …
+GLOBAL RULES: {A lock}; {B lock}; {screen direction follows the confirmed blocking}; emotional continuity: {per-shot progression shown through eyes/posture/mouth/rhythm/blocking, not bare labels}; key light always from {direction}; {prop state}; no music, only room tone, action sounds and dialogue; no subtitles.
 ```
 
 ## E 参数与交付状态

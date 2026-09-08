@@ -17,8 +17,10 @@ from validate_prompt import validate
 
 def prompt(body, duration=10):
     return (f'【素材绑定】无参考素材。\n【总述】{duration}秒16:9，室内对话。\n'
-            '【起始状态】A 居中。\n【分镜时间线】\n'
-            f'镜头1（0-{duration}s）：【近景，固定】\n{body}\n'
+            '【起始状态】A 居中。\n'
+            '【整体情绪弧线】走向：紧张→释然；- A：紧张（镜1，肩膀绷起）→ 释然（镜1，肩膀落下）\n'
+            '【分镜时间线】\n'
+            f'镜头1（0-{duration}s）：【近景，固定】〔A：紧张→释然〕\n{body}\n'
             '【贯穿要求】无bgm，只有环境音；不要字幕。')
 
 
@@ -98,6 +100,39 @@ class TimelineTests(unittest.TestCase):
     def test_dialogue_density_does_not_accelerate_slow_lines(self):
         text = prompt('台词（A，0-4s）："今天这个事情我一定要和你说清楚。"')+'\n| 项 | 值 |\n| 台词密度 | 密 |'
         self.assertEqual(run(text)['dialogue'][0]['estimate'], 15/4)
+
+
+class EmotionLayerTests(unittest.TestCase):
+    """W20: the emotion arc and per-shot emotion are a structural presence check,
+    not an acting-quality judgement; W20 is a warning, never an error."""
+    def test_missing_arc_and_untagged_shot_warn(self):
+        bare = ('【素材绑定】无参考素材。\n【总述】10秒16:9，室内对话。\n【起始状态】A 居中。\n'
+                '【分镜时间线】\n镜头1（0-10s）：【近景，固定】A 抬眼。\n'
+                '【贯穿要求】无bgm，只有环境音；不要字幕。')
+        result = run(bare)
+        w20 = [w for w in result['warnings'] if w.startswith('W20')]
+        self.assertTrue(any('整体情绪弧线' in w for w in w20))
+        self.assertTrue(any('〔情绪〕' in w for w in w20))
+        self.assertFalse(any(e.startswith('W20') for e in result['errors']))
+        self.assertEqual(result['checks']['performance'], 'needs_review')
+
+    def test_arc_and_per_shot_tag_clear_w20(self):
+        text = ('【素材绑定】无参考素材。\n【总述】10秒16:9，室内对话。\n【起始状态】A 居中。\n'
+                '【整体情绪弧线】走向：紧张→释然；- A：紧张（镜1，肩膀绷起）→ 释然（镜1，肩膀落下）\n'
+                '【分镜时间线】\n镜头1（0-10s）：【近景，固定】〔A：紧张→释然〕A 肩膀绷起后又落下。\n'
+                '【贯穿要求】无bgm，只有环境音；不要字幕。')
+        self.assertFalse(any(w.startswith('W20') for w in run(text)['warnings']))
+
+    def test_english_arc_and_emo_tag_clear_w20(self):
+        text = ('REFERENCES: no reference material.\nOVERVIEW: 10-second 16:9 indoor.\n'
+                'OPENING STATE: A centered.\nEMOTION ARC: tense→calm; - A: tense (Shot 1, shoulders tighten) → calm (Shot 1, shoulders drop)\n'
+                'TIMELINE:\nShot 1 (0-10s): [medium, static] [EMO: A tense→calm] A shoulders tighten then drop.\n'
+                'GLOBAL RULES: no music, room tone only; no subtitles.')
+        self.assertFalse(any(w.startswith('W20') for w in run(text)['warnings']))
+
+    def test_performance_artifact_has_no_w20(self):
+        result = run('0–4秒：A 抬眼。\n4–10秒：A 低头。', artifact='performance', duration_override=10)
+        self.assertFalse(any(w.startswith('W20') for w in result['warnings']))
 
 
 class ParameterTests(unittest.TestCase):

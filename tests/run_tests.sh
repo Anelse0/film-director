@@ -27,7 +27,7 @@ echo "$out" | grep -q "W05"; check "original long line retains timing review" $?
 
 out=$($V examples/bad-example.prompt.md); rc=$?
 [ $rc -eq 1 ]; check "bad-1 exits 1" $? "rc=$rc"
-for code in E01 E12 E05 E02 E03 E04 W06 W09 W10 W02; do
+for code in E01 E12 E05 E02 E03 E04 W06 W09 W10 W02 W20; do
   echo "$out" | grep -q "$code"; check "bad-1 has $code" $? ""
 done
 

@@ -7,6 +7,8 @@ Default production CLI remains compatible. ERROR is a format/contract issue,
 not necessarily an official model limitation. WARN requires review.
 F01-F06 concern record/schema/text fidelity; E20 concerns performance timing.
 W14 reviews identical adjacent complete blocks; W18 is retired.
+W20 flags a production prompt missing the emotion-arc block or per-shot emotion
+tags (structural presence only, not an acting-quality judgement).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
 """
@@ -261,6 +263,18 @@ def validate(path, duration_override=None, artifact="production", record=None, e
             warn("W04", f"30s 内 {len(shots)} 镜 > 8（剧情类建议 ≤ 8 [推论]）")
     elif task not in {"edit", "motion", "transition"} and artifact == "production":
         warn("W08", "未识别到「镜头N（a-bs）」格式的分镜段落")
+
+    # W20 emotion layer: a production prompt carries an overall arc plus per-shot
+    # emotion, each anchored to visible evidence (eyes/posture/mouth/rhythm/blocking).
+    # Presence only — acting quality stays a semantic review (checks.performance
+    # is always needs_review); this never certifies that the emotion is good.
+    if artifact == "production" and shots:
+        if not re.search(r"【整体情绪弧线】|EMOTION ARC", text, re.I):
+            warn("W20", "缺【整体情绪弧线】/EMOTION ARC 块（补一条 clip 情绪走向 + 每角色逐镜递进；情绪须锚定可见证据，不堆形容词）")
+        untagged = [no for no, s, e, body in shots
+                    if not re.search(r"〔[^〕]{1,40}〕|\bEMO[:：]", body[:120])]
+        if untagged:
+            warn("W20", f"镜头 {untagged} 段首未标〔情绪〕（逐镜情绪须与可见证据并存、不替代表演正文；确为无表演空镜可在 QA 注明）")
 
     # Explicit dialogue settings only; emotional intensity is independent.
     ZH_RATE, EN_RATE, SPEECH_CAP = speech_parameters(metadata_text)
