@@ -34,7 +34,12 @@ wardrobe split into two entries; no E-layer notes in 素材绑定; new WARN W24)
 stage-6-prompt-compiler.md (§6.2 binding format + §6.6 self-check),
 stage-5b-reference-assets.md (identity/wardrobe asset rows), prompt-templates.md
 (T2/T3/T4/T5 + English REFERENCES), reference-asset-brief.md and asset-registry.md
-(example rows), validate_prompt.py (W24). See CHANGELOG 1.4.0."""
+(example rows), validate_prompt.py (W24). See CHANGELOG 1.4.0.
+
+1.4.1 rebaselines stage-6-prompt-compiler.md (§6.2 图数) and stage-5b-reference-assets.md
+(wardrobe row): the stability limit is by SUBJECT (character) count, not image count —
+the identity/wardrobe split adds images (multi-view), not subjects, so it never triggers
+抽卡 for <=8 characters; only the 30-image cap limits image count. Wording only."""
 import hashlib
 import unittest
 from pathlib import Path
@@ -47,8 +52,8 @@ PROTECTED = {
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': 'ade55ddb33655042f6360bdde1bd5a0d4e149a479b1b407f142d510b696338a0',
     'references/stage-5-directing-storyboard.md': '69fb453c6cce9d91fbcf7c33909562bc1256a54fc20e2a4c4ade2318007235f1',
-    'references/stage-5b-reference-assets.md': '401d633ac9ba7541572beb2987b8afc9cf0161c3c1ae466691c1dc346ac75730',
-    'references/stage-6-prompt-compiler.md': '06c63adb91ad67c432f61848af4ee3bd505dc4c793527742b4b4f4b50866a220',
+    'references/stage-5b-reference-assets.md': 'ecd595f1b39d6a7396968562febf185533536a95b4f83719c61954b0c446b72f',
+    'references/stage-6-prompt-compiler.md': '472c86ccf1393edc52c1df415a022ac5ed2b320bb83650b32e01fd0b7cb4a7c4',
     'references/stage-7-qa-continuity.md': '7957aca66d6cda61e4c2de9a69464b61f96abdd0e1a595fe36ff82d37e9e2f68',
     'references/production-workflow.md': 'db8cc8de428952283a2cda4d7d23e0b1b0f4784ab18c54b57f674ca93eac6cfd',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
