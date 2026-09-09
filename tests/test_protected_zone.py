@@ -39,7 +39,12 @@ stage-5b-reference-assets.md (identity/wardrobe asset rows), prompt-templates.md
 1.4.1 rebaselines stage-6-prompt-compiler.md (§6.2 图数) and stage-5b-reference-assets.md
 (wardrobe row): the stability limit is by SUBJECT (character) count, not image count —
 the identity/wardrobe split adds images (multi-view), not subjects, so it never triggers
-抽卡 for <=8 characters; only the 30-image cap limits image count. Wording only."""
+抽卡 for <=8 characters; only the 30-image cap limits image count. Wording only.
+
+1.4.2 rebaselines stage-6-prompt-compiler.md (6.2) and prompt-templates.md: each binding line
+ends with the official 4.1 role tag (-形象参考/-服饰参考/-场景参考/-音色参考/-动作参考); a
+character identity/wardrobe ref is tagged 唯一参考 and 全程锁定 (local [推论]); the body refers
+to a split character as {name}(@图片{id} wearing @图{wardrobe}) using official @ syntax. Wording only."""
 import hashlib
 import unittest
 from pathlib import Path
@@ -53,7 +58,7 @@ PROTECTED = {
     'references/stage-4-performance.md': 'ade55ddb33655042f6360bdde1bd5a0d4e149a479b1b407f142d510b696338a0',
     'references/stage-5-directing-storyboard.md': '69fb453c6cce9d91fbcf7c33909562bc1256a54fc20e2a4c4ade2318007235f1',
     'references/stage-5b-reference-assets.md': 'ecd595f1b39d6a7396968562febf185533536a95b4f83719c61954b0c446b72f',
-    'references/stage-6-prompt-compiler.md': '472c86ccf1393edc52c1df415a022ac5ed2b320bb83650b32e01fd0b7cb4a7c4',
+    'references/stage-6-prompt-compiler.md': '1ca4dd6d518540f099595c50daded02c3b5fb1b4eda4dd2b2d0a768fd0ad7ff4',
     'references/stage-7-qa-continuity.md': '7957aca66d6cda61e4c2de9a69464b61f96abdd0e1a595fe36ff82d37e9e2f68',
     'references/production-workflow.md': 'db8cc8de428952283a2cda4d7d23e0b1b0f4784ab18c54b57f674ca93eac6cfd',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
@@ -62,7 +67,7 @@ PROTECTED = {
     'references/externalization-lexicon.md': '7a79bf1bf42805f185441a7767c95dd900dc390503674b286807df68eb709ce6',
     'references/genre-packs.md': '8e7334eaa40d40f07278bf0493bfe9315c515f203cf9876acfca7e6fccd4dd40',
     'references/director-lenses.md': '5d76b7b5f1f2908ea732eab1bb69dee8f9c81297bc5203e1a788d274d5b8c36a',
-    'templates/prompt-templates.md': 'd41377b789a8fcbb2aad666b447c898f1ca70186abea02e40dcd2a3e6d0b0720',
+    'templates/prompt-templates.md': '9a540c25e0ee9b19666a26f6c77bf76b5a592e0b5e7339510507057308fa9b11',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '7adc7226bf0b7648ecc2f2320db3edefe317297bf7486645271d9f87d8bb56fd',
     'templates/shot-card.md': '2c59e1022197bc88fa3539cbe7dcc2c61ee4bd60c1586c380995ef9623005f30',
