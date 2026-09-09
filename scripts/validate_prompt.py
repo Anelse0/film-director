@@ -13,7 +13,9 @@ W22 flags a dialogue-carrying shot of 7s or more (dialogue scenes cut per line b
 local convention [推论]); quoted acting annotations (重读/轻读/一词/word …) are not
 lines. W23 flags three consecutive shots sharing the same header tag (camera
 monotony). W04's shot-count hint applies only when the average shot is under 2s,
-so it does not contradict the one-line-per-cut convention. All are review hints.
+so it does not contradict the one-line-per-cut convention. W24 flags planning /
+provenance / draft notes (约定/说明/草稿/待回填/S5b/共N张/用户提供) leaking into the
+【素材绑定】 section, which the official §4.1 keeps to id+role only. All are review hints.
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
 """
@@ -220,6 +222,23 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     if missing:
         err("E05", f"引用了未声明的素材：{', '.join(f'{k}{n}' for k, n in missing)}")
     info(f"素材声明 {len(declared)} 个，引用 {len(used)} 个")
+
+    # W24 素材绑定段泄漏 E 层注释（规划/来源/草稿/数量），应移到 E 参数表或 07_qa，不进 D 层。
+    # 官方 §4.1 素材指代只含编号＋用途；五层分离禁止 E 层进 D 层。
+    if artifact == "production" and find_section(text, "refs"):
+        r_alias = next(a for a in SECTION_ALIASES["refs"] if a in text)
+        seg_start = text.index(r_alias)
+        seg_end = len(text)
+        for key in ("overview", "opening", "timeline", "global"):
+            for a in SECTION_ALIASES[key]:
+                i = text.find(a, seg_start + len(r_alias))
+                if i != -1:
+                    seg_end = min(seg_end, i)
+        leak = re.findall(r"约定|说明[:：]|草稿|待回填|待登记|尚未.{0,4}上传|需\s*S5b|S5b\s*回填|共\s*\d+\s*张|本条为|不作生产就绪|用户提供",
+                          text[seg_start:seg_end])
+        if leak:
+            uniq = "、".join(dict.fromkeys(leak))
+            warn("W24", f"【素材绑定】段出现给人看的注释（{uniq}）：规划/来源/草稿属 E 层，移到文末 E 参数表或 07_qa，不进 D 层 Prompt")
 
     # timestamps
     shots = split_shots(text)

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0 — 2026-09-09
+
+参考素材绑定格式修正（面向 director 输出 Prompt 的两个实测问题：给人看的注释漏进 D 层、人物形象与服饰揉在一条）。依据官方 `seedance-2.5-capabilities.md` §4.1（素材指代=编号＋用途）、§4.2（每个素材一个职责、分工具体到"参考什么"），非自创格式。
+
+- **【素材绑定】人物形象与服饰硬拆两条**：`图N = {角色} 人物形象，只参考面部、发型、体型，不参考服装/背景/姿势` ＋ `图M = {角色} {本场}服装造型，只参考服装与配饰，不参考面部/背景`；换装态各一条服饰参考。改 `stage-6-prompt-compiler.md` §6.2、`prompt-templates.md`（T2/T3/T4/T5＋英文 REFERENCES）、`stage-5b-reference-assets.md`（角色主体图拆成人物形象图/服饰图）、`reference-asset-brief.md`、`asset-registry.md` 示例行；硬规则 3 从"不为凑模板拆图"改为"形象与服饰分别供图、分别绑定，每个参考一个职责"；生产档案"每人每场一张造型图"改为"形象图＋服饰图"。图数上升：主体图数=角色数×2，官方 §3 >8 需抽卡，S7 登记。
+- **【素材绑定】段禁止 E 层注释**：约定/数量小计/草稿/待回填/S5b/"用户提供"等规划与来源说明是 E 层，进文末 E 参数表或 `07_qa/`，不进 D 层 Prompt（五层分离）。新增校验 **W24**（production：扫【素材绑定】段的这类词，WARN 级）。§6.6 自检加两项。
+- 受保护区同一提交重算 6 个文件哈希（stage-6、stage-5b、prompt-templates、reference-asset-brief、asset-registry、validate_prompt）。示例 Prompt（examples/01–04）保留 1.4.0 前合并式绑定，用作台词/情绪/参数示例，已在 §6.2 注明。
+- 测试：`tests/test_binding.py`（5）＋ run_tests W24 断言；99 unittest ＋ shell 回归 ＋ CI 预检通过。
+
 ## 1.3.2 — 2026-09-08
 
 容错修复（对两个 skill 的脚本、测试与文档做一次审查后发现的问题；无新功能、无新警告码）。

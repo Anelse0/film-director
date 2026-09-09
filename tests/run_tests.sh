@@ -41,6 +41,14 @@ check "bad-3 exits 0 (pacing hints are WARN)" $rc "$out"
 for code in W22 W23; do
   echo "$out" | grep -q "$code"; check "bad-3 has $code" $? ""
 done
+
+# 1.4.0 W24: E 层注释泄漏进【素材绑定】即告警；干净绑定不触发
+tmp=$(mktemp -d)
+printf '【素材绑定】图1 = A 人物形象，只参考面部、发型、体型，不参考服装、背景与姿势。（约定：每人两图，共 3 张 ≤6。本条为草稿。）\n【总述】10秒 9:16，室内。\n【起始状态】图1 的 A 在画左。\n【整体情绪弧线】平静。\n- A：平静（镜1，抬眼）\n【分镜时间线】\n镜头1（0-10s）：【中景，正面，固定】〔A：平静〕A 抬眼。\n【贯穿要求】A 外观锁；无 bgm；不要字幕。\n' > "$tmp/leak.prompt.md"
+out=$($V "$tmp/leak.prompt.md"); echo "$out" | grep -q "W24"; check "note leak in 素材绑定 triggers W24" $? "$out"
+echo "$out" | grep -q "E01"; rc=$?; [ "$rc" -ne 0 ]; check "W24 is a warning, prompt still structurally valid" $? "$out"
+echo "$out" | grep -q "0 error"; check "leak prompt has 0 error (W24 is WARN)" $? "$out"
+rm -rf "$tmp"
 out=$($V examples/example-03-yogurt-comedy.prompt.md examples/example-01-kitchen-keys.prompt.md --batch independent)
 echo "$out" | grep -q "W22\|W23"; rc=$?
 [ "$rc" -ne 0 ]; check "accepted one-take and 6s shots do not trigger W22/W23" $? "$out"
