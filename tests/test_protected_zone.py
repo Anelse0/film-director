@@ -50,7 +50,12 @@ to a split character as {name}(@图片{id} wearing @图{wardrobe}) using officia
 rhythm method: vary shot length against the beat, accelerate into peaks, long shots must earn
 their length, avoid a uniform/over-wide grid — fix a flat timeline by re-timing cuts, never by
 trimming dialogue) and validate_prompt.py (new WARN W25: three or more consecutive shots of equal
-duration read as a flat meter). W25 is a presence-only review hint like W23. See CHANGELOG 1.5.0."""
+duration read as a flat meter). W25 is a presence-only review hint like W23. See CHANGELOG 1.5.0.
+
+1.5.1 rebaselines prompt-templates.md: adds a top-level 排版 (line-break) rule and fixes the
+default T2 template, which had rendered 【素材绑定】 and 【整体情绪弧线】 as run-on single lines —
+each 【】 section on its own line, one binding per line, one arc character per line, one shot per
+line. Wording/formatting only, no code or new warning. See CHANGELOG 1.5.1."""
 import hashlib
 import unittest
 from pathlib import Path
@@ -73,7 +78,7 @@ PROTECTED = {
     'references/externalization-lexicon.md': '7a79bf1bf42805f185441a7767c95dd900dc390503674b286807df68eb709ce6',
     'references/genre-packs.md': '8e7334eaa40d40f07278bf0493bfe9315c515f203cf9876acfca7e6fccd4dd40',
     'references/director-lenses.md': '5d76b7b5f1f2908ea732eab1bb69dee8f9c81297bc5203e1a788d274d5b8c36a',
-    'templates/prompt-templates.md': '9a540c25e0ee9b19666a26f6c77bf76b5a592e0b5e7339510507057308fa9b11',
+    'templates/prompt-templates.md': '421ad58ff62857858068b82b18902d2b6b194c7cec206d5f6acda8caf518647e',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '7adc7226bf0b7648ecc2f2320db3edefe317297bf7486645271d9f87d8bb56fd',
     'templates/shot-card.md': '2c59e1022197bc88fa3539cbe7dcc2c61ee4bd60c1586c380995ef9623005f30',
