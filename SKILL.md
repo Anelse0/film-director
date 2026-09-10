@@ -129,7 +129,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 12. **S6 后分层校验**：production 默认 `python3 scripts/validate_prompt.py <prompt.md>`；片段加 `--artifact performance --duration N`，原文加 `--artifact raw --entry-id N`。可选记录接口见 `references/performance-record.md`。完整生产包另按 `references/production-workflow.md` 执行 `--production-record … --require-ready`，不得把基础 CLI 的零错误称为生产就绪。未落盘可用临时文件检查，不强制保存产物。ERROR 修复；WARN 审阅；脚本通过不等于表演/成片通过。
 13. **需求参数优先于默认美学。** 场景强度、角色情绪强度、克制、方向与台词密度分别判断；高强度可以内收且无台词，不自动套预设。
 14. **状态与因果连贯。** 表演检查状态推进/持续；删除测试不能删识别性细节；同步多部位不等于多个无关任务（`references/causal-chain.md`）。
-15. **对白场一句一切、逐镜变化、亮相介绍先行。** `[推论]` 一句台词一个切点，对白镜默认 2–4s，相邻镜至少改变景别 / 角度 / 运镜 / 拍谁之一；含台词的单镜 ≥7s（一句）或 ≥9s 触发 W22，三镜同标注触发 W23，均为 WARN——有意长镜与有意重复在 QA 写理由，不为消警告删台词。台词超预算回传 film-creative 精简，不拉长镜头承载。人物亮相按 stage-5 5.1d 与 `references/dialogue-pacing.md` §4：介绍先行、他人反应赋予地位、特写作揭示。
+15. **对白场一句一切、逐镜变化、亮相介绍先行；镜长随 beat 变化，不排均匀/过宽网格。** `[推论]` 一句台词一个切点，对白镜默认 2–4s，相邻镜至少改变景别 / 角度 / 运镜 / 拍谁之一；含台词的单镜 ≥7s（一句）或 ≥9s 触发 W22，三镜同标注触发 W23，**连续 3 镜时长相同触发 W25**，均为 WARN——有意长镜、有意重复与有意等长在 QA 写理由，不为消警告删台词。**节奏靠镜长随 beat 起伏（快切聚峰值、长镜留 earned beat、拆没有内部发展的静止平台），不靠把镜头调成同一长度或统一缩短**（时长曲线方法见 `references/stage-5-directing-storyboard.md` §5.1c）。"太宽/太平"是重排切点，不是删台词——台词超预算才回传 film-creative 精简（时长适配，另一件事），不拉长镜头承载、不擅自删词。人物亮相按 stage-5 5.1d 与 `references/dialogue-pacing.md` §4：介绍先行、他人反应赋予地位、特写作揭示。
 
 ## 默认输出契约
 
@@ -157,6 +157,6 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | "宣布 / 演讲 / 群戏点名 / 人物亮相 / 出场" | S5 加读 `references/dialogue-pacing.md`：一句一切、他人反应、特写作揭示 |
 | "分镜表改了，帮我检查 / 同步" | 账本模式：读表 → `scripts/ledger_check.py` → 只改生产侧列；正典变了先等创作侧登记与扫描 |
 | "台词装不进 30s / 太长" | 回传台词预算（`references/handoff-contract.md` §四）给 film-creative 精简，不拉长镜头、不擅自删词 |
-| "节奏太慢 / 拆细 / 不要一大段" | 回 S5 按 `references/dialogue-pacing.md` 重切；交付完整 Prompt 全文 |
+| "节奏太慢 / 太平 / 太宽 / 拆细 / 不要一大段" | 回 S5 按 `stage-5-directing-storyboard.md` §5.1c 时长曲线 + `references/dialogue-pacing.md` 重排镜长与切点（快切聚峰值、长镜留 earned beat、拆静止平台、避免均匀网格）；不靠统一缩短或删台词（台词预算另计）；交付完整 Prompt 全文 |
 
 不确定入口且结果会实质不同时，只问一个简短问题；否则按最保守解读推进并写明假设。

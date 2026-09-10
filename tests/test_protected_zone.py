@@ -44,7 +44,13 @@ the identity/wardrobe split adds images (multi-view), not subjects, so it never 
 1.4.2 rebaselines stage-6-prompt-compiler.md (6.2) and prompt-templates.md: each binding line
 ends with the official 4.1 role tag (-形象参考/-服饰参考/-场景参考/-音色参考/-动作参考); a
 character identity/wardrobe ref is tagged 唯一参考 and 全程锁定 (local [推论]); the body refers
-to a split character as {name}(@图片{id} wearing @图{wardrobe}) using official @ syntax. Wording only."""
+to a split character as {name}(@图片{id} wearing @图{wardrobe}) using official @ syntax. Wording only.
+
+1.5.0 rebaselines stage-5-directing-storyboard.md (§5.1c 节奏曲线 expanded into a shot-duration
+rhythm method: vary shot length against the beat, accelerate into peaks, long shots must earn
+their length, avoid a uniform/over-wide grid — fix a flat timeline by re-timing cuts, never by
+trimming dialogue) and validate_prompt.py (new WARN W25: three or more consecutive shots of equal
+duration read as a flat meter). W25 is a presence-only review hint like W23. See CHANGELOG 1.5.0."""
 import hashlib
 import unittest
 from pathlib import Path
@@ -56,7 +62,7 @@ PROTECTED = {
     'references/emotion-performance.md': 'a150f6047b6a484a6ab858a93773d9c28fab022ac274bcc358dd20684468d8d0',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': 'ade55ddb33655042f6360bdde1bd5a0d4e149a479b1b407f142d510b696338a0',
-    'references/stage-5-directing-storyboard.md': '69fb453c6cce9d91fbcf7c33909562bc1256a54fc20e2a4c4ade2318007235f1',
+    'references/stage-5-directing-storyboard.md': '1e6f3e4633479a2a83645f69ab513362c3d28f854855680983c157aee861a599',
     'references/stage-5b-reference-assets.md': 'ecd595f1b39d6a7396968562febf185533536a95b4f83719c61954b0c446b72f',
     'references/stage-6-prompt-compiler.md': '1ca4dd6d518540f099595c50daded02c3b5fb1b4eda4dd2b2d0a768fd0ad7ff4',
     'references/stage-7-qa-continuity.md': '7957aca66d6cda61e4c2de9a69464b61f96abdd0e1a595fe36ff82d37e9e2f68',
@@ -73,7 +79,7 @@ PROTECTED = {
     'templates/shot-card.md': '2c59e1022197bc88fa3539cbe7dcc2c61ee4bd60c1586c380995ef9623005f30',
     'templates/reference-asset-brief.md': 'ed6e9e6f5c2b66ad29cf5ddb73b3ee7a1280c56e470a4ac5dc2937c2cfffc58d',
     'templates/asset-registry.md': '0628db7bc42ff34d8b2043f0a8f43f89edefd546d5bfc1eb940ba00858f4673e',
-    'scripts/validate_prompt.py': '19db1ce6e25ad235c3f04b9811007c0963cf09838bb2a1fe2f42f435dfb24358',
+    'scripts/validate_prompt.py': 'dd498406c4362bb05e17768f8d3d231c7ec35a230dd2ad7a57332cffe4e75ba9',
     'scripts/prompt_structure.py': 'd9f73020e41eec19edee56b7ad8a45f9b973c28db9c93e451274ab6d1a0b60bf',
     'scripts/production_contract.py': '963653540c39519d99a731749736e96b39bed17005305af1082c857af5426bfa',
     'scripts/production_preflight.py': '80379ec01b3f952ee82cc1611e38b555ad41838bd0bb6f0ac52ddb5453605702',

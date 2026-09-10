@@ -15,7 +15,9 @@ lines. W23 flags three consecutive shots sharing the same header tag (camera
 monotony). W04's shot-count hint applies only when the average shot is under 2s,
 so it does not contradict the one-line-per-cut convention. W24 flags planning /
 provenance / draft notes (约定/说明/草稿/待回填/S5b/共N张/用户提供) leaking into the
-【素材绑定】 section, which the official §4.1 keeps to id+role only. All are review hints.
+【素材绑定】 section, which the official §4.1 keeps to id+role only. W25 flags three or
+more consecutive shots of equal duration (a uniform meter reads flat; vary shot
+length against the beat, do not uniformly shorten or trim dialogue). All are review hints.
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
 """
@@ -330,6 +332,19 @@ def validate(path, duration_override=None, artifact="production", record=None, e
                     warn("W23", f"镜头{tags[i - 2][0]}–{tags[i][0]} 连续 3 镜【景别/角度/运镜】标注完全相同（对白场约定逐镜变化；有意重复请在 QA 注明 [推论]）")
             else:
                 run = 1
+        # W25 duration rhythm: equal-length shots read as a flat, steady beat.
+        # Rhythm comes from varying shot length against the dramatic beat
+        # (accelerate into peaks, hold earned beats), not a uniform grid — and
+        # never by trimming dialogue. Presence-only WARN, mirrors W23's run-of-3.
+        drun = 1
+        for i in range(1, len(shots)):
+            if shots[i][2] - shots[i][1] == shots[i - 1][2] - shots[i - 1][1]:
+                drun += 1
+                if drun == 3:
+                    d = shots[i][2] - shots[i][1]
+                    warn("W25", f"镜头{shots[i - 2][0]}–{shots[i][0]} 连续 3 镜时长相同（{d:g}s），时长曲线易平；按 beat 变化镜长（高潮处收短、earned beat 处保留），不靠统一缩短或删台词 [推论]")
+            else:
+                drun = 1
 
     # Explicit dialogue settings only; emotional intensity is independent.
     ZH_RATE, EN_RATE, SPEECH_CAP = speech_parameters(metadata_text)

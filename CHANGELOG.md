@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.5.0 — 2026-09-10
+
+镜长节奏（节奏靠镜长随 beat 起伏，不是均匀或过宽的网格）。此前分镜时间线的节奏检查是**对白/机位向**的（W22 含台词长镜、W23 三镜同机位标注、W04 太快/太多），没有一条针对**镜长本身过匀/过宽导致的"平"**——于是排出的时间线镜长均匀或中段并排长镜，读起来节奏很平。
+
+**根因**：①无镜长节奏方法（§5.1c 节奏曲线只有一句"按信息与情绪选切点"）；②校验只覆盖对白长镜与机位单调，不覆盖时长曲线的平。
+
+**改动**：
+- `references/stage-5-directing-storyboard.md` §5.1c（受保护，重算哈希）：扩成镜长节奏方法——镜长是双向节奏工具（张力升/高潮处收短、必要处保留长镜）；**均匀等长的镜头形成稳定拍点、读起来平**，制造节奏靠偏离基线而非把镜头调成同一长度或统一缩短（ASL 基线约 4–6s，为效果高于/低于它）；长镜要配得上长度（内部有走位/揭示/动作节拍/earned hero beat），静止平台按 beat 拆开或补节拍；把快切聚到峰值（高潮前半段镜长下降、尾段回升）；**"太宽/太平"是重排切点，不是删台词**（台词预算另计，见 `dialogue-pacing.md` §3）。
+- `scripts/validate_prompt.py`（受保护，重算哈希）：新增 **W25**——连续 3 镜时长相同（均匀拍点、时长曲线易平）给 production 专用 WARN，镜像 W23 的 run-of-3 逻辑；只提示不拦，"更细的太宽/太平"不由脚本判、靠 §5.1c 方法。
+- `references/dialogue-pacing.md` §2/§6：补"镜长也要变"与 W25；`SKILL.md` 硬规则 15 补镜长节奏＋W25，快速路由"节奏太慢/太平/太宽"指向 §5.1c 时长曲线；`references/production-profile.md` 节奏约定补镜长随 beat 起伏。
+- 边界与护栏：镜长节奏是**重排切点**（生产侧），台词逐字不动（硬规则 7）；不为消 W25/提速删台词或删识别性细节（硬规则 14）；与叙事节奏（film-creative `narrative-pacing.md`）、台词预算（时长适配）三者分清。
+- 来源：Murch《In the Blink of an Eye》（剪辑六律 情绪>故事>节奏；`source-analysis.md` 已录）、Eisenstein 韵律蒙太奇（镜长由内容而非公式决定）、StudioBinder / Backstage 剪辑节奏、"evolution of pace in popular movies" 研究——经 web search 获取要点、**未通读原文**，tag 从严（`[转述]`）。
+- 测试：`test_pacing.py` 加 `test_three_equal_durations_warn_but_varied_lengths_do_not`；100 unittest + shell 回归 + CI preflight 通过。W25 不触发既有干净示例与 30s-fight 生产包（`example-04`/`30s-fight` 最长等长连跑=2），`bad-example-2`（3,3,3,3）会正常提示。
+
 ## 1.4.2 — 2026-09-09
 
 恢复并规范素材绑定的**用途尾标**（官方 §4.1：素材指代 = 编号＋用途「谁是形象/音色/动作/场景」）。1.4.0 把用途折进主体名、丢了显式标注。

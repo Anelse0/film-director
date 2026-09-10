@@ -1,8 +1,15 @@
 # film-director
 
-版本 **1.3.2**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+版本 **1.5.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片、**调整分镜节奏**）。
 
 创意前端（概念、故事、剧本、台词创作与改写）由独立的 [film-creative](https://github.com/Anelse0/film-creative) Skill 承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
+
+## 1.5.0 更新（镜长节奏：节奏靠镜长随 beat 起伏，不是均匀/过宽网格）
+
+- `stage-5-directing-storyboard.md` §5.1c 节奏曲线扩成**镜长节奏方法**：镜长随 beat 变化——张力升/高潮处收短切点、必要处保留长镜；均匀等长（3,3,3）或中段并排长镜（6,6）读起来平；长镜要"配得上长度"（内部有走位/揭示/动作节拍/earned hero beat），否则拆开或补 beat。**"太宽/太平"的修法是按 beat 曲线重排切点，不是统一缩短、更不是删台词**（台词预算是另一件事）。
+- 新增校验 **W25**：连续 3 镜时长相同（时长曲线易平）给 WARN 审阅提示——只提示不拦，更细的"太宽"靠 §5.1c 判断，不由脚本裁决。
+- SKILL 硬规则 15 补镜长节奏与 W25；快速路由"节奏太慢/太平/太宽"指向 §5.1c 时长曲线 + `dialogue-pacing.md`。
+- 来源经检索（Murch《In the Blink of an Eye》剪辑六律、Eisenstein 韵律蒙太奇、StudioBinder/Backstage 剪辑节奏、流行片 pace 研究），tag 从严（未通读原文）。
 
 ## 1.3.2 更新（容错修复）
 

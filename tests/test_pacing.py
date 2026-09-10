@@ -65,6 +65,19 @@ class PacingTests(unittest.TestCase):
         varied = [shot(1, 0, 3, '中景，正面，固定'), shot(2, 3, 6, '中景，侧面，固定'), shot(3, 6, 9, '中景，正面，微推')]
         self.assertEqual(codes(run(prompt(varied, 9)), 'W23'), [])
 
+    def test_three_equal_durations_warn_but_varied_lengths_do_not(self):
+        # W25: a uniform meter (equal-length shots) reads flat — even with varied tags.
+        flat = [shot(1, 0, 3, '中景，正面，固定'), shot(2, 3, 6, '近景，侧面，微推'),
+                shot(3, 6, 9, '特写，正面，固定'), shot(4, 9, 14, '全景，俯，摇')]  # 3,3,3,5
+        r = run(prompt(flat, 14))
+        self.assertEqual(r['errors'], [])
+        self.assertEqual(len(codes(r, 'W25')), 1)
+        self.assertIn('镜头1–3', codes(r, 'W25')[0])
+        self.assertEqual(codes(r, 'W23'), [])  # tags vary, so this is a duration-only flag
+        varied = [shot(1, 0, 2, '中景，正面，固定'), shot(2, 2, 6, '近景，侧面，微推'),
+                  shot(3, 6, 9, '特写，正面，固定')]  # 2,4,3
+        self.assertEqual(codes(run(prompt(varied, 9)), 'W25'), [])
+
     def test_performance_artifact_never_emits_pacing_codes(self):
         text = '【表演条件】12秒。\n【表演时间线】\n节拍 1（0-12s）：她说 "I am fine." 然后闭嘴。'
         r = run(text, artifact='performance')
