@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.0.0 — 2026-09-11
+
+把 25 条情绪原文从"可调用的资源"升级为"可组合的表演语法"，把导演手法从二手归纳换成一手来源的决策规则，并逐页复读官方 2.5 指南补齐写法依据。全部改动是判断工具与依据，不新增警告码；1.3.1–1.5.1 被回退的内容（绑定拆条、W24、W25、账本视图）不恢复。
+
+**根因**：①原文库只支持 raw / adapt / blend 三种调用，没有回答"同一情绪更强怎么写、从 A 到 B 怎么过渡、表面一层心里一层怎么写、听者怎么演、这个景别读不读得出"——于是组合表演靠每次临场发挥，示例 02–05 里做对的方法没有沉淀；②`director-lenses.md` 的来源多为 nofilmschool / studiobinder 等二手拆解，`source-analysis.md` 已自认"不是逐条第一手核实"；③W04 的"30s 内 >8 镜"与官方案例（9 镜 / 30s）直接冲突。
+
+- **`references/performance-grammar.md`（新，受保护）**：§1 官方依据（描述性语句 / 只在有记忆点处写细节 / 案例的情绪词 + 证据并写与渐变链）；§2 压缩留 hinge（Ekman reliable facial expressions、Duchenne 眼轮匝肌 `[一手·摘要]`）；§3 可读性地板（Hitchcock 影像尺寸随情绪重要性、Bergman、Villeneuve；反例 Sonnenfeld）；§4 时间包络与相对时间（Ekman 微 / 宏表情时长；官方相对时间控制）；§5 家族阶梯与失控铰链；§6 过渡铰链三检查；§7 面具与泄漏（Ekman leakage；Caine 不眨眼）；§8 听者与切点（Kuleshov / Pudovkin、Hitchcock 1964、Jenkins、Murch 六律与眨眼切点）；§9–12 多人、语言、检索、误用信号。
+- **`references/emotion-index.json`（受保护，重算哈希）**：25 条各加 `zh`（译写，标 adapt）、`hinge`、`readability`、`wider_parts`、`onset`、`min_seconds`（`[推论]`）、`ladder`、`listener`、`mask`、`neighbors`（共 89 条，每条带桥梁部位）；条目 17 末句歧义记在 `notes`。原有 terms / cues / relations 不变；`assets/emotion-library.json` 字节不变，raw 保真检查不变。
+- **`scripts/emotion_library.py`（受保护，重算哈希）**：新增 `--zh`、`--neighbors ID`、`--ladder FAMILY`、`--readability 景别`、`--listener`；`--query` 只搜条目与其自身索引注记，不搜 neighbors / ladder（否则"害羞"会命中半个库）；`--raw`、`--id`、`--list` 行为不变。
+- **`references/director-craft.md`（新，受保护）**：按决策组织 A–M 十三节，每节 = 一手说法 `[一手·摘要]` + 决策 + Seedance 写法 `[推论]` + 误用；末表对应 L1–L18。来源：Hitchcock / Truffaut 与 1964 CBC 访谈、Pudovkin 记述的 Kuleshov 实验、Lumet《Making Movies》、Murch《In the Blink of an Eye》、Ekman、Caine BBC 表演课、Weston《Directing Actors》、Bergman、Deakins、ASC Shot Craft、Fincher / Messerschmidt、Kubrick / Ciment、Cuarón / Lubezki（ASC）、Villeneuve（DGA）、Haneke、Nolan（DGA Quarterly）、Lanthimos（BFI / ASC）、Coen（ASC）、Tarkovsky、DGA Shot to Remember（Jenkins / Sonnenfeld / Payne / Spielberg）。按用户约定只用搜索不抓全文，故一律标"仅读摘要"，不做推演式归因；Edgar Wright 的视频论文（第三方）与 Spielberg 纵深调度（摘要无具体说法）未采纳。
+- **`references/director-lenses.md`（受保护，重算哈希）**："从已核实资料到本地决策"改为指向 `director-craft.md`，保留 Lumet / ASC / Gerwig 三条已核实链接。
+- **`references/seedance-2.5-capabilities.md`（受保护，重算哈希）**：§2 补编辑时长差异说明与时间戳编辑 / 音频编辑；新增 §4.9 官方案例揭示的写法（切镜密度、情绪词与证据并写、渐变链、段首标注、分段参考绑定、参考只做指代、【严格排除】段、一键成片与转场、音频编辑、总体介绍、官方 sd25-pe skill、2.0 附录缺口）；复核日期 2026-09-11。
+- **`references/stage-4-performance.md`（受保护，重算哈希）**：4.4 听与回应加"先写他看见了什么"；新增 4.4b 组合语法七条；4.5 表加相对时间行 `[官方]`。
+- **`references/stage-5-directing-storyboard.md`（受保护，重算哈希）**：§5.1c 加 Murch 权重顺序与眨眼切点、Tarkovsky 时间压力；§5.2 景别一步改为"影像尺寸随情绪重要性 + 可读性地板"；§5.4 运动三种合法动机；§5.9 加两行（反应镜空、景别与地板不符）；§5.10 加白模参考与表情参考锁调度 `[官方]`；新增 §5.11 镜头曲线（Lumet）与平行动作（Nolan）。
+- **`references/stage-5b-reference-assets.md`（受保护，重算哈希）**：资产表加"表情 / 表演参考视频（运动参考）"与"白模视频（粗粒度）" `[官方]`。
+- **`references/stage-6-prompt-compiler.md`（受保护，重算哈希）**：§6.0 压缩回 S4 留 hinge；§6.2 加相对时间与时间点、部署密度、分段绑定参考三条规则。
+- **`templates/shot-card.md`（受保护，重算哈希）**：头部加镜头曲线字段；C 层表演块行记 hinge 与可读性地板。
+- **`scripts/validate_prompt.py`（受保护，重算哈希）**：W04 镜数条件由"30s 内 >8 镜"改为"≥3 镜且平均镜长 < 2s"，提示文案引用官方案例；单镜 < 1.5s 不变；文档字符串更新。`references/dialogue-pacing.md` §6 与 `validation-log.md` 待验证队列（+5 项）同步。
+- **`references/source-analysis.md`**：新增 §2.0.0 调研表（20 行来源、采纳要点、去处、未采纳说明）。
+- `SKILL.md`：表演优先路由加组合语法与新检索项；流水线表 S4 / S5 读取项；硬规则 4（相对时间）、7（压缩留 hinge、部署密度）、8（景别服从情绪重要性、运动动机）；快速路由加七个入口。README 同步。
+- 示例：`examples/performance/07-mask-and-leak.prompt.md` + `.performance.json`（blend 25 / 19 / 6，`--record` 保真 matched）、`examples/performance/08-listener-reaction-chain.prompt.md`（production，B 走 9 → 14 → 25，切点落在眨眼 / 凝视 / 闭嘴之后，0 error 0 warning）；`examples/performance/acceptance.md` 补两组说明。
+- 测试：新增 `tests/test_grammar.py`（索引字段完整性与取值域、neighbors 有效且不自指、译写无来源元数据、`--query` 范围、四个新检索函数与 CLI、示例 07 / 08 断言）；`test_pacing.py` 加 W04 重校（9 镜 / 30s 不提示、平均 < 2s 提示）；`run_tests.sh` 加 07 / 08 断言；`test_protected_zone.py` 重算 12 个受保护文件哈希并新增 2 个受保护文件。
+- 未做与边界：`min_seconds`、`readability`、hinge 部位对应均为本 skill 估算 `[推论]`，成片验证后按 `validation-log.md` 修订；未读取官方 `sd25-pe` skill 内容；2.0 指南附录的 R2V 基础案例未收录。远端 tags v1.3.1–v1.5.1 保留（2.0.0 > 1.5.1，无冲突，未删除）。
+
 ## 1.3.0 — 2026-09-08
 
 面向实际协作返工的版本：把两天生产里反复出现的四类返工（一段发言装进长镜、连续同机位、修订只给 diff、正典改了旧分镜还在表里）和一个断掉的接口（创作侧 1.2.0 起不再逐句给说法，生产侧 W20 却需要〔说法〕）收进规则与工具。

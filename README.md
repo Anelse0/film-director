@@ -1,16 +1,17 @@
 # film-director
 
-版本 **1.3.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+版本 **2.0.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
 
 创意前端（概念、故事、剧本、台词创作与改写）由独立的 [film-creative](https://github.com/Anelse0/film-creative) Skill 承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
 
-## 1.3.0 更新（对白节奏 · 亮相 · 与 film-creative 的协作契约 · 账本模式）
+## 2.0.0 更新（表演语法 · 一手导演手法 · 官方指南复读）
 
-- **协作契约** `references/handoff-contract.md`（与 film-creative 同文）：台词设计表作为交接物直接映射为〔说法〕〔情绪〕与【整体情绪弧线】；正典变更协议（登记 → 扫描 → 处理，不 patch 旧镜头）；台词预算反向回传；每次修订交付完整 Prompt 全文。
-- **对白场节奏与亮相** `references/dialogue-pacing.md`：一句一切、对白镜 2–4s、逐镜换景别 / 角度 / 运镜、hero beat 模板（介绍 → 他人反应 → 特写揭示 → 落定）。新增校验 **W22**（含台词长镜：≥7s 单句或 ≥9s 对白，旁白与单镜 clip 免检）与 **W23**（三镜标注完全相同），均为 WARN 级本地约定 `[推论]`。
-- **生产档案** `references/production-profile.md` + `templates/production-profile.md`：画幅、语言、素材绑定约定、调色段、声音 / 旁白、节奏约定、字幕、首帧策略、台词预算口径——一个项目只说一次，S1 先读。
-- **账本模式**：项目主表是分镜 / 台词表（xlsx）时的读写规则；新增 `scripts/ledger_check.py`（stdlib 读 xlsx：时间连续 L02、长镜含台词 L03、机位单调 L05、台词窗口 L06、语速 L08、占位统计 L07）与 `scripts/xlsx_lite.py`。
-- 硬规则 15 与快速路由新增对应入口；反例 `examples/bad-example-3-lazy-long-take.prompt.md`。
+- **表演语法** `references/performance-grammar.md`：把 25 条情绪原文从"单一情绪、单张脸"扩展成人物表演的组合方法——压缩留 hinge（Ekman 可靠信号）、可读性地板（景别决定哪个部位可读）、家族阶梯（19→6、18→3、17→4、25/21→1，铰链是先失控的部位）、跨情绪过渡铰链、面具与泄漏（双层表演）、听者与切点（Kuleshov / Murch）、相对时间、部署密度。全部是判断工具，不是配额或警告。
+- **情绪索引增强** `references/emotion-index.json`：每条新增 `zh` 译写、`hinge`、`readability`、`wider_parts`、`onset`、`min_seconds`、`ladder`、`listener`、`mask`、`neighbors`（89 条带桥梁部位的衔接关系）。`scripts/emotion_library.py` 新增 `--zh` `--neighbors` `--ladder` `--readability` `--listener`；`--raw` 与原文保真检查不变。
+- **导演手法一手提炼** `references/director-craft.md`：Hitchcock（影像尺寸随情绪重要性）、Kuleshov / Pudovkin、Murch（六律、切在眨眼）、Fincher / Kubrick / Lubezki（运动动机）、Lumet（镜头曲线）、Deakins、ASC Shot Craft（视线与机位高度）、Haneke、Tarkovsky、Weston / Caine（表演）、Jenkins / Sonnenfeld / Payne / Spielberg（DGA Shot to Remember）、Lanthimos / Coen、Nolan。按决策组织，每条带 `[一手·摘要]` 标签（一手来源，本次仅读到摘要）与 Seedance 写法；`director-lenses.md` 的 L1–L18 指向它。
+- **官方指南复读**：`seedance-2.5-capabilities.md` 新增 §4.9 官方案例揭示的写法（9 镜 / 30s 每镜一句台词、情绪词与证据并写、渐变链、分段参考绑定、【严格排除】段、白模与表情参考）；S5 §5.10 加白模 / 表情参考锁调度，§5.11 镜头曲线与平行动作；S5b 资产表加表情参考视频与白模；S6 加相对时间、部署密度、分段绑定。
+- **校验重校**：W04 不再以"30s 内 >8 镜"提示（官方案例本身 9 镜 / 30s），改为平均镜长 < 2s 或单镜 < 1.5s 才提示。无新增警告码。
+- 示例：`examples/performance/07-mask-and-leak`（面具 + 泄漏，blend 25/19/6，保真 matched）、`examples/performance/08-listener-reaction-chain`（听者反应链 9→14→25 的 production 示例，0 警告）。
 
 ## 一句话
 
@@ -32,10 +33,12 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `references/seedance-2.5-capabilities.md` | 写任何模型能力/参数前；事实分级表 |
 | `references/stage-1-intake.md` | S1 / S2：资产登记、任务树（R2V 核心）、入口判定、clip 估算、画幅时长、项目目录 |
 | `references/emotion-performance.md` | 原文/微调/重组，强度与克制独立，高光时间编排及保真 |
+| `references/performance-grammar.md` | 把条目组成人物表演：hinge、可读性地板、阶梯、过渡铰链、面具与泄漏、听者与切点、相对时间 |
 | `references/performance-record.md` | 可选编译前记录与自动检查接口 |
 | `references/stage-4-performance.md` | S4 表演外化与台词的模型执行约束 |
 | `references/stage-5-directing-storyboard.md` | S5 导演与分镜 |
 | `references/director-lenses.md` | S5 透镜：按意图选择，不覆盖锁定表演 |
+| `references/director-craft.md` | 导演 / 摄影 / 剪辑一手说法按决策整理（景别、并置、切点、运动动机、镜头曲线、画外、平行动作）及 Seedance 写法 |
 | `references/camera-vocabulary.md` | 运镜词汇："术语 + 描述" |
 | `references/stage-5b-reference-assets.md` | S5b 参考资产清单与图像简报（图 + 文核心） |
 | `references/stage-6-prompt-compiler.md` | S6 编译规范 |
@@ -52,7 +55,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `references/genre-packs.md` | 基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇时叠加 |
 | `references/source-analysis.md` | 审计 / 更新来源时 |
 | `templates/*` | 分镜卡 / Prompt / 资产简报 / 登记表 / 生产记录骨架（`script-scene.md` 为输入格式参照） |
-| `scripts/emotion_library.py` | 按编号或关键词读取完整条目，`--list` 查看索引 |
+| `scripts/emotion_library.py` | 按编号或关键词读取完整条目，`--list` 查看索引；`--zh` 译写、`--neighbors ID` 过渡、`--ladder FAMILY` 阶梯、`--readability 景别`、`--listener` 反应镜候选 |
 | `scripts/validate_prompt.py` | S6 之后必跑 |
 | `scripts/ledger_check.py` | 分镜 / 台词表（xlsx）改动后：时间连续、长镜含台词、机位单调、台词窗口 |
 | `examples/example-01-kitchen-keys*.md` | 完整走查 + 通过校验的 Prompt |
@@ -100,6 +103,7 @@ python3 scripts/validate_prompt.py <prompt.md> --production-record <production.j
 ## 事实来源
 
 - `[官方]` 火山方舟《Doubao Seedance 2.5 提示词指南》（2026 版，38 页）
+- `[一手·摘要]` 导演 / 摄影师 / 剪辑师本人著作与访谈，DGA · ASC · BFI · Criterion · Paul Ekman Group 等机构材料，本次调研只读到搜索摘要（清单见 `references/source-analysis.md` §2.0.0 调研）
 - `[第三方]` Higgsfield、fal.ai、rundiffusion、runware、the-decoder、mindstudio 等（见 `references/source-analysis.md`）
 - 分辨率各来源不一致（480p/720p/1080p/4K），Skill 内标为"以平台为准"。
 
@@ -107,7 +111,7 @@ python3 scripts/validate_prompt.py <prompt.md> --production-record <production.j
 
 - 语义化版本，记录在 `VERSION` 与 `CHANGELOG.md`。
 - 每次改动跑 `bash tests/run_tests.sh`；GitHub Actions 在 push 与 PR 时自动跑。
-- 生产/表演核心文件由 `tests/test_protected_zone.py` 哈希锁定（1.0.0 基线取自 v2.3.1；1.1.0 为强制情绪层 W20 重算了 validate_prompt.py、stage-6、prompt-templates、shot-card 四个文件的基线；1.3.0 为 W22/W23 重算 validate_prompt.py）；有意变更属于独立的生产版本发布，需同步更新哈希并在 CHANGELOG 说明。
+- 生产/表演核心文件由 `tests/test_protected_zone.py` 哈希锁定（1.0.0 基线取自 v2.3.1；1.1.0 为强制情绪层 W20 重算了 validate_prompt.py、stage-6、prompt-templates、shot-card 四个文件的基线；1.3.0 为 W22/W23 重算 validate_prompt.py；2.0.0 为表演语法与一手导演手法重算 emotion-index、emotion_library、stage-4/5/5b/6、capabilities、director-lenses、shot-card、validate_prompt，并新增 performance-grammar 与 director-craft 两个受保护文件）；有意变更属于独立的生产版本发布，需同步更新哈希并在 CHANGELOG 说明。
 
 ## 维护
 

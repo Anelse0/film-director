@@ -27,12 +27,15 @@
 | L17 色彩与情节剧 | 怎样容纳外放情绪 | 服装、陈设、色彩、姿态与声音可放大关系 | 大哭和大笑可持续，不强制对称配色或平视机位 |
 | L18 群戏 | 多人怎样各有生活 | 决定主交流、次交流与焦点转移；需要时安排重叠对白 | 身份参考按实际人数绑定，非主角也能有台词；多人嘴型另标风险 |
 
-## 从已核实资料到本地决策
+## 从一手资料到本地决策
 
-- [Lumet / DGA](https://www.dga.org/craft/dgaq/issues/0305-may-2003/under-the-influence-sidney-lumet)：在《Network》中视觉与表演随作品意图变化；排练时连走位、道具一起走。对应 L10 与跨镜连续性，不推导“峰值必须静止”。
+导演、摄影师、剪辑师本人的说法按"它决定什么"整理在 `references/director-craft.md`（景别 / 并置 / 切点 / 运动动机 / 镜头曲线 / 光 / 视线与机位高度 / 画外 / 时间压力 / 表演 / 反应与纪实感 / 反常规覆盖 / 平行动作），每条带 `[一手·摘要]` 标签（一手来源，本次仅读到摘要）并给出 Seedance 写法；表演层的组合语法在 `references/performance-grammar.md`。上表的 L1–L18 与那些章节的对应见 `director-craft.md` 末表。此前已核实的三条一手链接保留：
+
+- [Lumet / DGA](https://www.dga.org/craft/dgaq/issues/0305-may-2003/under-the-influence-sidney-lumet)：在《Network》中视觉与表演随作品意图变化；排练时连走位、道具一起走。对应 L10 与跨镜连续性，不推导"峰值必须静止"。
 - [ASC：Camera Movement](https://theasc.com/article/shot-craft-camera-movement/)：器材/运动从剧本与导演意图出发；推轨能细微调整遮挡，手持并非只有一种幅度；《Jaws》的推轨与变焦是明确的复合动作。对应 L2/L3/L15，不把复合运镜一律判错。
 - [Gerwig / DGA](https://www.dga.org/craft/dgaq/issues/1802-spring-2018/gen-next-greta-gerwig)：剧场经验与重叠对白参与创作，并尊重写定台词。对应 L18 与台词保留，不代表模型已解决多人同步。
-- 更多人物与台词依据见创意侧的编剧传统资料（film-creative）。其他透镜保留为本地构图/剪辑工具，不凭旧版姓名归因声称已研究作者完整方法；用户指定某位作者时按所问手法补查第一手资料。
+
+用户点名某位导演时按所问手法补查第一手资料（访谈 / 著作 / DGA · ASC · BFI 文章），不凭旧版姓名归因；人物与台词依据见创意侧的编剧传统资料（film-creative）。
 
 ## 误用信号
 

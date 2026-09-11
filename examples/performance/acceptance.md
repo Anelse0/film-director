@@ -36,6 +36,18 @@ Embarrassment + Joy / Laughter。中段把笑压回去是新增过渡；末段�
 
 Rage + Sadness + Crying。保留怒相的眉、上唇、鼻翼、颈部；怒相松动到委屈属于新增连接。末段积泪抬眼是克制改编。
 
+### 面具与泄漏：表面在笑，眉在说别的，最后面具裂开（2.0.0）
+
+[Prompt](07-mask-and-leak.prompt.md) · [编译前表演记录](07-mask-and-leak.performance.json)
+
+Nervous Fake Smile + Sadness + Crying 重组，按 `performance-grammar.md` §7 的分配：表层占嘴与回位（25），泄漏只占内眉角一个部位（19 的 hinge），回位句在 b2；b3 把 25 的回位句反写（"回位的笑没有再回来"）作为进入 6 的铰链，末态按 6 不收束。特写里肩只在画框下缘，所以肩抖写在结束时才开始。
+
+### 听者反应链：怀疑 → 明白 → 盖住（2.0.0，production）
+
+[Prompt](08-listener-reaction-chain.prompt.md)
+
+B 走 9 → 14 → 25，桥梁按索引 `neighbors`（更高的眉落回、眼睁大、分唇吸气；点头结束后嘴拉出笑）。示范三件事：反应镜先写他看见了什么（镜 2 以"目光从侧面落在 A 身上"开头，镜 4 以"A 说完之后"开头）；可读性地板（9 与 25 的 hinge 都是"特写"级，所以镜 1 的双人中景只写 B 的头转成侧视，hinge 留给镜 2 / 镜 4 的特写）；切点落在思想完成处（镜 1→2 在 A 的句尾、镜 2→3 在 B 不眨的凝视之后、镜 3→4 在 A 嘴闭上之后），不机械落在句号。
+
 ## 文本审阅结论
 
 - 01：控制表现为合唇、收稳下颌；吞咽后下拉嘴角仍在，不强加泪水。
@@ -55,6 +67,9 @@ Rage + Sadness + Crying。保留怒相的眉、上唇、鼻翼、颈部；怒相
 python3 scripts/validate_prompt.py examples/performance/02-sadness-high-held.prompt.md --artifact performance --record examples/performance/02-sadness-high-held.performance.json
 python3 scripts/validate_prompt.py examples/performance/06-production-rage-hurt.prompt.md --record examples/performance/05-rage-to-hurt.performance.json
 python3 scripts/emotion_library.py --id 6 --raw
+python3 scripts/validate_prompt.py examples/performance/07-mask-and-leak.prompt.md --artifact performance --record examples/performance/07-mask-and-leak.performance.json
+python3 scripts/validate_prompt.py examples/performance/08-listener-reaction-chain.prompt.md
+python3 scripts/emotion_library.py --neighbors 25
 bash tests/run_tests.sh
 ```
 

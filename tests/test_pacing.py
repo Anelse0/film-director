@@ -65,6 +65,19 @@ class PacingTests(unittest.TestCase):
         varied = [shot(1, 0, 3, '中景，正面，固定'), shot(2, 3, 6, '中景，侧面，固定'), shot(3, 6, 9, '中景，正面，微推')]
         self.assertEqual(codes(run(prompt(varied, 9)), 'W23'), [])
 
+    def test_w04_follows_average_shot_length_not_shot_count(self):
+        # Official 2.5 guide example: 9 shots / 30s, one line per 3-4s shot.
+        nine = [shot(1, 0, 3, '全景，仰拍，固定'), shot(2, 3, 6, '中景，正面，手持'), shot(3, 6, 10, '特写，正面，固定'),
+                shot(4, 10, 14, '全景，仰摇'), shot(5, 14, 18, '全景，正面，固定'), shot(6, 18, 22, '特写，正面，固定'),
+                shot(7, 22, 25, '近景，正面，固定'), shot(8, 25, 28, '近景，仰拍，固定'), shot(9, 28, 30, '全景，背影，固定')]
+        r = run(prompt(nine, 30))
+        self.assertEqual(r['errors'], [])
+        self.assertEqual(codes(r, 'W04'), [])
+        dense = [shot(i + 1, int(i * 1.5), int((i + 1) * 1.5), f'{"中景" if i % 2 else "近景"}，正面，固定') for i in range(12)]
+        r = run(prompt(dense, 18))
+        self.assertTrue(any('平均镜长' in w for w in codes(r, 'W04')))
+        self.assertTrue(any('< 1.5s' in w for w in codes(r, 'W04')))
+
     def test_performance_artifact_never_emits_pacing_codes(self):
         text = '【表演条件】12秒。\n【表演时间线】\n节拍 1（0-12s）：她说 "I am fine." 然后闭嘴。'
         r = run(text, artifact='performance')

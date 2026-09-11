@@ -13,6 +13,8 @@ description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词�
 
 用户只要原文、强度/克制调整、情绪弧线或 N 秒表演测试时，直接读 `references/emotion-performance.md`，用 `scripts/emotion_library.py` 按需读取所选完整条目。走 S4 → 轻量 S5 可见性检查 → S6 → S7，不强制补故事、人物小传、台词、道具、参考图或停靠点。
 
+要把条目组成人物表演（同一情绪更强、从 A 过渡到 B、表面一层心里一层、听者反应、景别里读不读得出）时读 `references/performance-grammar.md`：压缩留 hinge、可读性地板、家族阶梯、过渡铰链、面具与泄漏、听者与切点、相对时间、部署密度。索引 `references/emotion-index.json` 每条带 zh 译写 / hinge / readability / neighbors，检索用 `--zh` `--neighbors ID` `--ladder FAMILY` `--readability 特写` `--listener`。示例：`examples/performance/07-mask-and-leak.prompt.md`（面具 + 泄漏）、`examples/performance/08-listener-reaction-chain.prompt.md`（听者反应链，production）。
+
 `performance` 是独立测试或嵌入镜头的表演片段；`production` 是完整生产 Prompt，保留素材/镜头流程；`raw` 是逐字原文正文。全流程共用同一表演模块：强度、克制与台词密度独立；高光不强制静止或收束；连续部位变化没有次数配额。用户及已确认内容优先于默认手法。
 
 ## 工作边界
@@ -48,8 +50,8 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 |---|---|---|---|
 | S1 资源读取 | `references/stage-1-intake.md` ＋ 已有 `production-profile.md`（`references/production-profile.md`） | 资产登记 + 缺口清单（+ 生产档案回显） | |
 | S2 任务识别 | 同上 §任务识别 ＋ `references/scene-parameters.md` §一 | 任务类型 · 运行模式 · 入口阶段 · clip 数 · 锁定判定 · **场景参数卡** | |
-| S4 表演外化 | `references/stage-4-performance.md` ＋ `references/emotion-performance.md` | 有序表演块（C 层）及内部核对记录 | |
-| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md`；对白场 / 亮相加读 `references/dialogue-pacing.md` | `04_shots/scene-XX-clipYY.md` 分镜卡（五层） | ▮（与 S5b 一起） |
+| S4 表演外化 | `references/stage-4-performance.md` ＋ `references/emotion-performance.md`；组合表演时加读 `references/performance-grammar.md` | 有序表演块（C 层）及内部核对记录 | |
+| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md`；景别 / 切点 / 运动动机 / 镜头曲线的依据在 `references/director-craft.md`；对白场 / 亮相加读 `references/dialogue-pacing.md` | `04_shots/scene-XX-clipYY.md` 分镜卡（五层） | ▮（与 S5b 一起） |
 | S5b 参考资产 | `references/stage-5b-reference-assets.md` | `05_assets/asset-plan.md`：资产清单 + 图像简报 + 上传顺序 | 等用户回填 |
 | S6 Prompt 编译 | `references/stage-6-prompt-compiler.md` ＋ `templates/prompt-templates.md` | `06_prompts/scene-XX-clipYY.prompt.md` | |
 | S7 检查 | `references/stage-7-qa-continuity.md` ＋ `scripts/validate_prompt.py` | `07_qa/…`；有成片时追加 `references/validation-log.md` | |
@@ -118,11 +120,11 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 1. **不虚构模型能力。** 写能力 / 参数必须带事实标签；`[未验证]` 项只能作为可选尝试并注明。
 2. **完整生产以图 + 文为核心。** production 的 S6 前做 S5b 资产计划，无参考图的跨 clip 一致性标高风险；用户选择文生时走 T1。performance/raw 不要求资产计划。
 3. **素材编号按每条 clip 的实际上传顺序绑定，明确各素材参考范围。** production 开头有【素材绑定】，无素材写明；实际引用都必须已登记，不虚构图或视频。不靠图片文字绑定角色。`[官方]` 同一素材可承担明确兼容的参考用途；不为凑模板复制或拆图。
-4. **各层时间分别核对。** production 镜头时间线或独立 performance 时间线从 0 连续到 duration；镜内节拍不能跨镜，不能把镜头与节拍时长相加。使用整数秒的本地编译约定，不以时间戳精确控动作频次。
+4. **各层时间分别核对。** production 镜头时间线或独立 performance 时间线从 0 连续到 duration；镜内节拍不能跨镜，不能把镜头与节拍时长相加。使用整数秒的本地编译约定，不以时间戳精确控动作频次；镜内的先后关系用相对时间与时间点表达（"呼气完全结束后 1 秒才出现笑"）`[官方]`，不造亚秒时间戳。
 5. **画面对象优先正向描述。** "不眨眼"等行为保持与排除对象不是同类；不能据一个否定词改写原文。能力边界查能力表，静态脚本不判任意否定语义。
 6. **台词逐字加引号、标注说话人与语言、给时间窗；非说话者写嘴部状态。** `[官方示例] + [第三方]`
-7. **表演有可见证据。** 保留速度、幅度、渐变与控制信息；删空泛替代，不按词性删细节。原文不润色，已有台词不因本规则被擅改。
-8. **每个镜头写景别、清晰可执行的运镜与起止状态。** 冷门术语"术语 + 描述"。`[官方]` 复合运镜说明同步或先后；单一运镜只是降低复杂度的本地建议。
+7. **表演有可见证据。** 保留速度、幅度、渐变与控制信息；删空泛替代，不按词性删细节。原文不润色，已有台词不因本规则被擅改。因时长或景别必须压缩时，先删外围动作、最后才碰该条目的识别性信号（索引 `hinge`，依据 Ekman 的可靠信号 `[一手·摘要]`）；完整表演正文只放高光节拍，铺垫与余韵写概括与衔接 `[官方]`。
+8. **每个镜头写景别、清晰可执行的运镜与起止状态。** 景别先服从此刻的情绪重要性（Hitchcock `[一手·摘要]`），再核对所选表演的可读性地板（`references/performance-grammar.md` §3）；喜剧与关系戏优先双人镜。运镜写它跟的是什么（人物行为 / 揭示 / 有意的主观），固定机位是默认。冷门术语"术语 + 描述"。`[官方]` 复合运镜说明同步或先后；单一运镜只是降低复杂度的本地建议。
 9. **每个 clip 的 Prompt 自足。** 外观锁、空间、光源、声音在每个 clip 重写。`[推论]`
 10. **手法服务需求。** 复用、重复、持续或创新按本次目标判断，不以配额或词频裁决。导演名字不作为风格捷径进入 Prompt；通用技术名如希区柯克变焦可配可见描述使用，透镜不覆盖锁定表演。
 11. **生产审阅看具体表现**：表演检查高光、衔接、可见性与保真，不要求每片都有反转或固定手法。
@@ -157,6 +159,12 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | "宣布 / 演讲 / 群戏点名 / 人物亮相 / 出场" | S5 加读 `references/dialogue-pacing.md`：一句一切、他人反应、特写作揭示 |
 | "分镜表改了，帮我检查 / 同步" | 账本模式：读表 → `scripts/ledger_check.py` → 只改生产侧列；正典变了先等创作侧登记与扫描 |
 | "台词装不进 30s / 太长" | 回传台词预算（`references/handoff-contract.md` §四）给 film-creative 精简，不拉长镜头、不擅自删词 |
-| "节奏太慢 / 拆细 / 不要一大段" | 回 S5 按 `references/dialogue-pacing.md` 重切；交付完整 Prompt 全文 |
+| "节奏太慢 / 拆细 / 不要一大段" | 回 S5 按 `references/dialogue-pacing.md` 重切；切点落在听者的眨眼 / 吞咽之后；交付完整 Prompt 全文 |
+| "更悲伤一点 / 从愤怒到委屈怎么过渡" | `references/performance-grammar.md` §5–6：走家族阶梯或过渡铰链，`emotion_library.py --ladder` / `--neighbors` |
+| "表面在笑其实想哭 / 憋着 / 装没事" | `references/performance-grammar.md` §7 面具与泄漏：表层占嘴与姿态、泄漏只占一个部位、必有回位句 |
+| "听的人怎么演 / 反应镜空" | `references/performance-grammar.md` §8：先写他看见了什么，subtle 条目，`--listener` |
+| "特写里看不出 / 全景里表情丢了" | `references/performance-grammar.md` §3 可读性地板：`--readability 特写`，删 wider_parts 或加插入镜 |
+| "像某导演那样拍 / 这一段怎么拍才有分量" | `references/director-craft.md` 按决策查一手说法（景别 / 并置 / 切点 / 运动动机 / 镜头曲线 / 画外 / 平行动作）；名字不进 Prompt |
+| "走位太复杂写不清 / 追逐群戏" | S5 §5.10：粗粒度白模作运镜与动线参考，表情参考视频锁表演 `[官方]` |
 
 不确定入口且结果会实质不同时，只问一个简短问题；否则按最保守解读推进并写明假设。

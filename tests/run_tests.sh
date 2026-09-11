@@ -45,6 +45,15 @@ out=$($V examples/example-03-yogurt-comedy.prompt.md examples/example-01-kitchen
 echo "$out" | grep -q "W22\|W23"; rc=$?
 [ "$rc" -ne 0 ]; check "accepted one-take and 6s shots do not trigger W22/W23" $? "$out"
 
+# 2.0.0 performance-grammar examples
+out=$($V examples/performance/07-mask-and-leak.prompt.md --artifact performance --record examples/performance/07-mask-and-leak.performance.json); rc=$?
+check "mask-and-leak exits 0" $rc "$out"
+echo "$out" | grep -q '"fidelity": "matched"'; check "mask-and-leak record matched" $? "$out"
+out=$($V examples/performance/08-listener-reaction-chain.prompt.md); rc=$?
+check "listener-chain exits 0" $rc "$out"
+echo "$out" | grep -q "0 error(s), 0 warning(s)"; check "listener-chain clean" $? "$(echo "$out" | tail -1)"
+python3 scripts/emotion_library.py --neighbors 4 | grep -q '"id": 19'; check "neighbors lookup bridges rage to sadness" $? ""
+
 # 1.3.0 ledger check on a generated fixture
 L="python3 scripts/ledger_check.py"
 tmpl=$(mktemp -d); python3 - "$tmpl/ledger.xlsx" <<'PY'

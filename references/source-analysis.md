@@ -88,3 +88,34 @@
 | Scorsese / Bergman | 视点归属；主观镜头；两张脸 | 通识 |
 
 设计决定：不把这些做成"风格预设"，而做成"透镜 = 它回答的问题 + 误用信号"，用上下文审阅防止套用，不能以配额或词频裁决。2.3.1 保留方法 IDs、去掉未经第一手核实的作者硬性归属；具体导演请求需读取其访谈或作品材料。
+
+## 2.0.0 调研（2026-09-11）：一手来源，仅读摘要
+
+本轮按用户要求只用搜索、不抓取全文，因此每条只收录搜索摘要中直接出现的说法，标 `[一手·摘要]`；按用户约定，未通读原文的链接不得标"已读"。提炼结果写在 `director-craft.md`（导演 / 摄影 / 剪辑）与 `performance-grammar.md`（表演）。来源清单：
+
+| 作者 / 机构 | 材料 | 采纳要点 | 去处 |
+|---|---|---|---|
+| Hitchcock（Truffaut 访谈；1964 CBC《Telescope》） | https://thequietus.com/culture/film/hitchcock-truffaut-article/ · https://www.openculture.com/2012/05/alfred_hitchcock_on_the_essential_filmmakers_tool_the_great_kuleshov_effect.html | "影像尺寸随情绪重要性变化"；用自己的脸演示 Kuleshov，"纯电影 = 胶片的组装" | craft A、B |
+| Pudovkin 记述 Kuleshov 实验 | https://en.wikipedia.org/wiki/Kuleshov_effect（转述 Pudovkin） | 同一张脸接汤 / 棺材 / 女人，观众读出三种情绪并称赞表演 | craft B、grammar §8 |
+| Lumet《Making Movies》 | https://www.bfi.org.uk/features/how-12-angry-men-works-25-frames/ · https://www.rogerebert.com/reviews/great-movie-12-angry-men-1957 | 《十二怒汉》焦距 28–40 → 50 → 75 → 100mm；机位高 → 平 → 低 | craft E、stage-5 §5.11 |
+| Murch《In the Blink of an Eye》 | https://www.provideocoalition.com/aotc-murch-books/ · https://www.lrb.co.uk/the-paper/v47/n19/john-lahr/every-blink | 六律权重 51/23/10/7/5/4，从底放弃；眨眼 = 思想完成 = 切点 | craft C、grammar §8 |
+| Ekman（Paul Ekman Group） | https://www.paulekman.com/blog/fake-smile-or-genuine-smile/ · https://www.paulekman.com/resources/micro-expressions/ · https://www.paulekman.com/blog/my-six-discoveries/ | Duchenne 眼轮匝肌；reliable facial expressions；微表情 1/25–1/2 s；leakage | grammar §2、§4、§7；索引 hinge |
+| Caine（BBC 1987 表演课；《Acting in Film》） | https://www.backstage.com/magazine/article/watch-hour-acting-advice-masterful-michael-caine-5422/ | 特写里不眨眼更强；盯对方一只眼；少即是多 | craft J、grammar §7 |
+| Weston《Directing Actors》 | https://books.google.com/books/about/Directing_Actors.html?id=p6hiAAAAMAAJ（摘要经 scriptreader.ai 等转述） | 动作动词、结果导向指导、as-if 调整 | craft J、stage-4 §4.0c 依据 |
+| Bergman | https://www.bfi.org.uk/features/ingmar-bergman-faces-close-ups · https://www.ingmarbergman.se/en/production/each-film-my-last | "我们的工作从人脸开始"；特写是电影摄影的顶点 | craft A |
+| Deakins | https://www.rogerdeakins.com/forums/topic/lighting/ · https://www.theparisreview.org/blog/2017/05/09/master-light/ | 动机光源、单一实用光源 | craft F |
+| ASC Shot Craft | https://theasc.com/article/shot-craft-where-do-you-put-the-camera/ · https://theasc.com/article/shot-craft-light-quality-101/ | 视线 = 180 度线，越近越亲密；机位高低相对视线；block-light-rehearse-shoot | craft G |
+| Fincher / Messerschmidt | https://filmmakermagazine.com/108283-erik-messerschmidt-mindhunter-season-two/ · https://nofilmschool.com/2017/10/watch-david-fincher-camera-movement-characters | 镜头跟人物行为，"行为是一切"；为有趣而动镜头说明戏不有趣 | craft D、J |
+| Kubrick（Ciment 访谈，Kubrick Site） | http://www.visual-memory.co.uk/amk/doc/interview.html | 排练时不想镜头；运动是电影语法基本元素 | craft D |
+| Cuarón / Lubezki（ASC） | https://theasc.com/article/children-of-men-humanitys-last-hope/ | 长镜更沉浸；手持有时自走不跟演员 | craft D |
+| Villeneuve（DGA 问答） | https://www.dga.org/Events/2024/May2024/DunePartTwo_QnA_0324 | 大远景 + 大特写以贴近人物内心 | craft A |
+| Haneke | https://www.ioncinema.com/news/uncategorized/interview-michael-haneke-funny-games-u-s · https://www.fangoria.com/exclusive-interview-michael-haneke-on-revisiting-his-anti-horror-film-funny-games/ | 暴力在画外、靠声音；反恐怖片 | craft H |
+| Nolan（DGA Quarterly 2012） | https://www.dga.org/craft/dgaq/issues/1202-spring-2012/dga-interview-christopher-nolan | 平行动作 / 交叉剪辑；拍得省、剪辑选择多 | craft M |
+| Lanthimos（BFI / ASC） | https://www.bfi.org.uk/interviews/yorgos-lanthimos-screen-talk-poor-things-bugonia · https://theasc.com/article/life-anew-poor-things/ | 不拍常规正反打；10mm 广角 | craft L |
+| Coen / Deakins（ASC《Fargo》） | https://theasc.com/article/fargo-cold-blooded-scheming/ | 分镜是出发点，现场可扔 | craft L |
+| Tarkovsky《雕刻时光》 | https://offscreen.com/view/tarkovsky1 | 时间压力；节奏不由镜长决定 | craft I、stage-5 §5.1c |
+| DGA Shot to Remember：Jenkins / Sonnenfeld / Payne / Spielberg | https://www.dga.org/news/guild-news/2026/craftarticles/0526-shot2remember-wonderwoman · https://www.dga.org/craft/dgaq/issues/1902-spring-2019/shot-to-remember-men-in-black · https://www.dga.org/News/Guild-News/2025/December2025/1225-Shot2Remember-SIDEWAYS · https://www.dga.org/craft/dgaq/issues/1103-fall-2011/shot-to-remember-saving-private-ryan | 背景反应赋予地位；特写杀喜剧；150mm 特写靠表演；手持 + 震动匹配 Capa | craft A、K |
+| 火山方舟 2.5 指南（PDF 逐页复读） | 用户提供的 PDF | §4.9 官方案例写法；白模 / 表情参考；相对时间 | capabilities、stage-5/5b/6 |
+| 火山方舟 2.0 指南（附录位置） | https://docs.volcengine.com/docs/82379/2222480 | 仅确认附录所在，未读内容 | capabilities §4.9 缺口 |
+
+未采纳：Edgar Wright 的《How to Do Visual Comedy》为第三方视频论文（Tony Zhou），非导演本人材料，L9 维持既有 `[第三方]` 标注；Spielberg 关于纵深调度的 DGA 访谈摘要未含具体说法，L2 不再以其姓名归因。

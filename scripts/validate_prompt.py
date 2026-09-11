@@ -9,6 +9,9 @@ F01-F06 concern record/schema/text fidelity; E20 concerns performance timing.
 W14 reviews identical adjacent complete blocks; W18 is retired.
 W20 flags a production prompt missing the emotion-arc block or per-shot emotion
 tags (structural presence only, not an acting-quality judgement).
+W04 flags a single shot under 1.5s or an average shot length under 2s; the
+official 2.5 guide's own example runs 9 shots in 30s, so shot count alone is
+never flagged (2.0.0 recalibration).
 W22 flags a dialogue-carrying shot of 7s or more (dialogue scenes cut per line by
 local convention [推论]); W23 flags three consecutive shots sharing the same shot
 size word in the header tag (camera monotony). Both are review hints, not limits.
@@ -262,8 +265,10 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         short = [no for no, s, e, _ in shots if e - s < 1.5]
         if short:
             warn("W04", f"单镜 < 1.5s：镜头 {short}（2.5 抗拒快切 [第三方]）")
-        if len(shots) > 8 and end <= 30:
-            warn("W04", f"30s 内 {len(shots)} 镜 > 8（剧情类建议 ≤ 8 [推论]）")
+        # Official 2.5 guide example: 9 shots in 30s, one line per 3-4s shot, so a
+        # shot count alone is not a limit; only a very short average is a hint.
+        if len(shots) >= 3 and end / len(shots) < 2:
+            warn("W04", f"{end:g}s 内 {len(shots)} 镜，平均镜长 {end / len(shots):.1f}s < 2s（官方案例 30s 走 9 镜、每镜 3–4s [官方示例]；核对各时段内容是否过载 [推论]）")
     elif task not in {"edit", "motion", "transition"} and artifact == "production":
         warn("W08", "未识别到「镜头N（a-bs）」格式的分镜段落")
 
