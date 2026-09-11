@@ -22,40 +22,7 @@ W20 stays a WARN-level review hint). See CHANGELOG 1.1.1.
 no validation/code change. See CHANGELOG 1.2.0.
 
 1.3.0 rebaselines validate_prompt.py: adds W22 (dialogue-carrying long shot) and W23 (three
-consecutive identical shot tags), WARN-level pacing hints for dialogue scenes. See CHANGELOG 1.3.0.
-
-1.3.2 rebaselines validate_prompt.py: W22 no longer counts quoted acting annotations
-(重读/轻读/一词/word …) as lines; W04's ">8 shots in 30s" hint applies only when the average
-shot is under 2s (it contradicted the 1.3.0 one-line-per-cut convention); docstring names
-film-director. No new codes. See CHANGELOG 1.3.2.
-
-1.4.0 rebaselines six files for the reference-binding format change (identity vs
-wardrobe split into two entries; no E-layer notes in 素材绑定; new WARN W24):
-stage-6-prompt-compiler.md (§6.2 binding format + §6.6 self-check),
-stage-5b-reference-assets.md (identity/wardrobe asset rows), prompt-templates.md
-(T2/T3/T4/T5 + English REFERENCES), reference-asset-brief.md and asset-registry.md
-(example rows), validate_prompt.py (W24). See CHANGELOG 1.4.0.
-
-1.4.1 rebaselines stage-6-prompt-compiler.md (§6.2 图数) and stage-5b-reference-assets.md
-(wardrobe row): the stability limit is by SUBJECT (character) count, not image count —
-the identity/wardrobe split adds images (multi-view), not subjects, so it never triggers
-抽卡 for <=8 characters; only the 30-image cap limits image count. Wording only.
-
-1.4.2 rebaselines stage-6-prompt-compiler.md (6.2) and prompt-templates.md: each binding line
-ends with the official 4.1 role tag (-形象参考/-服饰参考/-场景参考/-音色参考/-动作参考); a
-character identity/wardrobe ref is tagged 唯一参考 and 全程锁定 (local [推论]); the body refers
-to a split character as {name}(@图片{id} wearing @图{wardrobe}) using official @ syntax. Wording only.
-
-1.5.0 rebaselines stage-5-directing-storyboard.md (§5.1c 节奏曲线 expanded into a shot-duration
-rhythm method: vary shot length against the beat, accelerate into peaks, long shots must earn
-their length, avoid a uniform/over-wide grid — fix a flat timeline by re-timing cuts, never by
-trimming dialogue) and validate_prompt.py (new WARN W25: three or more consecutive shots of equal
-duration read as a flat meter). W25 is a presence-only review hint like W23. See CHANGELOG 1.5.0.
-
-1.5.1 rebaselines prompt-templates.md: adds a top-level 排版 (line-break) rule and fixes the
-default T2 template, which had rendered 【素材绑定】 and 【整体情绪弧线】 as run-on single lines —
-each 【】 section on its own line, one binding per line, one arc character per line, one shot per
-line. Wording/formatting only, no code or new warning. See CHANGELOG 1.5.1."""
+consecutive identical shot tags), WARN-level pacing hints for dialogue scenes. See CHANGELOG 1.3.0."""
 import hashlib
 import unittest
 from pathlib import Path
@@ -67,9 +34,9 @@ PROTECTED = {
     'references/emotion-performance.md': 'a150f6047b6a484a6ab858a93773d9c28fab022ac274bcc358dd20684468d8d0',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': 'ade55ddb33655042f6360bdde1bd5a0d4e149a479b1b407f142d510b696338a0',
-    'references/stage-5-directing-storyboard.md': '1e6f3e4633479a2a83645f69ab513362c3d28f854855680983c157aee861a599',
-    'references/stage-5b-reference-assets.md': 'ecd595f1b39d6a7396968562febf185533536a95b4f83719c61954b0c446b72f',
-    'references/stage-6-prompt-compiler.md': '1ca4dd6d518540f099595c50daded02c3b5fb1b4eda4dd2b2d0a768fd0ad7ff4',
+    'references/stage-5-directing-storyboard.md': '69fb453c6cce9d91fbcf7c33909562bc1256a54fc20e2a4c4ade2318007235f1',
+    'references/stage-5b-reference-assets.md': '167fee36b688f32f5a8796be58098e043eb3ae0d27af3624ce7ed75ff7adc2d0',
+    'references/stage-6-prompt-compiler.md': '012c548ef99538c283ec05fd2d8c58782058f4f2723cbf4346bc9315572de707',
     'references/stage-7-qa-continuity.md': '7957aca66d6cda61e4c2de9a69464b61f96abdd0e1a595fe36ff82d37e9e2f68',
     'references/production-workflow.md': 'db8cc8de428952283a2cda4d7d23e0b1b0f4784ab18c54b57f674ca93eac6cfd',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
@@ -78,13 +45,13 @@ PROTECTED = {
     'references/externalization-lexicon.md': '7a79bf1bf42805f185441a7767c95dd900dc390503674b286807df68eb709ce6',
     'references/genre-packs.md': '8e7334eaa40d40f07278bf0493bfe9315c515f203cf9876acfca7e6fccd4dd40',
     'references/director-lenses.md': '5d76b7b5f1f2908ea732eab1bb69dee8f9c81297bc5203e1a788d274d5b8c36a',
-    'templates/prompt-templates.md': '421ad58ff62857858068b82b18902d2b6b194c7cec206d5f6acda8caf518647e',
+    'templates/prompt-templates.md': 'c1f83c00453494b185b2bd1c1a7baf247157e6348288021275332ce74eee9006',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '7adc7226bf0b7648ecc2f2320db3edefe317297bf7486645271d9f87d8bb56fd',
     'templates/shot-card.md': '2c59e1022197bc88fa3539cbe7dcc2c61ee4bd60c1586c380995ef9623005f30',
-    'templates/reference-asset-brief.md': 'ed6e9e6f5c2b66ad29cf5ddb73b3ee7a1280c56e470a4ac5dc2937c2cfffc58d',
-    'templates/asset-registry.md': '0628db7bc42ff34d8b2043f0a8f43f89edefd546d5bfc1eb940ba00858f4673e',
-    'scripts/validate_prompt.py': 'dd498406c4362bb05e17768f8d3d231c7ec35a230dd2ad7a57332cffe4e75ba9',
+    'templates/reference-asset-brief.md': 'adc6b7c7c52c169d31ee7ba83111293496e7133572a7bedc08bf4a08d251df0b',
+    'templates/asset-registry.md': '996818cda8aa55796820ae96c808c56459198f8f465b4e4924196d7ed8cc2943',
+    'scripts/validate_prompt.py': '08015c5b854a4ac8ad069fb3df65d038b1fb30d238bf5536372d8a54608cd46a',
     'scripts/prompt_structure.py': 'd9f73020e41eec19edee56b7ad8a45f9b973c28db9c93e451274ab6d1a0b60bf',
     'scripts/production_contract.py': '963653540c39519d99a731749736e96b39bed17005305af1082c857af5426bfa',
     'scripts/production_preflight.py': '80379ec01b3f952ee82cc1611e38b555ad41838bd0bb6f0ac52ddb5453605702',

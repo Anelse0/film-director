@@ -2,7 +2,7 @@
 """Storyboard-ledger checks for a shared 分镜/台词 spreadsheet (.xlsx, stdlib only).
 
 Usage: ledger_check.py LEDGER.xlsx [--sheet NAME] [--lines-sheet NAME]
-                       [--long 7] [--long-dialogue 9] [--very-long 10] [--json]
+                       [--long 7] [--very-long 10] [--json]
 
 The ledger is the table both skills write into when a project keeps its master
 storyboard in a spreadsheet instead of 03_script/04_shots files. The sheet is
@@ -14,8 +14,7 @@ Codes — L01/L02/L06 are deterministic ERRORs (exit 1); L03–L05, L08 are WARN
 for review; L07 is information. None of them judges story or acting quality.
   L01 出点 ≤ 入点
   L02 相邻镜头时间不连续（缝隙/重叠，按表内顺序）
-  L03 单镜 ≥ --long 秒且只承载一句对白，或 ≥ --long-dialogue 秒含对白（与 validate_prompt W22
-      同口径的“一句一切”约定 [推论]，审阅是否偷懒长镜；旁白/画外音不计；台词格里数不出引号时按一句处理）
+  L03 单镜 ≥ --long 秒且含对白（对白场“一句一切”约定 [推论]，审阅是否偷懒长镜；旁白/画外音不计）
   L04 单镜 ≥ --very-long 秒（任何内容）
   L05 连续 ≥3 镜「景别与运镜」原文相同（机位/景别/运镜一成不变）
   L06 台词窗口越出所属镜头或无效
@@ -51,7 +50,6 @@ LINE_HEADERS = {
 PLACEHOLDER_RE = re.compile(r"〔待定〕|待定|待重写|未出|留空|TBD", re.I)
 NO_LINE_RE = re.compile(r"^\s*(无台词|无|—|-|none|n/a)?\s*$", re.I)
 VO_RE = re.compile(r"旁白|画外|V\.?O\.?|voice.?over|narrat", re.I)
-QUOTE_RE = re.compile(r"[“\"][^”\"\n]{1,400}[”\"]")
 
 
 def parse_time(value):
@@ -132,7 +130,7 @@ def pick_sheets(book, sheet, lines_sheet):
     return shots, lines
 
 
-def check(path, sheet=None, lines_sheet=None, long=7.0, very_long=10.0, long_dialogue=9.0):
+def check(path, sheet=None, lines_sheet=None, long=7.0, very_long=10.0):
     book = read_workbook(path)
     errors, warnings, infos = [], [], []
     shots_sheet, lines_sheet_data = pick_sheets(book, sheet, lines_sheet)
@@ -171,12 +169,10 @@ def check(path, sheet=None, lines_sheet=None, long=7.0, very_long=10.0, long_dia
             placeholders.append(s["id"])
             continue  # placeholder rows are reserved time, not designed shots
         has_lines = not NO_LINE_RE.match(s["lines"]) and not VO_RE.search(s["lines"])
-        n_quotes = len(QUOTE_RE.findall(s["lines"]))
         if dur >= very_long:
             warnings.append(f"L04 镜{s['id']} 时长 {dur:.0f}s ≥ {very_long:g}s（{fmt(s['start'])}–{fmt(s['end'])}）")
-        elif has_lines and dur >= long and (n_quotes <= 1 or dur >= long_dialogue):
-            count = f" {n_quotes} 句台词" if n_quotes else "台词"
-            warnings.append(f"L03 镜{s['id']} 时长 {dur:.0f}s 且含{count}（{fmt(s['start'])}–{fmt(s['end'])}）：对白场默认一句一切，审阅是否拆镜")
+        elif dur >= long and has_lines:
+            warnings.append(f"L03 镜{s['id']} 时长 {dur:.0f}s 且含台词（{fmt(s['start'])}–{fmt(s['end'])}）：对白场默认一句一切，审阅是否拆镜")
     for a, b in zip(shots, shots[1:]):
         if a.get("end") is None or b.get("start") is None:
             continue
@@ -238,13 +234,12 @@ def main(argv):
     parser.add_argument("ledger")
     parser.add_argument("--sheet")
     parser.add_argument("--lines-sheet")
-    parser.add_argument("--long", type=float, default=7.0, help="单句对白镜的长镜阈值（秒）")
-    parser.add_argument("--long-dialogue", type=float, default=9.0, help="多句对白镜的长镜阈值（秒）")
+    parser.add_argument("--long", type=float, default=7.0)
     parser.add_argument("--very-long", type=float, default=10.0)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv[1:])
     try:
-        result = check(args.ledger, args.sheet, args.lines_sheet, args.long, args.very_long, args.long_dialogue)
+        result = check(args.ledger, args.sheet, args.lines_sheet, args.long, args.very_long)
     except (OSError, KeyError, ValueError) as exc:
         parser.error(str(exc))
     if args.json:

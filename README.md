@@ -1,45 +1,8 @@
 # film-director
 
-版本 **1.5.1**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片、**调整分镜节奏**）。
+版本 **1.3.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
 
 创意前端（概念、故事、剧本、台词创作与改写）由独立的 [film-creative](https://github.com/Anelse0/film-creative) Skill 承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
-
-## 1.5.0 更新（镜长节奏：节奏靠镜长随 beat 起伏，不是均匀/过宽网格）
-
-- `stage-5-directing-storyboard.md` §5.1c 节奏曲线扩成**镜长节奏方法**：镜长随 beat 变化——张力升/高潮处收短切点、必要处保留长镜；均匀等长（3,3,3）或中段并排长镜（6,6）读起来平；长镜要"配得上长度"（内部有走位/揭示/动作节拍/earned hero beat），否则拆开或补 beat。**"太宽/太平"的修法是按 beat 曲线重排切点，不是统一缩短、更不是删台词**（台词预算是另一件事）。
-- 新增校验 **W25**：连续 3 镜时长相同（时长曲线易平）给 WARN 审阅提示——只提示不拦，更细的"太宽"靠 §5.1c 判断，不由脚本裁决。
-- SKILL 硬规则 15 补镜长节奏与 W25；快速路由"节奏太慢/太平/太宽"指向 §5.1c 时长曲线 + `dialogue-pacing.md`。
-- 来源经检索（Murch《In the Blink of an Eye》剪辑六律、Eisenstein 韵律蒙太奇、StudioBinder/Backstage 剪辑节奏、流行片 pace 研究），tag 从严（未通读原文）。
-
-## 1.3.2 更新（容错修复）
-
-- xlsx 读取：缺 `r` 属性的行 / 单元格按位置读；Excel 锁文件与损坏文件报 `ValueError` 而非追溯。`ledger_view` 只把时间列的小数显示为 mm:ss。
-- `ledger_check` L03 与 `validate_prompt` W22 同口径（单句 ≥7s 或多句 ≥9s，新参数 `--long-dialogue`）。
-- `validate_prompt`：W22 不把"重读 / 一词"标注的引号当台词；W04 的 >8 镜提示只在平均镜长 <2s 时给出，不再与一句一切约定冲突。
-- 新增与 film-creative 同文文件的一致性测试；修正 run_tests 里一条恒真断言。
-
-## 1.4.2 更新（用途尾标 · 唯一 · @图片引用）
-
-- 素材绑定每行以官方 §4.1 用途收尾（`-形象参考/-服饰参考/-场景参考/-音色参考/-动作参考`）；人物形象/服饰标"唯一参考"＋"全程锁定"（本地 `[推论]`）。
-- 正文引用拆图人物用官方 @ 语法：`{角色}（@图片{形象号} 身穿@图{服饰号}）`。
-- 改 stage-6 §6.2 与模板，无代码变化。
-
-## 1.4.1 更新（措辞修正）
-
-- 稳定度按**主体（角色）数**计、不按图片数：官方 §3“1–8 主体更稳、9–12 抽卡”数的是主体；形象／服饰拆图属“≤5 主体多视图均可”，只增图不增主体、不触发抽卡；图片另有 30 张硬上限。改 stage-6 §6.2 / stage-5b / production-profile 措辞，无代码变化。
-
-## 1.4.0 更新（参考素材绑定格式）
-
-- 【素材绑定】人物形象（面部/发型/体型）与服饰（本场服装/配饰）**硬拆两条**，换装态各一条服饰参考（官方 §4.2 一图一职责）；改 stage-6/prompt-templates/stage-5b 及两个模板、硬规则 3、生产档案。主体图数=角色数×2，>8 抽卡。
-- 【素材绑定】段**禁止 E 层注释**（约定/数量/草稿/待回填/用户提供）：这些进文末 E 参数表或 QA，不进 D 层。新增校验 **W24**。
-- 受保护区重算 6 文件哈希；示例 01–04 保留旧式绑定作示例。
-
-## 1.3.1 更新
-## 1.3.1 更新
-
-- `references/dialogue-pacing.md` 新增 §4b：台词设计表各列 → 〔说法〕/〔情绪〕/【整体情绪弧线】/ 反应镜 / S4 表演块 / 末镜收尾 的映射表；有表时不重推情绪层。
-- `scripts/ledger_view.py`：账本模式下按镜号范围把 xlsx 读成 Markdown（与 film-creative 同文）。
-- 测试夹具中的人名改为泛称。
 
 ## 1.3.0 更新（对白节奏 · 亮相 · 与 film-creative 的协作契约 · 账本模式）
 
@@ -92,7 +55,6 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `scripts/emotion_library.py` | 按编号或关键词读取完整条目，`--list` 查看索引 |
 | `scripts/validate_prompt.py` | S6 之后必跑 |
 | `scripts/ledger_check.py` | 分镜 / 台词表（xlsx）改动后：时间连续、长镜含台词、机位单调、台词窗口 |
-| `scripts/ledger_view.py` | 账本模式开工前：按镜号范围把表读成 Markdown |
 | `examples/example-01-kitchen-keys*.md` | 完整走查 + 通过校验的 Prompt |
 | `examples/example-02-one-scene-three-lenses.md` | 同一场戏三个透镜的对照，含一版通过校验的 Prompt |
 | `examples/example-03-yogurt-comedy*.md` | 喜剧走查（三拍 + 反讽落差），通过校验 |
@@ -116,8 +78,7 @@ python3 scripts/validate_prompt.py <original.txt> --artifact raw --entry-id 6
 账本检查（项目主表为分镜 / 台词 xlsx 时）：
 
 ```bash
-python3 scripts/ledger_check.py <分镜与台词.xlsx> [--sheet 分镜总表] [--lines-sheet 台词与表演] [--long 7] [--long-dialogue 9] [--very-long 10] [--json]
-python3 scripts/ledger_view.py <分镜与台词.xlsx> --from 30 --to 40 [--cols 镜号,入点,出点,景别,台词]
+python3 scripts/ledger_check.py <分镜与台词.xlsx> [--sheet 分镜总表] [--lines-sheet 台词与表演] [--long 7] [--very-long 10] [--json]
 ```
 
 完整生产预检：

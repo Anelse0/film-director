@@ -1,9 +1,7 @@
 """ledger_check: timing/pacing checks on a shared storyboard spreadsheet (stdlib xlsx)."""
-import re
 import sys
 import tempfile
 import unittest
-import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -58,8 +56,8 @@ class LedgerTests(unittest.TestCase):
 
     def test_long_dialogue_shot_flags_but_voiceover_and_placeholder_do_not(self):
         r = self.run_check(book([
-            shot('01', '00:00:00', '00:00:08', lines='A（旁白） 00:02–00:08\n“This is…”'),
-            shot('02', '00:00:08', '00:00:16', '中景，固定', lines='B 00:08–00:15\n“Welcome.”'),
+            shot('01', '00:00:00', '00:00:08', lines='Lena（旁白） 00:02–00:08\n“This is…”'),
+            shot('02', '00:00:08', '00:00:16', '中景，固定', lines='Sloane 00:08–00:15\n“Welcome.”'),
             shot('03', '00:00:16', '00:00:40', '〔待定〕', lines='〔待定〕', scene='【待重写·留空】'),
             shot('04', '00:00:40', '00:00:51', '全景，固定', lines='无台词'),
         ]))
@@ -91,40 +89,6 @@ class LedgerTests(unittest.TestCase):
         self.assertTrue(any(w.startswith('L08 台词D03') for w in r['warnings']))
         self.assertFalse(any('D01' in w for w in r['warnings']))
         self.assertEqual(len(r['lines']), 4)
-
-    def test_l03_matches_w22_single_line_or_nine_seconds(self):
-        r = self.run_check(book([
-            shot('01', '00:00:00', '00:00:08', lines='A 00:00–00:03\n“One.”\nB 00:04–00:07\n“Two.”'),
-            shot('02', '00:00:08', '00:00:17', '近景，微推', lines='A 00:08–00:11\n“One.”\nB 00:12–00:16\n“Two.”'),
-            shot('03', '00:00:17', '00:00:24', '特写，固定', lines='A 00:17–00:23 说了一段话（无引号）'),
-        ]))
-        self.assertEqual(r['errors'], [])
-        self.assertFalse(any('镜01' in w for w in r['warnings']), r['warnings'])   # 8s, two lines: a beat
-        self.assertTrue(any(w.startswith('L03 镜02') and '2 句' in w for w in r['warnings']))  # 9s: warn
-        self.assertTrue(any(w.startswith('L03 镜03') for w in r['warnings']))   # 7s, count unknown: conservative
-
-    def test_workbook_without_r_attributes_reads_by_position(self):
-        with tempfile.TemporaryDirectory() as d:
-            src = Path(d) / 'a.xlsx'
-            write_workbook(src, {'S': [['镜号', '入点', '出点'], ['01', '00:00:00', '00:00:03']]})
-            with zipfile.ZipFile(src) as zf:
-                items = {n: zf.read(n) for n in zf.namelist()}
-            xml = items['xl/worksheets/sheet1.xml'].decode()
-            xml = re.sub(r'<row r="\d+"', '<row', xml)
-            xml = re.sub(r' r="[A-Z]+\d+"', '', xml)
-            items['xl/worksheets/sheet1.xml'] = xml.encode()
-            dst = Path(d) / 'b.xlsx'
-            with zipfile.ZipFile(dst, 'w') as zf:
-                for n, b in items.items():
-                    zf.writestr(n, b)
-            self.assertEqual(read_workbook(dst)['S'][1], ['01', '00:00:00', '00:00:03'])
-
-    def test_non_workbook_raises_value_error_not_badzipfile(self):
-        with tempfile.TemporaryDirectory() as d:
-            lock = Path(d) / '~$ledger.xlsx'
-            lock.write_bytes(b'not a zip')
-            with self.assertRaises(ValueError):
-                read_workbook(lock)
 
     def test_missing_header_is_reported(self):
         r = self.run_check({'Sheet1': [['a', 'b'], [1, 2]]})
