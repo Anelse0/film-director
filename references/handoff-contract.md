@@ -7,7 +7,7 @@
 | 交接物 | 谁写 | 谁读 | 何时必需 |
 |---|---|---|---|
 | 场景页（`03_script/scene-XX.md`）或账本行（台词 / 本场事件列） | film-creative | film-director | 对白场进入生产 |
-| **台词设计表**（每句：目的动词 · 潜台词 · 说法 · 听者反应 · 情绪递进 · 收尾句标记；模板见 film-creative `templates/dialogue-design-sheet.md`） | film-creative | film-director：直接映射为每句〔说法〕、每镜〔情绪〕与【整体情绪弧线】，不重新推导 | 对白场进入生产时默认附；用户只要故事阅读稿时不附 |
+| **台词设计表**（每句：目的动词 · 潜台词 · 说法 · 听者反应 · 情绪递进 · 收尾句标记；模板见 film-creative `templates/dialogue-design-sheet.md`） | film-creative | film-director：直接映射为每句〔说法〕、每镜〔情绪〕与【整体情绪弧线】，不重新推导 | 对白场进入生产**必附**（生产版：每句一行、台词逐字、来源标注）；无表 = 剧本层缺口，登记交回 film-creative，不由生产侧补写（用户明确锁定糙台词除外）；用户只要故事阅读稿时不附 |
 | `ip.md`（人物 · 地点 · 视觉声音总则 · **正典变更表**） | film-creative 维护正典；用户直接改动同样有效 | 双方每次开工先读 | 始终 |
 | **生产档案**（`production-profile.md`：画幅 · Prompt 语言 / 台词语言 · 素材绑定约定 · 调色段 · 声音与旁白策略 · 节奏约定 · 字幕 · 首帧策略 · 台词预算口径；模板见 film-director `templates/production-profile.md`） | film-director 建立与维护；首次从 `ip.md` §视觉声音总则与用户反复提出的要求提炼 | film-director 每条 clip 读；film-creative 读"台词预算"行 | 有生产的项目始终 |
 | 时长预算回传（clip 秒数 → 台词预算：句数 / 词数） | film-director | film-creative | 台词超预算时 |
@@ -44,7 +44,8 @@
 ## 五、交付默认
 
 - film-creative 对白场：英文台词 + 中文对照 + 台词设计表；正文前两行写承接（上一场留下什么 / 本场交给下一场什么）；对白有收尾句（scene button）或明确写"无收尾、切下一场"。
-- film-director：**每次交付（含每次修订）都给完整 Prompt 全文**（代码块），不是 diff、不是"改动处"；每镜〔情绪〕与每句〔说法〕取自台词设计表；无表时先在对话里补出并标"生产侧补写、待创作侧确认"。
+- film-director：**每次交付（含每次修订）都给完整 Prompt 全文**（代码块），不是 diff、不是"改动处"；每镜〔情绪〕与每句〔说法〕取自台词设计表；表里没有的句子不进 Prompt；无表时先交回 film-creative 出表，用户明确锁定糙台词时才补出并标"生产侧补写、待创作侧确认"，并在落盘文件头部写明台词来源。
+- 项目层可在落盘前追加自己的闸门（例：工作区 `tools/scene_gate.py`：对白场台词密度、台词与设计表逐字对照、微表情档位），规则写在项目 CLAUDE.md；不属于本 skill，不改本 skill 的校验脚本。
 - 双方修订都保留上一版可回看；改台词回 film-creative，改镜头回 film-director。
 
 ## 六、语言与格式
