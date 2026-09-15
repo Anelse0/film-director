@@ -34,6 +34,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `references/stage-1-intake.md` | S1 / S2：资产登记、任务树（R2V 核心）、入口判定、clip 估算、画幅时长、项目目录 |
 | `references/emotion-performance.md` | 原文/微调/重组，强度与克制独立，高光时间编排及保真 |
 | `references/performance-grammar.md` | 把条目组成人物表演：hinge、可读性地板、阶梯、过渡铰链、面具与泄漏、听者与切点、相对时间 |
+| `references/micro-expression-tiers.md` | 眼眉骤变类表情的 A / B 分类、严 / 中 / 宽三档、S5 定档、原文不豁免的改写法；词表与阈值由项目闸门维护 |
 | `references/performance-record.md` | 可选编译前记录与自动检查接口 |
 | `references/stage-4-performance.md` | S4 表演外化与台词的模型执行约束 |
 | `references/stage-5-directing-storyboard.md` | S5 导演与分镜 |

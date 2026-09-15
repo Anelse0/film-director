@@ -50,7 +50,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 |---|---|---|---|
 | S1 资源读取 | `references/stage-1-intake.md` ＋ 已有 `production-profile.md`（`references/production-profile.md`） | 资产登记 + 缺口清单（+ 生产档案回显） | |
 | S2 任务识别 | 同上 §任务识别 ＋ `references/scene-parameters.md` §一 | 任务类型 · 运行模式 · 入口阶段 · clip 数 · 锁定判定 · **场景参数卡** | |
-| S4 表演外化 | `references/stage-4-performance.md` ＋ `references/emotion-performance.md`；组合表演时加读 `references/performance-grammar.md` | 有序表演块（C 层）及内部核对记录 | |
+| S4 表演外化 | `references/stage-4-performance.md` ＋ `references/emotion-performance.md`；组合表演时加读 `references/performance-grammar.md`；骤变类表情的分档与改写读 `references/micro-expression-tiers.md` | 有序表演块（C 层）及内部核对记录 | |
 | S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md`；景别 / 切点 / 运动动机 / 镜头曲线的依据在 `references/director-craft.md`；对白场 / 亮相加读 `references/dialogue-pacing.md` | `04_shots/scene-XX-clipYY.md` 分镜卡（五层） | ▮（与 S5b 一起） |
 | S5b 参考资产 | `references/stage-5b-reference-assets.md` | `05_assets/asset-plan.md`：资产清单 + 图像简报 + 上传顺序 | 等用户回填 |
 | S6 Prompt 编译 | `references/stage-6-prompt-compiler.md` ＋ `templates/prompt-templates.md` | `06_prompts/scene-XX-clipYY.prompt.md` | |
@@ -80,6 +80,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 
 - **S5 后必停**：分镜卡是最后一个人类可读的决策层；资产清单随分镜一起确认。
 - 其余停靠只问"按此继续？或改哪里"。
+- S5 停靠同时定「微表情档」（严 / 中 / 宽，`references/micro-expression-tiers.md`），写进 E 层与落盘头部；默认 中。
 - **每个停靠点第一行回显场景参数卡**（`references/scene-parameters.md`：强度 · 方向 · 信息 · 权力 · 进场温度 · 密度），让用户在早期纠正。
 
 ## 五层分离（贯穿 S5–S7）
@@ -164,6 +165,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | "表面在笑其实想哭 / 憋着 / 装没事" | `references/performance-grammar.md` §7 面具与泄漏：表层占嘴与姿态、泄漏只占一个部位、必有回位句 |
 | "听的人怎么演 / 反应镜空" | `references/performance-grammar.md` §8：先写他看见了什么，subtle 条目，`--listener` |
 | "特写里看不出 / 全景里表情丢了" | `references/performance-grammar.md` §3 可读性地板：`--readability 特写`，删 wider_parts 或加插入镜 |
+| "特写里表情演过 / 眼睛瞪太大 / 显假" | `references/micro-expression-tiers.md`：A / B 类骤变改写为保持 / 慢变 / 身体 / 视线，档位在 S5 定并写进头部 |
 | "像某导演那样拍 / 这一段怎么拍才有分量" | `references/director-craft.md` 按决策查一手说法（景别 / 并置 / 切点 / 运动动机 / 镜头曲线 / 画外 / 平行动作）；名字不进 Prompt |
 | "走位太复杂写不清 / 追逐群戏" | S5 §5.10：粗粒度白模作运镜与动线参考，表情参考视频锁表演 `[官方]` |
 
