@@ -6,7 +6,8 @@ Usage: validate_prompt.py FILE... [--duration N] [--json]
 Default production CLI remains compatible. ERROR is a format/contract issue,
 not necessarily an official model limitation. WARN requires review.
 F01-F06 concern record/schema/text fidelity; E20 concerns performance timing.
-W14 reviews identical adjacent complete blocks; W18 is retired.
+W14 reviews identical adjacent complete blocks; W18 and W19 are retired.
+W04 thresholds follow the official 30s example (9 shots, 2s minimum): <2s and >10 shots per 30s are review hints.
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
 """
@@ -254,11 +255,11 @@ def validate(path, duration_override=None, artifact="production", record=None, e
             err("E04", f"末镜结束 {end}s != 声明时长 {dur}s")
         info(f"镜头数 {len(shots)}，总时长 {end}s")
         # W04 pacing
-        short = [no for no, s, e, _ in shots if e - s < 1.5]
+        short = [no for no, s, e, _ in shots if e - s < 2]
         if short:
-            warn("W04", f"单镜 < 1.5s：镜头 {short}（2.5 抗拒快切 [第三方]）")
-        if len(shots) > 8 and end <= 30:
-            warn("W04", f"30s 内 {len(shots)} 镜 > 8（剧情类建议 ≤ 8 [推论]）")
+            warn("W04", f"单镜 < 2s：镜头 {short}（官方范例最短 2s；审阅该镜是否只承载一个事件 [推论]）")
+        if len(shots) > 10 and end <= 30:
+            warn("W04", f"30s 内 {len(shots)} 镜 > 10（官方范例 9 镜/30s；审阅每镜是否有信息或节奏理由 [推论]）")
     elif task not in {"edit", "motion", "transition"} and artifact == "production":
         warn("W08", "未识别到「镜头N（a-bs）」格式的分镜段落")
 
@@ -296,10 +297,7 @@ def validate(path, duration_override=None, artifact="production", record=None, e
                 warn("W11", f"镜头{no} 有 {len(speakers)} 个说话人（{', '.join(speakers)}），确认不是同框同时说话")
             if not re.search(r"闭着嘴|抿嘴|不出声|嘴[^，。]{0,4}闭|mouth (?:stays )?closed|lips (?:pressed|closed)", body) and len(speakers) >= 1 and re.search(r"[两二]人|B|另一|对方|listener|the other", body):
                 warn("W05", f"镜头{no} 有台词但未写非说话者嘴部状态")
-        for q in quotes:
-            if len(re.findall(r"[。！？!?]", q)) >= 3:
-                warn("W19", f"镜头{no} 台词「{q[:20]}…」含多个终止标点；审阅是否挤入无关意图，不按标点自动拆句")
-                break
+        # W19 retired: punctuation cannot infer dramatic intention; W05 occupancy checks remain.
         for pat in SPEECH_LEAK:
             if re.search(pat, body):
                 warn("W06", f"镜头{no} 疑似引号外的台词描述（明确逐字台词，避免仅给概述）")

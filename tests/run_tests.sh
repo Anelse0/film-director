@@ -25,6 +25,14 @@ out=$($V examples/example-04-parameters-fight.prompt.md); rc=$?
 check "example-04 exits 0" $rc "$out"
 echo "$out" | grep -q "W05"; check "original long line retains timing review" $? "$out"
 
+out=$($V examples/example-05-stairwell-letter.prompt.md); rc=$?
+check "example-05 exits 0" $rc "$out"
+echo "$out" | grep -q "0 error(s), 0 warning(s)"; check "example-05 clean (keyframe carrier)" $? "$(echo "$out" | tail -1)"
+
+out=$($V examples/example-06-balcony-cigarette.prompt.md); rc=$?
+check "example-06 exits 0" $rc "$out"
+echo "$out" | grep -q "0 error(s), 0 warning(s)"; check "example-06 clean (romance)" $? "$(echo "$out" | tail -1)"
+
 out=$($V examples/bad-example.prompt.md); rc=$?
 [ $rc -eq 1 ]; check "bad-1 exits 1" $? "rc=$rc"
 for code in E01 E12 E05 E02 E03 E04 W06 W09 W10 W02; do

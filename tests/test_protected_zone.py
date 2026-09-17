@@ -1,4 +1,12 @@
-"""film-director 1.0.0 protected zone: production/performance core hash-locked at the 1.0.0 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.1.0 baseline.
+
+1.1.0 (2026-09-17) is a deliberate directing-core release (official-doc alignment, director grammar, carriers,
+dialogue budget, validator W04/W19); the baseline was re-set in the same commit with a CHANGELOG entry, as this
+docstring requires. Files not touched by 1.1.0 keep their 1.0.0 hashes (emotion library, emotion-performance,
+performance-record, production-workflow, record templates, prompt_structure, production_contract,
+production_preflight, emotion_library, performance_checks).
+
+1.0.0 baseline history: production back end of Film-Seedance-Director v2.3.1.
 
 Baseline content: Film-Seedance-Director v2.3.1 production back end (the user chose 2.3.1 as the
 production baseline). At the split, references to files now living in film-creative (and to the
@@ -17,25 +25,25 @@ PROTECTED = {
     'assets/emotion-library.json': 'ef22ac8bfec33567344e13a927d47f7b577c3c6f07b110cc5a2e316523599977',
     'references/emotion-performance.md': 'a150f6047b6a484a6ab858a93773d9c28fab022ac274bcc358dd20684468d8d0',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
-    'references/stage-4-performance.md': 'ade55ddb33655042f6360bdde1bd5a0d4e149a479b1b407f142d510b696338a0',
-    'references/stage-5-directing-storyboard.md': '49980af3b95bdd4e2eca0288a915293c7dada4ddfb4c45ef54fc7daf23aec16d',
-    'references/stage-5b-reference-assets.md': '167fee36b688f32f5a8796be58098e043eb3ae0d27af3624ce7ed75ff7adc2d0',
-    'references/stage-6-prompt-compiler.md': 'a6e4b9dc35e47123461bdbabe5d62dd2e0bd481fbdd91c0656f08d4aa142ff76',
-    'references/stage-7-qa-continuity.md': '7957aca66d6cda61e4c2de9a69464b61f96abdd0e1a595fe36ff82d37e9e2f68',
+    'references/stage-4-performance.md': 'df8bc48db59bc120f728d8ad1901048332c890819324512d721fc0b4886795de',
+    'references/stage-5-directing-storyboard.md': 'fd321f31943fb0864b0e14867b48cb03e51243ae8854aa50f75edcc4ed896d47',
+    'references/stage-5b-reference-assets.md': 'ee87fc676e3128def78a2aaa220688fe68b472768e669934ff52e5b4c01e7a77',
+    'references/stage-6-prompt-compiler.md': '369dba49541e9e82f021fd54354c4a619ed74f2c401f24bda923814cd1ab4242',
+    'references/stage-7-qa-continuity.md': 'dae624565bdeeb00f7009f860c9cbdc72ca2a578f947a7489a062e64233210d8',
     'references/production-workflow.md': 'db8cc8de428952283a2cda4d7d23e0b1b0f4784ab18c54b57f674ca93eac6cfd',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
-    'references/seedance-2.5-capabilities.md': 'cee3b580a447f686b4fc62723438c39dbd8f8233f01c8550e3b1086878bf7a7b',
-    'references/camera-vocabulary.md': 'de1cd86da8fbf17c778038a565d57a425218636c8a148abfec476aead1007bd8',
-    'references/externalization-lexicon.md': '7a79bf1bf42805f185441a7767c95dd900dc390503674b286807df68eb709ce6',
-    'references/genre-packs.md': '8e7334eaa40d40f07278bf0493bfe9315c515f203cf9876acfca7e6fccd4dd40',
-    'references/director-lenses.md': '5d76b7b5f1f2908ea732eab1bb69dee8f9c81297bc5203e1a788d274d5b8c36a',
-    'templates/prompt-templates.md': '4f37de4d413ca36d042473b855b8ad4396802a1ea951787f9ddd5f680defa512',
+    'references/seedance-2.5-capabilities.md': '1e65d256e069b07807ea63172a017655d0788c78344b83ca46fd0a33c008bd60',
+    'references/camera-vocabulary.md': '06a5c14733a3c2cffb5c8dcaa02d107e6ab9f57982dfae0708b06b1583a3b93e',
+    'references/externalization-lexicon.md': '292b8363a566a18aae1eae2b3e2c085760930d2dfb608b2dc3040288cb03bbbb',
+    'references/genre-packs.md': '9b12fbcc6ce13d60d086021b981274f1a24e89f9091d34e3b734f31b8dd4e231',
+    'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
+    'templates/prompt-templates.md': '1fcd521969d8d2e746faf8e21499ea50e50c539f00e5d093d60a5cfac0193d50',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '7adc7226bf0b7648ecc2f2320db3edefe317297bf7486645271d9f87d8bb56fd',
-    'templates/shot-card.md': 'e15d5da482fbcdd17a3dfa177b944d035d30d5391514dbda90fb5385ea373f44',
+    'templates/shot-card.md': '53c840ba177e68edc9f80d5d994a0e0520fbeba9b1c0bf46954167d76d3394e8',
     'templates/reference-asset-brief.md': 'adc6b7c7c52c169d31ee7ba83111293496e7133572a7bedc08bf4a08d251df0b',
     'templates/asset-registry.md': '996818cda8aa55796820ae96c808c56459198f8f465b4e4924196d7ed8cc2943',
-    'scripts/validate_prompt.py': 'd2504bf6a99874ccca3e7d30335d9dc3335ee7aae3054cfc3ab23dfbc4e57896',
+    'scripts/validate_prompt.py': '626c274816db99e84dbc22d5906d1695f7d1f47157f3216861d639789bb18569',
     'scripts/prompt_structure.py': 'd9f73020e41eec19edee56b7ad8a45f9b973c28db9c93e451274ab6d1a0b60bf',
     'scripts/production_contract.py': '963653540c39519d99a731749736e96b39bed17005305af1082c857af5426bfa',
     'scripts/production_preflight.py': '80379ec01b3f952ee82cc1611e38b555ad41838bd0bb6f0ac52ddb5453605702',
@@ -49,7 +57,7 @@ def sha(path):
 
 
 class ProtectedZoneTests(unittest.TestCase):
-    def test_production_and_performance_core_unchanged_since_1_0_0(self):
+    def test_production_and_performance_core_unchanged_since_1_1_0(self):
         for name, expected in PROTECTED.items():
             with self.subTest(file=name):
                 self.assertEqual(sha(name), expected)

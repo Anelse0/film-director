@@ -1,6 +1,8 @@
 # film-director
 
-版本 **1.0.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+版本 **1.1.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜（含导演语法：景别 / 运镜 / 动线 / 剪辑 / 决策载体）、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+
+1.1.0 是导演语法与官方对齐版本：能力表按火山方舟在线文档（API 文档、教程、2.0 指南 FAQ）复核；新增 `references/director-grammar.md`（一手来源的导演决策规则）与"决策载体"步骤（关键帧 / 白模 / 动作视频承载精确构图与运镜时序）；台词每秒预算有语音学依据；退役 W19、按官方范例调整 W04；修正 2.3.1 遗留的机械映射。**工程完成（测试通过）；效果提升未验证**——没有生成对照成片，见 `tests/acceptance-1.1.0/`。
 
 创意前端（概念、故事、剧本、台词创作与改写）由独立的 [film-creative](https://github.com/Anelse0/film-creative) Skill 承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
 
@@ -26,9 +28,10 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `references/emotion-performance.md` | 原文/微调/重组，强度与克制独立，高光时间编排及保真 |
 | `references/performance-record.md` | 可选编译前记录与自动检查接口 |
 | `references/stage-4-performance.md` | S4 表演外化与台词的模型执行约束 |
-| `references/stage-5-directing-storyboard.md` | S5 导演与分镜 |
-| `references/director-lenses.md` | S5 透镜：按意图选择，不覆盖锁定表演 |
-| `references/camera-vocabulary.md` | 运镜词汇："术语 + 描述" |
+| `references/stage-5-directing-storyboard.md` | S5 导演与分镜：决策载体、走位表、镜头设计顺序、每镜负载 |
+| `references/director-grammar.md` | S5 主参考：景别 / 运镜 / 动线 / 剪辑 / 构图 / 光 / 载体 / 类型语法，每条附一手来源与核实状态 |
+| `references/director-lenses.md` | S5 透镜：场景问题 → 作用机制 → 选择 → 边界 → 语法依据 |
+| `references/camera-vocabulary.md` | 镜头语汇：景别 / 机高 / 焦距与景深 / 运镜与终点 / 构图 / 转场 / 光 / 声音符号 |
 | `references/stage-5b-reference-assets.md` | S5b 参考资产清单与图像简报（图 + 文核心） |
 | `references/stage-6-prompt-compiler.md` | S6 编译规范 |
 | `references/stage-7-qa-continuity.md` | S7 检查与成片反馈 |
@@ -38,7 +41,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `references/externalization-lexicon.md` | 外化词典（可选写法） |
 | `references/anti-mechanical.md` | 机械感诊断 |
 | `references/causal-chain.md` | 表演状态推进/持续与镜头链 |
-| `references/genre-packs.md` | 基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇时叠加 |
+| `references/genre-packs.md` | 基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇 / 视觉喜剧 / 暧昧爱情时叠加：难题 → 机制 → 选择 → 风险 |
 | `references/source-analysis.md` | 审计 / 更新来源时 |
 | `templates/*` | 分镜卡 / Prompt / 资产简报 / 登记表 / 生产记录骨架（`script-scene.md` 为输入格式参照） |
 | `scripts/emotion_library.py` | 按编号或关键词读取完整条目，`--list` 查看索引 |
@@ -47,6 +50,9 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `examples/example-02-one-scene-three-lenses.md` | 同一场戏三个透镜的对照，含一版通过校验的 Prompt |
 | `examples/example-03-yogurt-comedy*.md` | 喜剧走查（三拍 + 反讽落差），通过校验 |
 | `examples/example-04-parameters-fight*.md` | 同一套规则，参数卡不同：高强度外放吵架，与示例 01 对照 |
+| `examples/example-05-stairwell-letter*.md` | 导演语法走查：信息差、有动机的推近与反向跟拍、关键帧作为构图载体，通过校验 |
+| `examples/example-06-balcony-cigarette*.md` | 暧昧 / 爱情走查：凝视、距离、未完成的触碰、音乐克制，通过校验 |
+| `tests/acceptance-1.1.0/` | 1.1.0 的 review、三份调研摘要（官方文档 / 导演语法 / 台词速率 / 暧昧爱情）与验收协议 |
 | `examples/performance/acceptance.md` | 五组验收 Demo、取材/改动说明及成片观察点 |
 | `examples/production/acceptance-2.3.1.md` | 生产侧验收与 30 秒对照 |
 
@@ -80,15 +86,16 @@ python3 scripts/validate_prompt.py <prompt.md> --production-record <production.j
 
 ## 事实来源
 
-- `[官方]` 火山方舟《Doubao Seedance 2.5 提示词指南》（2026 版，38 页）
+- `[官方]` 火山方舟《Doubao Seedance 2.5 提示词指南》（PDF 与在线版）、《Seedance 2.5 教程》、《创建视频生成任务 API》、《Seedance 2.0 系列提示词指南》、ByteDance Seed 博客（见 `references/seedance-2.5-capabilities.md` 头部与 `tests/acceptance-1.1.0/research-seedance-official.md`）
+- `[一手]` 导演 / 摄影师 / 剪辑师著作与访谈、语音学标准（见 `references/director-grammar.md` §十、能力表 §7）
 - `[第三方]` Higgsfield、fal.ai、rundiffusion、runware、the-decoder、mindstudio 等（见 `references/source-analysis.md`）
-- 分辨率各来源不一致（480p/720p/1080p/4K），Skill 内标为"以平台为准"。
+- 分辨率按官方 API 文档：480p / 720p / 1080p，2.5 无 4k。
 
 ## 版本管理
 
 - 语义化版本，记录在 `VERSION` 与 `CHANGELOG.md`。
 - 每次改动跑 `bash tests/run_tests.sh`；GitHub Actions 在 push 与 PR 时自动跑。
-- 生产/表演核心文件由 `tests/test_protected_zone.py` 哈希锁定（1.0.0 基线，内容取自 v2.3.1）；有意变更属于独立的生产版本发布，需同步更新哈希并在 CHANGELOG 说明。
+- 生产/表演核心文件由 `tests/test_protected_zone.py` 哈希锁定（1.1.0 基线；1.0.0 基线取自 v2.3.1）；有意变更属于独立的生产版本发布，需同步更新哈希并在 CHANGELOG 说明。
 
 ## 维护
 

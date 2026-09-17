@@ -18,7 +18,7 @@ description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词�
 ## 工作边界
 
 - **做**：表演外化（含情绪提示词）、导演与分镜、参考资产计划、Seedance 2.5 Prompt 编译（参考生为主；文生 / 关键帧 / 宫格 / 首尾帧 / 编辑 / 延长）、连续性与质量检查、成片问题定位。
-- **不做**：不创作概念、故事与剧本，不代写或润色台词（创意工作由 film-creative skill 承担；剧本缺口只登记，不代补）；不调用模型 API，不生成图片（只产出图像简报）；不虚构模型参数；不替用户决定与任务无关的美术风格。
+- **不做**：不创作概念、故事与剧本，不代写或润色台词，不开发人物语言（创意工作由 film-creative skill 承担；剧本缺口只登记，不代补；S4 只取执行需要的语音信息）；不调用模型 API，不生成图片（只产出图像简报）；不虚构模型参数；不替用户决定与任务无关的美术风格。
 - **事实分级**（写任何模型能力时必须带标签）：`[官方]` 火山方舟指南原文 · `[第三方]` 有出处的外部经验 · `[推论]` 本 Skill 的设计推论 · `[未验证]` 未核实假设。能力表见 `references/seedance-2.5-capabilities.md`。
 
 完整生产到 S5b–S7 时读取 `references/production-workflow.md`。该接口把既有素材、任务参数、上游版本和审阅记录绑定到每条 clip；文本草稿不冒充可提交生产包。
@@ -42,13 +42,13 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | S1 资源读取 | `references/stage-1-intake.md` | 资产登记 + 缺口清单 | |
 | S2 任务识别 | 同上 §任务识别 ＋ `references/scene-parameters.md` §一 | 任务类型 · 运行模式 · 入口阶段 · clip 数 · 锁定判定 · **场景参数卡** | |
 | S4 表演外化 | `references/stage-4-performance.md` ＋ `references/emotion-performance.md` | 有序表演块（C 层）及内部核对记录 | |
-| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` | `04_shots/scene-XX-clipYY.md` 分镜卡（五层） | ▮（与 S5b 一起） |
+| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-grammar.md`（景别 / 运镜 / 动线 / 剪辑 / 载体的决策规则）＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` | `04_shots/scene-XX-clipYY.md` 分镜卡（五层）+ 走位表 + 决策载体 | ▮（与 S5b 一起） |
 | S5b 参考资产 | `references/stage-5b-reference-assets.md` | `05_assets/asset-plan.md`：资产清单 + 图像简报 + 上传顺序 | 等用户回填 |
 | S6 Prompt 编译 | `references/stage-6-prompt-compiler.md` ＋ `templates/prompt-templates.md` | `06_prompts/scene-XX-clipYY.prompt.md` | |
 | S7 检查 | `references/stage-7-qa-continuity.md` ＋ `scripts/validate_prompt.py` | `07_qa/…`；有成片时追加 `references/validation-log.md` | |
 
 **只读当前阶段需要的文件。**
-**按类型叠加**：基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇时，S4–S5 加读 `references/genre-packs.md` 对应一包。
+**按类型叠加**：基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇 / 视觉喜剧 / 暧昧爱情时，S4–S5 加读 `references/genre-packs.md` 对应一包。
 表演检查状态推进/持续与同步部位关系时读 `references/causal-chain.md`；机械感诊断读 `references/anti-mechanical.md`。表演测试以状态衔接替代剧情因果链，不为填表增加故事。
 
 ## 交付原则：对话是默认，落盘是显式动作
@@ -59,7 +59,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 
 运行模式只回答两件事：**范围**（跑到哪一阶段）和**自主度**（停不停）。落盘由交付原则决定，不属于模式。默认停靠式：在需要用户选择的地方停，不替用户选，停下时只问一个问题。
 
-| 模式 | 触发词 | 范围与停靠 | 落盘（按交付原则） |
+| 模式 | 典型说法（示例，不是触发词；按意图判断） | 范围与停靠 | 落盘（按交付原则） |
 |---|---|---|---|
 | **单阶段** | 用户指定某阶段（拆分镜、补表演、做资产计划、转 Prompt、查成片） | 只跑该阶段，停 | 该阶段产物（确认后） |
 | **停靠式**（默认） | 有剧本/场景稿，要完整生产 Prompt | S4 → S5+S5b ▮ → S6 → S7 | 停靠点确认后落盘 |
@@ -103,7 +103,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 
 一个 **clip = 一次 Seedance 2.5 生成 ≤ 30 秒**。clip 衔接策略在 S5 决定（延长 / 尾帧接首帧 / 独立）。
 
-示例：`examples/example-01-kitchen-keys.md`（完整走查）· `examples/example-02-one-scene-three-lenses.md`（透镜对照）· `examples/example-03-yogurt-comedy.md`（喜剧语域）· `examples/example-04-parameters-fight.md`（参数对照）。示例展示流程，不提供答案，禁止复用其中的台词与镜头设计。
+示例：`examples/example-01-kitchen-keys.md`（完整走查）· `examples/example-02-one-scene-three-lenses.md`（透镜对照）· `examples/example-03-yogurt-comedy.md`（喜剧语域）· `examples/example-04-parameters-fight.md`（参数对照）· `examples/example-05-stairwell-letter.md`（导演语法：信息差、有动机的运镜、关键帧载体）· `examples/example-06-balcony-cigarette.md`（暧昧 / 爱情：凝视、距离、未完成的触碰）。示例展示流程，不提供答案，禁止复用其中的台词与镜头设计。
 
 ## 硬规则
 
@@ -114,13 +114,16 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 5. **画面对象优先正向描述。** "不眨眼"等行为保持与排除对象不是同类；不能据一个否定词改写原文。能力边界查能力表，静态脚本不判任意否定语义。
 6. **台词逐字加引号、标注说话人与语言、给时间窗；非说话者写嘴部状态。** `[官方示例] + [第三方]`
 7. **表演有可见证据。** 保留速度、幅度、渐变与控制信息；删空泛替代，不按词性删细节。原文不润色，已有台词不因本规则被擅改。
-8. **每个镜头写景别、清晰可执行的运镜与起止状态。** 冷门术语"术语 + 描述"。`[官方]` 复合运镜说明同步或先后；单一运镜只是降低复杂度的本地建议。
+8. **每个镜头写景别、有动机与终点的运镜、起止状态。** 机器只在人物移动或人物内部变化时动，动就写动机、动作、终点（`references/director-grammar.md` §二）；冷门术语"术语 + 描述"。`[官方]` 复合运镜说明同步或先后；单一运镜只是降低复杂度的本地建议。
 9. **每个 clip 的 Prompt 自足。** 外观锁、空间、光源、声音在每个 clip 重写。`[推论]`
-10. **手法服务需求。** 复用、重复、持续或创新按本次目标判断，不以配额或词频裁决。导演名字不作为风格捷径进入 Prompt；通用技术名如希区柯克变焦可配可见描述使用，透镜不覆盖锁定表演。
+10. **手法服务需求。** 复用、重复、持续或创新按本次目标判断，不以配额或词频裁决。导演名字不作为风格捷径进入 Prompt（导演逻辑的研究与引用只在 `director-grammar.md` / `director-lenses.md` 与 A 层）；通用技术名如希区柯克变焦可配可见描述使用，透镜不覆盖锁定表演。
 11. **生产审阅看具体表现**：表演检查高光、衔接、可见性与保真，不要求每片都有反转或固定手法。
 12. **S6 后分层校验**：production 默认 `python3 scripts/validate_prompt.py <prompt.md>`；片段加 `--artifact performance --duration N`，原文加 `--artifact raw --entry-id N`。可选记录接口见 `references/performance-record.md`。完整生产包另按 `references/production-workflow.md` 执行 `--production-record … --require-ready`，不得把基础 CLI 的零错误称为生产就绪。未落盘可用临时文件检查，不强制保存产物。ERROR 修复；WARN 审阅；脚本通过不等于表演/成片通过。
 13. **需求参数优先于默认美学。** 场景强度、角色情绪强度、克制、方向与台词密度分别判断；高强度可以内收且无台词，不自动套预设。
 14. **状态与因果连贯。** 表演检查状态推进/持续；删除测试不能删识别性细节；同步多部位不等于多个无关任务（`references/causal-chain.md`）。
+15. **每镜负载有上限。** 一镜一个主要事件 + 至多一个记忆点细节，其余概括；部位级表情只写在可见景别。`[官方]` 概括优先、时段内容过多会被过度剪切或遗漏。
+16. **导演决策交给合适的载体。** 精确构图用关键帧，复杂走位与运镜时序用白模或动作视频，文字只承载它能稳定承载的（S5 §5.0、`director-grammar.md` §七）；文字驱动 15 秒以上的纵深走位或环绕须登记高风险。`[官方能力]` + `[推论]`
+17. **台词长度按预算。** 英文默认 2.5 词/s、中文 4 字/s、占比 ≤2/3（`references/seedance-2.5-capabilities.md` §7）；超预算先放宽窗口或拆镜，不改锁定台词、不自动提速。`[一手]` 语音学标准 + `[推论]`
 
 ## 默认输出契约
 

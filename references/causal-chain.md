@@ -66,4 +66,4 @@
 - `scene-parameters.md` §二 的表是取值与允许；本文件规定怎么用它。
 - 概念候选附链、场景清单"因果"列与剧本页前置因果链属创意侧（film-creative）。
 - `stage-7-qa-continuity.md` 人工检查加三测。
-- `scripts/validate_prompt.py` W19 只能查"一句做多件事"的粗略代理（一句引号内 ≥ 3 个句号 / 叹号 / 问号）；遮住测试与删除测试只能人做。
+- `scripts/validate_prompt.py` 的 W19 标点代理已退役（标点数量推不出意图）；一件事测试、遮住测试与删除测试只能人做，估时检查（W05）继续有效。

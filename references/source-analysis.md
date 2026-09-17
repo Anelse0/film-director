@@ -1,6 +1,6 @@
 # 资源分析与研究记录
 
-初始分析2026-09-04，纠偏2026-09-05。本文件是来源账本，生成流程不读它；现行约束以能力表和 production-workflow.md 为准。下列旧研究条目不是逐条第一手核实记录，不再用来生成导演硬规则。
+初始分析 2026-09-04，纠偏 2026-09-05，1.1.0 复核 2026-09-17（官方在线文档、导演语法一手来源、台词速率标准；三份调研摘要见 `../tests/acceptance-1.1.0/`）。本文件是来源账本，生成流程不读它；现行约束以能力表和 production-workflow.md 为准。下列旧研究条目不是逐条第一手核实记录，不再用来生成导演硬规则。
 
 ## 资源一：Higgsfield《Seedance 2.5 Prompting Guide》
 
@@ -88,3 +88,25 @@
 | Scorsese / Bergman | 视点归属；主观镜头；两张脸 | 通识 |
 
 设计决定：不把这些做成"风格预设"，而做成"透镜 = 它回答的问题 + 误用信号"，用上下文审阅防止套用，不能以配额或词频裁决。2.3.1 保留方法 IDs、去掉未经第一手核实的作者硬性归属；具体导演请求需读取其访谈或作品材料。
+
+
+## 1.1.0 新增来源（2026-09-17）
+
+### 官方在线文档（`[官方]`，已进能力表）
+
+| 文档 | URL | 采纳 |
+|---|---|---|
+| Seedance 2.5 教程 | https://docs.volcengine.com/docs/82379/2607688 | Model ID、resolution / ratio / duration / output_format / watermark 取值域、输入规格、11 种语言、声音符号规范、基础公式、说唱范例 |
+| 创建视频生成任务 API | https://docs.volcengine.com/docs/82379/1520757 | 三种互斥场景、真人人脸限制、提示词长度建议、omni_reference_task_type、不支持的参数 |
+| Seedance 2.0 系列提示词指南 | https://docs.volcengine.com/docs/82379/2222480 | 常见问题（ID 漂移、字幕、双胞胎、续写劣化、多音字）、编辑 / 延长指代写法、断句防歧义 |
+| Seed 博客 2026-07-31 | https://seed.bytedance.com/en/blog/one-take-creation-flexible-referencing-introducing-seedance-2-5 | 发布日期、弱项声明（复杂运动物理、多主体互动） |
+
+未读到：《Seedance 2.5 提示词模板》飞书文档（需登录）、官方 `sd25-pe` Skill 原文。
+
+### 导演语法一手来源
+
+登记在 `director-grammar.md` §十（含核实状态：已读原页 / 搜索摘要）。本节旧表"外部研究（导演方法，2026-09-04 二次调研）"的 nofilmschool / studiobinder 转述条目已被 §十 的一手条目替代或降级为 `[第三方]`。
+
+### 台词速率标准
+
+登记在 `seedance-2.5-capabilities.md` §7.1（NCVS、Tauroza & Allison 1990、Yuan/Liberman/Cieri 2006、Netflix TTSG、Banse & Scherer 1996、中文配音行业数值）。
