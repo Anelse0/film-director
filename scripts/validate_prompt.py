@@ -24,7 +24,7 @@ from pathlib import Path
 from performance_checks import split_beats, timing_errors, check_record, check_raw, repeated_blocks
 from prompt_structure import Document, dialogue_checks
 from production_contract import metadata, task_type, parameters, roles_from_fields, check_parameters, TASKS
-from rhythm_checks import rhythm_checks, settings as rhythm_settings, track_mode
+from rhythm_checks import rhythm_checks, settings as rhythm_settings, track_mode, scene_mode
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -287,7 +287,10 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     de, dw, dialogue, total_speech = dialogue_checks(document, dur, (ZH_RATE, EN_RATE, SPEECH_CAP),
                                                     fill=rhythm_settings(metadata_text)["台词填充率"])
     errors.extend(de)
-    if track_mode(metadata_text) == "连续":
+    _rs = rhythm_settings(metadata_text)
+    _scene = scene_mode(metadata_text, sum(r["estimate"] for r in dialogue if r["explicit"]),
+                        dur if dur is not None else (shots[-1][2] if shots else None), len(shots), _rs)
+    if track_mode(metadata_text, _scene) == "连续":
         # A continuous track lets a line run past its window into the next shot; W29 checks the chain.
         dw = [w for w in dw if not (w.startswith("W05") and ("接近或超过窗口" in w or "单元" in w))]
     warns.extend(dw)

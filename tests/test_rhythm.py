@@ -87,13 +87,14 @@ class RhythmTests(unittest.TestCase):
         self.assertTrue(any('片长' in w for w in warns3))
 
     def test_track_mode_setting_and_track_sum_derivation(self):
-        self.assertEqual(track_mode(META), '窗口')
-        self.assertEqual(track_mode(META + '| 台词轨 | 连续 |\n'), '连续')
+        self.assertEqual(track_mode(META), '连续')             # dialogue-led default
+        self.assertEqual(track_mode(META, '表演'), '窗口')
+        self.assertEqual(track_mode(META + '| 台词轨 | 窗口 |\n'), '窗口')
         with self.assertRaises(ValueError):
             track_mode(META + '| 台词轨 | 快 |\n')
         shots = [(1, 0, 2, '【中景，固定】'), (2, 2, 4, '【近景，固定】'), (3, 4, 6, '【近景，固定】'), (4, 6, 8, '【近景，固定】')]
         rows = [row(2, 'A', 2, 4, 8), row(3, 'B', 4, 6, 8), row(4, 'A', 6, 8, 8)]   # 24 words = 8.0 s track
-        _, infos, stats = rhythm_checks(shots, rows, 8, META.replace('30', '8') + '| 台词轨 | 连续 |\n| 台词填充率 | 1.0 |\n')
+        _, infos, stats = rhythm_checks(shots, rows, 8, META.replace('30', '8') + '| 台词填充率 | 1.0 |\n')   # no 台词轨 field: dialogue-led -> 连续
         self.assertEqual(stats['derived'], 10)   # ceil(8.0 + 2 silent) — not 3 x ceil(2.67)=9 + 2 = 11
         self.assertEqual(stats['track_mode'], '连续')
 

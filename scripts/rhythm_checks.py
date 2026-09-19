@@ -35,11 +35,12 @@ DEFAULTS = {
 TRACK_MODES = ("窗口", "连续")
 
 
-def track_mode(metadata_text):
-    """E-layer 台词轨: 窗口 (default, each line fits its window) or 连续 (lines chain; picture cuts freely)."""
+def track_mode(metadata_text, scene="对话"):
+    """E-layer 台词轨 wins; otherwise a dialogue-led clip uses 连续 (lines chain across cuts) and a
+    performance-led clip uses 窗口 (each line fits its own window)."""
     m = re.search(r"\|\s*台词轨\s*\|\s*([^|\n]+)\|", metadata_text)
     if not m:
-        return "窗口"
+        return "连续" if scene == "对话" else "窗口"
     value = m.group(1).strip()
     if value not in TRACK_MODES:
         raise ValueError("台词轨 must be 窗口 or 连续")
@@ -146,7 +147,7 @@ def rhythm_checks(shots, rows, duration, metadata_text):
     est_total = sum(r["estimate"] for r in explicit)
     mode = scene_mode(metadata_text, est_total, duration, len(shots), cfg)
     dialogue_led = mode == "对话"
-    infos.append(f"节奏档 {mode}（台词净时长 {est_total:.1f}s / {duration:g}s；≥{cfg['对话场判定占比']:.0%} 判为对话场，可用 E 层「节奏档」覆盖）")
+    infos.append(f"节奏档 {mode}（台词净时长 {est_total:.1f}s / {duration:g}s；≥{cfg['对话场判定占比']:.0%} 判为对话场，可用 E 层「节奏档」覆盖；对话场默认 台词轨=连续）")
 
     # W22 dialogue window much wider than the speech it holds
     rec_total = 0.0
@@ -219,7 +220,7 @@ def rhythm_checks(shots, rows, duration, metadata_text):
         warns.append(f"W25 对话场平均镜长 {asl:.1f}s > {cfg['对话场平均镜长上限']:g}s（对白镜 2-4s 为目标；持续镜需理由）")
 
     # W29 continuous dialogue track (E-layer 台词轨 | 连续): lines chain across cuts
-    mode_track = track_mode(metadata_text)
+    mode_track = track_mode(metadata_text, mode)
     if explicit:
         tw, finishes, slack = track_schedule(explicit, duration, cfg["台词轨溢出容差"])
         if mode_track == "连续":

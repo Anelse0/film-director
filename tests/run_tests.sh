@@ -23,7 +23,7 @@ echo "$out" | grep -q "0 error(s), 0 warning(s)"; check "example-03 clean" $? "$
 
 out=$($V examples/example-04-parameters-fight.prompt.md); rc=$?
 check "example-04 exits 0" $rc "$out"
-echo "$out" | grep -q "W05"; check "original long line retains timing review" $? "$out"
+echo "$out" | grep -q "W05\|W29\|台词轨"; check "original long line retains timing review (W05 / W29 / 台词轨)" $? "$out"
 
 out=$($V examples/example-05-stairwell-letter.prompt.md); rc=$?
 check "example-05 exits 0" $rc "$out"

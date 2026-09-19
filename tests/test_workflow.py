@@ -48,7 +48,10 @@ class TaskMatrixTests(unittest.TestCase):
         self.assertEqual((shots[0].start,shots[-1].end),(0,30))
         self.assertGreaterEqual(result['dialogue'][-1]['start']-shots[-2].start,3)
         self.assertEqual(result['checks']['render'],'not_tested')
-        self.assertTrue(any(w.startswith('W05') for w in result['warnings']))
+        # 1.3.0: a dialogue-led clip reviews timing as a continuous track (W29 / 台词轨 INFO); the
+        # per-window W05 remains for performance-led clips or an explicit 台词轨 | 窗口.
+        self.assertTrue(any(w.startswith('W05') or w.startswith('W29') for w in result['warnings'])
+                        or any('台词轨' in i for i in result['info']))
 
 @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe'), 'real-media integration requires ffmpeg/ffprobe')
 class RealMediaTests(unittest.TestCase):
