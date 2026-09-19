@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from rhythm_checks import recommended_window, rhythm_checks, scene_mode, DEFAULTS  # noqa: E402
+from rhythm_checks import recommended_window, rhythm_checks, scene_mode, track_schedule, track_mode, DEFAULTS  # noqa: E402
 
 META = '| 项 | 值 |\n|---|---|\n| duration | 30 |\n| 语速词每秒 | 3 |\n'
 
@@ -37,8 +37,8 @@ class RhythmTests(unittest.TestCase):
         self.assertIn('W23', codes)   # shot 6: 6 s, no line, fixed camera
         self.assertIn('W24', codes)   # 30 - 16 = 14 s outside windows (47 %), trailing 7 s
         self.assertIn('W25', codes)   # ASL 5.0 > 4.5
-        self.assertIn('W26', codes)   # derived 4.5+4+3+4 + 8 silent = 24 vs 30
-        self.assertEqual(stats['derived'], 24)
+        self.assertIn('W26', codes)   # track 13.0/0.9 = 14.4 + 8 silent = 23 vs 30
+        self.assertEqual(stats['derived'], 23)
         self.assertTrue(any('平均镜长 5.0s' in i for i in infos))
 
     def test_performance_led_clip_only_reports_info(self):
@@ -74,6 +74,28 @@ class RhythmTests(unittest.TestCase):
         self.assertTrue(any(w.startswith('W28 镜头1') for w in warns))
         self.assertFalse(any('镜头2' in w and w.startswith('W28') for w in warns))  # 2 s
         self.assertFalse(any('镜头3' in w and w.startswith('W28') for w in warns))  # camera moves
+
+    def test_continuous_track_allows_spill_and_flags_pileup(self):
+        rows = [row(1, 'A', 4, 6, 9), row(2, 'B', 6, 8, 3), row(3, 'A', 8, 10, 8)]   # 2.7 s in a 2 s window spills 0.7
+        warns, finishes, slack = track_schedule(rows, 21, 1.0)
+        self.assertEqual(warns, [])
+        self.assertAlmostEqual(finishes[0], 7.0, places=1)   # 9 words / 3 = 3.0 s from 4
+        rows2 = [row(1, 'A', 4, 6, 15), row(2, 'B', 6, 8, 3)]                     # 5 s from 4 -> 9, pileup 3 s
+        warns2, _, _ = track_schedule(rows2, 21, 1.0)
+        self.assertTrue(any(w.startswith('W29') for w in warns2))
+        warns3, _, _ = track_schedule([row(1, 'A', 18, 20, 12)], 20, 1.0)          # 4 s from 18 > 20
+        self.assertTrue(any('片长' in w for w in warns3))
+
+    def test_track_mode_setting_and_track_sum_derivation(self):
+        self.assertEqual(track_mode(META), '窗口')
+        self.assertEqual(track_mode(META + '| 台词轨 | 连续 |\n'), '连续')
+        with self.assertRaises(ValueError):
+            track_mode(META + '| 台词轨 | 快 |\n')
+        shots = [(1, 0, 2, '【中景，固定】'), (2, 2, 4, '【近景，固定】'), (3, 4, 6, '【近景，固定】'), (4, 6, 8, '【近景，固定】')]
+        rows = [row(2, 'A', 2, 4, 8), row(3, 'B', 4, 6, 8), row(4, 'A', 6, 8, 8)]   # 24 words = 8.0 s track
+        _, infos, stats = rhythm_checks(shots, rows, 8, META.replace('30', '8') + '| 台词轨 | 连续 |\n| 台词填充率 | 1.0 |\n')
+        self.assertEqual(stats['derived'], 10)   # ceil(8.0 + 2 silent) — not 3 x ceil(2.67)=9 + 2 = 11
+        self.assertEqual(stats['track_mode'], '连续')
 
 
 if __name__ == '__main__':

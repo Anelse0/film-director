@@ -118,13 +118,13 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 9. **每个 clip 的 Prompt 自足。** 外观锁、空间、光源、声音在每个 clip 重写。`[推论]`
 10. **手法服务需求。** 复用、重复、持续或创新按本次目标判断，不以配额或词频裁决。导演名字不作为风格捷径进入 Prompt（导演逻辑的研究与引用只在 `director-grammar.md` / `director-lenses.md` 与 A 层）；通用技术名如希区柯克变焦可配可见描述使用，透镜不覆盖锁定表演。
 11. **生产审阅看具体表现**：表演检查高光、衔接、可见性与保真，不要求每片都有反转或固定手法。
-12. **S6 后分层校验**：production 默认 `python3 scripts/validate_prompt.py <prompt.md>`；片段加 `--artifact performance --duration N`，原文加 `--artifact raw --entry-id N`。可选记录接口见 `references/performance-record.md`。完整生产包另按 `references/production-workflow.md` 执行 `--production-record … --require-ready`，不得把基础 CLI 的零错误称为生产就绪。未落盘可用临时文件检查，不强制保存产物。ERROR 修复；WARN 审阅；脚本通过不等于表演/成片通过。W22–W27 是时间利用的下限审阅（窗口过宽 / 长镜 / 无声段 / 平均镜长 / 时长冗余 / 减速词），对话场默认启用，阈值与理由见 `references/duration-rhythm.md`。
+12. **S6 后分层校验**：production 默认 `python3 scripts/validate_prompt.py <prompt.md>`；片段加 `--artifact performance --duration N`，原文加 `--artifact raw --entry-id N`。可选记录接口见 `references/performance-record.md`。完整生产包另按 `references/production-workflow.md` 执行 `--production-record … --require-ready`，不得把基础 CLI 的零错误称为生产就绪。未落盘可用临时文件检查，不强制保存产物。ERROR 修复；WARN 审阅；脚本通过不等于表演/成片通过。W22–W29 是时间利用的下限审阅（窗口过宽 / 长镜 / 无声段 / 平均镜长 / 时长冗余 / 减速词 / 整句一镜 / 连续台词轨），对话场默认启用，阈值与理由见 `references/duration-rhythm.md`。
 13. **需求参数优先于默认美学。** 场景强度、角色情绪强度、克制、方向与台词密度分别判断；高强度可以内收且无台词，不自动套预设。
 14. **状态与因果连贯。** 表演检查状态推进/持续；删除测试不能删识别性细节；同步多部位不等于多个无关任务（`references/causal-chain.md`）。
 15. **每镜负载有上限。** 一镜一个主要事件 + 至多一个记忆点细节，其余概括；部位级表情只写在可见景别。`[官方]` 概括优先、时段内容过多会被过度剪切或遗漏。
 16. **导演决策交给合适的载体。** 精确构图用关键帧，复杂走位与运镜时序用白模或动作视频，文字只承载它能稳定承载的（S5 §5.0、`director-grammar.md` §七）；文字驱动 15 秒以上的纵深走位或环绕须登记高风险。`[官方能力]` + `[推论]`
 17. **台词长度按预算。** 英文默认 2.5 词/s、中文 4 字/s、占比 ≤2/3（`references/seedance-2.5-capabilities.md` §7）；超预算先放宽窗口或拆镜，不改锁定台词、不自动提速。`[一手]` 语音学标准 + `[推论]`
-18. **对话场一句不等于一镜，时长从内容推导。** 切点落在信息变化处（被点名的人、被提到的物、听者接住的一下、动作终点），一句可跨两镜、尾段画外；固定机位整句一镜 ≥4 s、窗口比估时宽 >1 s、无台词段无功能、30 s 未按内容推导都是校验 W22–W28 的审阅项，写明理由才保留（`references/duration-rhythm.md`）。`[官方范例]` + `[实测]` + `[推论]`
+18. **对话场一句不等于一镜，时长从内容推导。** 切点落在信息变化处（被点名的人、被提到的物、听者接住的一下、动作终点），一句可跨两镜、尾段画外；语速按成片校准（`scripts/measure_clip.py` 加 `--prompt`），对话场用 `台词轨 | 连续`（一句可溢出到下一镜 ≤1 s，W29 链式检查取代逐窗口 W05）；固定机位整句一镜 ≥4 s、窗口比估时宽 >1 s、无台词段无功能、30 s 未按内容推导都是校验 W22–W29 的审阅项，写明理由才保留（`references/duration-rhythm.md`）。`[官方范例]` + `[实测]` + `[推论]`
 
 ## 默认输出契约
 

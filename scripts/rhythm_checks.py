@@ -30,7 +30,46 @@ DEFAULTS = {
     "对话场判定占比": 0.25,  # speech estimate / duration at or above this = dialogue-led clip
     "动作节拍秒数": 0.0,     # declared seconds of physical beats inside dialogue shots (adds to the derived reference)
     "整句一镜阈值": 4.0,     # fixed shot holding exactly one whole line for at least this long -> W28
+    "台词轨溢出容差": 1.0,   # continuous track: a line may run past its window / into the next shot by this much
 }
+TRACK_MODES = ("窗口", "连续")
+
+
+def track_mode(metadata_text):
+    """E-layer 台词轨: 窗口 (default, each line fits its window) or 连续 (lines chain; picture cuts freely)."""
+    m = re.search(r"\|\s*台词轨\s*\|\s*([^|\n]+)\|", metadata_text)
+    if not m:
+        return "窗口"
+    value = m.group(1).strip()
+    if value not in TRACK_MODES:
+        raise ValueError("台词轨 must be 窗口 or 连续")
+    return value
+
+
+def track_schedule(rows, duration, tolerance):
+    """Chain explicit lines in start order: each begins at max(its window start, previous finish).
+
+    Returns (warnings, finish_times, slack). A warning fires only when the chained speech would
+    still be running past the next line's start by more than tolerance, or past the clip end."""
+    warns, finishes = [], []
+    ordered = sorted(rows, key=lambda r: (r["start"], r["end"]))
+    prev_finish = 0.0
+    for i, r in enumerate(ordered):
+        begin = max(r["start"], prev_finish)
+        finish = begin + r["estimate"]
+        finishes.append(finish)
+        nxt = ordered[i + 1]["start"] if i + 1 < len(ordered) else None
+        if nxt is not None and finish > nxt + tolerance + 1e-9:
+            warns.append(f"W29 台词轨：{r['speaker']}「{r['text'][:24]}」按 {r['start']:g}s 起说到 {finish:.1f}s，"
+                         f"压过下一句起点 {nxt:g}s 超过 {tolerance:g}s（后移下一句或拆句）")
+        elif duration is not None and nxt is None and finish > duration + 1e-9:
+            warns.append(f"W29 台词轨：末句按 {r['start']:g}s 起说到 {finish:.1f}s > 片长 {duration:g}s")
+        prev_finish = finish
+    slack = None
+    if ordered:
+        slack = (ordered[-1]["end"] - finishes[-1]) if finishes else None
+    return warns, finishes, slack
+
 MODES = ("对话", "表演")
 # Tempo cues in the observable prose. Slow cues are legitimate directing; the
 # count only tells the reviewer where the "air" in a slow render was written.
@@ -179,6 +218,16 @@ def rhythm_checks(shots, rows, duration, metadata_text):
     if dialogue_led and asl > cfg["对话场平均镜长上限"] + 1e-9:
         warns.append(f"W25 对话场平均镜长 {asl:.1f}s > {cfg['对话场平均镜长上限']:g}s（对白镜 2-4s 为目标；持续镜需理由）")
 
+    # W29 continuous dialogue track (E-layer 台词轨 | 连续): lines chain across cuts
+    mode_track = track_mode(metadata_text)
+    if explicit:
+        tw, finishes, slack = track_schedule(explicit, duration, cfg["台词轨溢出容差"])
+        if mode_track == "连续":
+            warns.extend(tw)
+        infos.append(f"台词轨 {mode_track}：{len(explicit)} 句连续说完约在 {finishes[-1]:.1f}s"
+                     f"（末句窗口止于 {max(r['end'] for r in explicit):g}s，余量 {slack:+.1f}s）")
+        stats.update({"track_finish": finishes[-1], "track_slack": slack, "track_mode": mode_track})
+
     # W27 tempo cues: where a slow render was written (dialogue-led clips)
     if dialogue_led:
         prose = re.sub(r"[“\"][^”\"\n]*[”\"]", "", "\n".join(body for _, _, _, body in shots))  # not the lines themselves
@@ -196,12 +245,13 @@ def rhythm_checks(shots, rows, duration, metadata_text):
         win_total = sum(r["end"] - r["start"] for r in explicit)
         silent_shots = sum(e - s for no, s, e, _ in shots if not any(r["shot"] == str(no) for r in rows))
         beats = cfg["动作节拍秒数"]
-        derived = math.ceil(rec_total + silent_shots + beats - 1e-9)
+        track_total = est_total / cfg["台词填充率"]   # one rounding for the whole track, not per line
+        derived = math.ceil(track_total + silent_shots + beats - 1e-9)
         infos.append(
             f"台词净时长 {est_total:.1f}s；建议窗口合计 {rec_total:g}s；实际窗口合计 {win_total:g}s（松弛 {win_total - rec_total:.1f}s）；"
             f"窗口外 {duration - union_length([(r['start'], r['end']) for r in explicit]):g}s")
         infos.append(
-            f"按台词量推导的时长参考 ≈ 建议窗口 {rec_total:g}s + 无台词镜 {silent_shots:g}s + 动作节拍 {beats:g}s = {derived}s（声明 {duration:g}s）")
+            f"按台词量推导的时长参考 ≈ 台词轨 {track_total:.1f}s（净 {est_total:.1f}s ÷ {cfg['台词填充率']:g}）+ 无台词镜 {silent_shots:g}s + 动作节拍 {beats:g}s = {derived}s（声明 {duration:g}s；逐句取整的窗口合计 {rec_total:g}s 只作参考）")
         if dialogue_led and duration - derived >= cfg["时长冗余阈值"] - 1e-9:
             warns.append(
                 f"W26 声明时长 {duration:g}s 比推导参考 {derived}s 多 {duration - derived:g}s ≥ {cfg['时长冗余阈值']:g}s"

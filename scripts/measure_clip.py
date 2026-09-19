@@ -8,7 +8,8 @@ average shot length, shot-length buckets, speech occupancy (non-silent audio
 above --silence dB for >= 0.3 s), leading / trailing silence and the longest
 silent stretch. With --prompt it also lists what the Prompt declared (shots,
 dialogue windows) next to what was generated, so the review can say which
-side is slow: the design or the render. Scene detection is a heuristic: a
+side is slow: the design or the render, and prints the calibrated speech
+rate (words / voiced seconds) to feed back into the E layer 语速词每秒. Scene detection is a heuristic: a
 slow pan across a bright opening can count as a cut and a hard cut between two
 similar frames can be missed; treat counts as ±1 and check by eye when it
 matters. Speech occupancy counts any non-silent audio, including footsteps
@@ -86,9 +87,12 @@ def declared(prompt_path):
     shots = [(u.ident, u.start, u.end) for u in doc.shots]
     dur = shots[-1][2] if shots else None
     _, _, rows, total = dialogue_checks(doc, dur, (4.0, 2.5, 2 / 3))
+    words = sum(len(re.findall(r"[A-Za-z]+(?:['’][A-Za-z]+)*", r["text"])) for r in rows)
+    zh = sum(len(re.findall(r"[\u4e00-\u9fff]", r["text"])) for r in rows)
     return {"shots": len(shots), "duration": dur, "asl": round(dur / len(shots), 2) if shots else None,
             "shot_lengths": [e - s for _, s, e in shots],
-            "dialogue_windows": [(r["start"], r["end"]) for r in rows if r["explicit"]]}
+            "dialogue_windows": [(r["start"], r["end"]) for r in rows if r["explicit"]],
+            "words": words, "zh_chars": zh}
 
 
 def main(argv):
@@ -114,6 +118,14 @@ def main(argv):
     if decl:
         print(f"== Prompt 声明: {decl['shots']} 镜 / {decl['duration']}s, 平均镜长 {decl['asl']}s, 镜长 {decl['shot_lengths']}")
         print(f"   台词窗口 {decl['dialogue_windows']}")
+        for r in results:
+            if decl["words"] and r["audio_active"] > 0:
+                rate = decl["words"] / r["audio_active"]
+                win = sum(e - s for s, e in decl["dialogue_windows"])
+                print(f"   校准：{decl['words']} 词 / 有声 {r['audio_active']}s ≈ {rate:.2f} 词/秒（有声含非台词声，是语速下限）；"
+                      f"词数 / 窗口合计 {win:g}s = {decl['words'] / win if win else 0:.2f} 词/秒（Prompt 假设）→ 可回填 E 层「语速词每秒」")
+            if decl["zh_chars"] and r["audio_active"] > 0:
+                print(f"   校准：{decl['zh_chars']} 字 / 有声 {r['audio_active']}s ≈ {decl['zh_chars'] / r['audio_active']:.2f} 字/秒")
     return 0
 
 
