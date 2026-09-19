@@ -74,8 +74,11 @@ SPEECH_RE = re.compile(
     r'[“"](?P<line>[^”"\n]*)[”"]', re.I)
 
 
-def dialogue_checks(doc, duration, rates):
-    """Count each declared utterance once, with its own or enclosing time window."""
+def dialogue_checks(doc, duration, rates, fill=0.9):
+    """Count each declared utterance once, with its own or enclosing time window.
+
+    fill: share of a window speech may occupy before W05 (E-layer 台词填充率;
+    1.0 means a line trips W05 only when it does not fit at all)."""
     errors, warnings, rows = [], [], []
     zh_rate, en_rate, cap = rates
     matches = list(SPEECH_RE.finditer(doc.text))
@@ -99,7 +102,7 @@ def dialogue_checks(doc, duration, rates):
         estimate = zh / zh_rate + en / en_rate
         rows.append({'speaker': speaker, 'text': line, 'start': start, 'end': end,
                      'estimate': estimate, 'explicit': bool(explicit), 'shot': shot.ident if shot else None})
-        if end is not None and end > start and estimate > (end - start) * .9:
+        if end is not None and end > start and estimate > (end - start) * fill:
             warnings.append(f'W05 {speaker} 台词约 {estimate:.1f}s 接近或超过窗口 {end-start:g}s')
     # Do not silently certify unknown dialogue syntax. Quoted parenthetical acting
     # directions are not additional speech. Legacy unlabelled quotations get review.
@@ -121,7 +124,7 @@ def dialogue_checks(doc, duration, rates):
     for unit in doc.shots or doc.beats:
         subtotal = sum(r['estimate'] for r in rows if r['start'] is not None and r['end'] is not None
                        and unit.start <= r['start'] < r['end'] <= unit.end)
-        if subtotal > (unit.end - unit.start) * .9:
+        if subtotal > (unit.end - unit.start) * fill:
             warnings.append(f'W05 单元 {unit.ident} 台词累计 {subtotal:.1f}s 超过可用窗口')
     total = sum(r['estimate'] for r in rows)
     if duration is not None and duration > 0 and total > duration * cap:

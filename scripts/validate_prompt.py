@@ -8,6 +8,8 @@ not necessarily an official model limitation. WARN requires review.
 F01-F06 concern record/schema/text fidelity; E20 concerns performance timing.
 W14 reviews identical adjacent complete blocks; W18 and W19 are retired.
 W04 thresholds follow the official 30s example (9 shots, 2s minimum): <2s and >10 shots per 30s are review hints.
+W22-W26 (rhythm_checks.py) review the lower side of time use: wide dialogue windows, long silent
+shots, silence share, dialogue-scene average shot length and declared-vs-derived duration.
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
 """
@@ -21,6 +23,7 @@ from pathlib import Path
 from performance_checks import split_beats, timing_errors, check_record, check_raw, repeated_blocks
 from prompt_structure import Document, dialogue_checks
 from production_contract import metadata, task_type, parameters, roles_from_fields, check_parameters, TASKS
+from rhythm_checks import rhythm_checks, settings as rhythm_settings
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -280,10 +283,17 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         tag_moves = [w for w in CAMERA_MOVES if w in tag_txt]
         if len(tag_moves) > 2:
             warn("W10", f"镜头{no} 标注含多个运镜词 {tag_moves}（核对同步/先后关系与表演可见性，不自动删复合运镜）")
-    de, dw, dialogue, total_speech = dialogue_checks(document, dur, (ZH_RATE, EN_RATE, SPEECH_CAP))
+    de, dw, dialogue, total_speech = dialogue_checks(document, dur, (ZH_RATE, EN_RATE, SPEECH_CAP),
+                                                    fill=rhythm_settings(metadata_text)["台词填充率"])
     errors.extend(de)
     warns.extend(dw)
     info(f"台词估时 {total_speech:.1f}s")
+    # W22-W26 duration / rhythm review hints (lower side of time use; W05 keeps the upper side).
+    if artifact == "production" and shots and not is_edit:
+        rw, ri, _ = rhythm_checks(shots, dialogue, dur if dur is not None else shots[-1][2], metadata_text)
+        warns.extend(rw)
+        for line in ri:
+            info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:
         if re.search(r"\d+\s*秒?内.{0,10}\d+\s*次|\d+\s*times? (?:per|in) \d+", body):
