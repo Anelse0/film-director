@@ -8,7 +8,7 @@ S5 §5.2 第 7 步"时长"与 S6 台词窗口的展开。回答四个问题：**
 |---|---|---|---|
 | 火山方舟《Doubao Seedance 2.5 提示词指南》（在线版 2026-09-18 更新） | 时间戳以 1 秒为单位；"指定时间段内剧情如果较少，模型会进行一定自由发挥。指定时间段内容过多，则会导致过度剪切或剧情遗漏，请注意时长安排的合理性。" 30 秒范例 9 镜 = 3/3/4/4/4/4/3/3/2 s（平均 3.3 s，最短 2 s），9 镜中 8 镜有台词，唯一无台词镜 3 s（10%）；首镜第 0 秒即有台词，末镜 2 s 内 10 词 | 镜长带 2–4 s、无声段 ≤20%、"首尾即事件"的官方参照；内容过少 = 模型自由发挥 = 我们看到的"拖" | `[官方]` |
 | 本项目实测：D05 Prompt（9 镜 / 30 s，切点 2/7/11/14/16/20/24/26）→ 成片 `棒球赛前球员对话.mp4`（2026-09-19 14:38，Seedance 2.5，9:16 480p） | `measure_clip.py` 检出切点 1.71/7.08/11.0/13.92/15.88/19.54/24.08/26.12，与 Prompt 逐一对应（误差 ≤0.3 s）；有声占比 59%，台词窗口内出现 0.3–0.9 s 静音空档 22 段 | **2.5 按整数秒时间戳出片；成片的节奏 = Prompt 的时间设计。** 窗口比估时宽多少，模型就在窗口里塞多少停顿 | `[实测·单样本]` 见 `validation-log.md` |
-| 本项目校准：`measure_clip.py --prompt` 对 D05 v1 成片 | 60 词 / 有声 17.85 s ≈ **3.36 词/秒**（有声含脚步纸声，是语速下限）；用户手改的 D10a/b/c（按 ~3.3–3.4 词/秒排、窗口短于逐句取整）已出片可用 | Skill 默认 2.5、项目口径 3 都比模型实际说话慢；语速应按成片校准而不是假设 | `[实测·单样本]` + `[用户反馈·未量]` |
+| 本项目校准（`measure_clip.py --prompt`）：D05 v1（窗口宽）60 词 / 有声 17.85 s ≈ 3.36 词/秒；用户手改 D10a（窗口 15 s 装 50 词）50 词 / 有声 13.9 s ≥ **3.6 词/秒**；D10b（14 词句放 3 s 镜）38 词 / 9.2 s ≥ **4.1 词/秒**，三条切点均逐镜跟随（误差 ≤0.5 s），用户判定成片可用 | **语速是窗口的函数，不是模型的常数**：窗口越紧模型说得越快（实测至少到 4.1 词/秒，单句到 ~4.7），上限由可懂度和人耳判定。Skill 默认 2.5、项目口径 3 都不是模型限制，是设计选择 | `[实测·三样本]` + `[用户判定]`，见 `validation-log.md` |
 | Walter Murch, *In the Blink of an Eye*（2nd ed. 2001） | 六准则：情绪 51 > 故事 23 > 节奏 10 > 视线 7 > 平面 5 > 空间 4；Huston 灯的比喻"You blinked. Those are cuts."；"your listener will blink at the precise moment he or she 'gets' the idea… that blink will occur where a cut could have happened" | 切点 = 一个思想单元被接收的一刻。一句台词说完、听者"接住"，就是切点；再留 1–2 秒是让观众盯着一张已经读完的脸 | `[一手·摘要]` 转引页 https://nevalalee.wordpress.com/2017/02/14/one-breath-one-blink/ 、https://www.lrb.co.uk/the-paper/v47/n19/john-lahr/every-blink 已读 |
 | Sidney Lumet, *Making Movies*（1995） | "it's the change in tempo we feel, not the tempo itself."；"Over-length is one of the things that most often results in the destruction of the movie in the cutting room." | 30 秒内至少一次镜长对比；过长是剪辑室里最常见的死因 | `[一手]` 语录页已读（见 `director-grammar.md` §十） |
 | David Bordwell, "Intensified continuity revisited"（davidbordwell.net 2007-05-27） | "today it isn't uncommon to find films with average shot lengths of 2-4 seconds….and not just action movies. Likewise, such cutting operates in conversation scenes"；《电子情书》（1998）开场段 ASL ≈4.1 s、咖啡馆段 ≈4.3 s，对比《街角商店》（1940）82 s / 21 s | 当代对话场的 ASL 就在 2–4 s；"对话就该慢"没有统计依据 | `[一手]` https://www.davidbordwell.net/blog/2007/05/27/intensified-continuity-revisited/ 已读 |
@@ -23,7 +23,7 @@ S5 §5.2 第 7 步"时长"与 S6 台词窗口的展开。回答四个问题：**
 对话场的时间设计是两条独立的轨，先各自排好再对齐，**不是"一句一镜、镜长 = 窗口"**：
 
 **台词轨**（声音，连续）
-1. 语速：有成片就用 `measure_clip.py --prompt` 校准出的实测值（本项目 D05 实测 ≥3.36 词/秒，取 3.3）；没有成片用项目口径或 Skill 默认 2.5。校准不是提速，是把假设换成测量；不因情绪自动提速，不改锁定台词。
+1. 语速是**设计参数**：模型会把台词塞进给定窗口，实测至少到 4.1 词/秒仍出片可用（§一），所以 `语速词每秒` 决定的是你要的说话密度，不是"放不放得下"。取值：常速交锋 3.3–3.5；短促交锋可到 4；慢的戏（陈述、哀伤、念定稿）写 2.5–3 并在说法里写明。有成片就用 `measure_clip.py --prompt` 校准出的实测值回填；校准不是提速，是把假设换成测量；不因情绪自动提速，不改锁定台词。
 2. 每句估时 = 词数 ÷ 语速；**整条轨一次取整**：台词轨长 = ceil(Σ估时 ÷ 填充率)。逐句向上取整（每句 +0.3–0.8 s）在 7 句里会吃掉 3 s，这正是"时长冗余"的来源。
 3. 句与句首尾相接：上一句话音落下时下一句已起音（起音延迟归入填充率，不另留空）。需要的停顿是戏（等回答、接不住），写秒数与功能，不是默认。
 
