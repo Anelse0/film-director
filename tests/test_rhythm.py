@@ -41,12 +41,30 @@ class RhythmTests(unittest.TestCase):
         self.assertEqual(stats['derived'], 23)
         self.assertTrue(any('平均镜长 5.0s' in i for i in infos))
 
-    def test_performance_led_clip_only_reports_info(self):
+    def test_performance_led_single_shot_only_reports_info(self):
         shots = [(1, 0, 20, '【中景，固定】')]
         rows = [row(1, 'A', 6, 8, 3)]
         warns, infos, _ = rhythm_checks(shots, rows, 20, META.replace('30', '20'))
         self.assertEqual(warns, [])
         self.assertTrue(any('节奏档 表演' in i for i in infos))
+
+    def test_performance_mode_selects_a_check_set_not_info_only(self):
+        # 1.4.0: 表演档 = W24 (silent stretches carry a declared function) + W30-W33; W22 / W23 / W25-W29 off.
+        shots = [(1, 0, 10, '【中景，固定】'), (2, 10, 20, '【近景，固定】')]
+        rows = [row(1, 'A', 2, 8, 3)]                 # 1 s of speech in a 6 s window: W22 would fire in 对话
+        meta = META.replace('30', '20')
+        warns, infos, stats = rhythm_checks(shots, rows, 20, meta)
+        self.assertEqual(stats['mode'], '表演')
+        self.assertTrue(any(w.startswith('W24 表演档') for w in warns), warns)
+        self.assertFalse(any(w.startswith(('W22', 'W23', 'W25', 'W26', 'W27', 'W28', 'W29')) for w in warns), warns)
+        self.assertTrue(any('检查集 W24' in i and 'W30–W33' in i for i in infos))
+        warns2, infos2, _ = rhythm_checks(shots, rows, 20, meta + '| 无声段理由 | 开头建立；结尾出画停留 |\n')
+        self.assertEqual(warns2, [])
+        self.assertTrue(any('已登记功能' in i for i in infos2))
+        # the dialogue set is unchanged: the same wide window is W22 there
+        warns3, infos3, _ = rhythm_checks(shots, rows, 20, meta + '| 节奏档 | 对话 |\n')
+        self.assertTrue(any(w.startswith('W22') for w in warns3))
+        self.assertTrue(any('检查集 W22–W29 + W30–W33' in i for i in infos3))
 
     def test_e_layer_overrides_mode_and_beats(self):
         shots = [(1, 0, 5, '【中景，固定】'), (2, 5, 10, '【中景，固定】')]

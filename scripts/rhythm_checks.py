@@ -9,6 +9,11 @@ threshold, and a reviewed reason keeps the design. Thresholds are the Skill's
 own inference from the official 30 s example (9 shots, 3.3 s average, one 3 s
 shot without speech = 10 % silent) and editing literature; see
 references/duration-rhythm.md.
+
+1.4.0: 节奏档 selects a check set instead of switching checks off. 对话 runs
+W22-W29 here plus W30-W33 (variation_checks.py, wired by validate_prompt);
+表演 runs W24 in its silent-stretch-function form (E-layer 无声段理由) plus
+W30-W33. No mode reduces every check to INFO.
 """
 import math
 import re
@@ -147,7 +152,11 @@ def rhythm_checks(shots, rows, duration, metadata_text):
     est_total = sum(r["estimate"] for r in explicit)
     mode = scene_mode(metadata_text, est_total, duration, len(shots), cfg)
     dialogue_led = mode == "对话"
-    infos.append(f"节奏档 {mode}（台词净时长 {est_total:.1f}s / {duration:g}s；≥{cfg['对话场判定占比']:.0%} 判为对话场，可用 E 层「节奏档」覆盖；对话场默认 台词轨=连续）")
+    # 1.4.0: the mode selects a check set; no mode turns every check into INFO.
+    #   对话: W22-W29 (time) + W30-W33 (variation, run by validate_prompt)
+    #   表演: W24 (silent stretches must carry a declared function) + W30-W33
+    infos.append(f"节奏档 {mode}（台词净时长 {est_total:.1f}s / {duration:g}s；≥{cfg['对话场判定占比']:.0%} 判为对话场，可用 E 层「节奏档」覆盖；对话场默认 台词轨=连续）；"
+                 + ("检查集 W22–W29 + W30–W33" if dialogue_led else "检查集 W24（无声段功能）+ W30–W33（变化轨）；W22 / W23 / W25–W29 不查"))
 
     # W22 dialogue window much wider than the speech it holds
     rec_total = 0.0
@@ -155,7 +164,7 @@ def rhythm_checks(shots, rows, duration, metadata_text):
         rec = recommended_window(r["estimate"], cfg["台词填充率"])
         rec_total += rec
         window = r["end"] - r["start"]
-        if window > rec + cfg["窗口松弛上限"] + 1e-9:
+        if dialogue_led and window > rec + cfg["窗口松弛上限"] + 1e-9:
             warns.append(
                 f"W22 {r['speaker']} 台词窗口 {window:g}s 比建议 {rec:g}s 宽 {window - rec:.1f}s"
                 f"（估时 {r['estimate']:.1f}s ÷ {cfg['台词填充率']:g} 向上取 0.5s；反应放在窗口外的镜内余量或反应镜）")
@@ -182,7 +191,26 @@ def rhythm_checks(shots, rows, duration, metadata_text):
                 warns.append(f"W28 镜头{no} {length:g}s 固定机位只承载一整句（{lines[0]['speaker']}）：在信息变化处切——前半句画内、后半句画外落在听者 / 插入 / 视线对象，或换景别（duration-rhythm §九）")
 
     # W24 silence outside dialogue windows (only for clips that have dialogue)
-    stats = {}
+    stats = {"mode": mode}
+    if not dialogue_led and len(shots) >= 2:
+        # 表演档: the silent stretches are exactly where visual monotony is most likely, so they
+        # must carry a written function (E-layer 无声段理由, one function word per stretch).
+        # A single-shot clip is the performance itself; its silence needs no separate function.
+        occupied = union_length([(r["start"], r["end"]) for r in explicit]) if explicit else 0.0
+        silent = duration - occupied
+        share = silent / duration
+        lead = min(r["start"] for r in explicit) if explicit else duration
+        trail = duration - max(r["end"] for r in explicit) if explicit else duration
+        reason = re.search(r"\|\s*无声段理由\s*\|\s*([^|\n]+)\|", metadata_text)
+        reason = reason.group(1).strip() if reason else ""
+        stats.update({"silent": silent, "silent_share": share, "lead": lead, "trail": trail, "silence_reason": reason})
+        if share > cfg["无声段占比上限"] + 1e-9 or lead > cfg["首尾无声上限"] + 1e-9 or trail > cfg["首尾无声上限"] + 1e-9:
+            if reason:
+                infos.append(f"无声段 {silent:g}s（{share:.0%}）已登记功能：{reason[:80]}")
+            else:
+                warns.append(f"W24 表演档：台词窗口外 {silent:g}s（{share:.0%}），开头 {lead:g}s，结尾 {trail:g}s，未登记功能"
+                             f"（每段无声写一个功能词——建立 / 揭示 / 反应 / 物件行动 / 出画停留——到 E 层「无声段理由」；"
+                             f"无台词段正是画面最容易不变的地方，同时看 W30–W33）")
     if dialogue_led and explicit:
         occupied = union_length([(r["start"], r["end"]) for r in explicit])
         silent = duration - occupied
@@ -223,7 +251,7 @@ def rhythm_checks(shots, rows, duration, metadata_text):
     mode_track = track_mode(metadata_text, mode)
     if explicit:
         tw, finishes, slack = track_schedule(explicit, duration, cfg["台词轨溢出容差"])
-        if mode_track == "连续":
+        if mode_track == "连续" and dialogue_led:
             warns.extend(tw)
         infos.append(f"台词轨 {mode_track}：{len(explicit)} 句连续说完约在 {finishes[-1]:.1f}s"
                      f"（末句窗口止于 {max(r['end'] for r in explicit):g}s，余量 {slack:+.1f}s）")

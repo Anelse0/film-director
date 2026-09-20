@@ -11,6 +11,11 @@ W04 thresholds follow the official 30s example (9 shots, 2s minimum): <2s and >1
 W22-W29 (rhythm_checks.py) review the lower side of time use: wide dialogue windows, long silent
 shots, silence share, dialogue-scene average shot length, declared-vs-derived duration, tempo cues,
 whole-line-one-shot, and (E-layer 台词轨 | 连续) the chained dialogue track replacing per-window W05.
+W30-W33 (variation_checks.py) review the variation track — what changes between shots: zero-change
+runs / too few changing dimensions / G6 repeat without a new element (W30), no shot-length contrast
+(W31), undeclared 峰值镜 or missing 【变化】 fields (W32), peak shot in a wide / OTS / fixed-while-
+others-move shot (W33). 节奏档 selects a check set (对话: W22-W33; 表演: W24 + W30-W33), never INFO-only.
+English speech estimate defaults to 3.5 words/s (1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
 """
@@ -25,6 +30,7 @@ from performance_checks import split_beats, timing_errors, check_record, check_r
 from prompt_structure import Document, dialogue_checks
 from production_contract import metadata, task_type, parameters, roles_from_fields, check_parameters, TASKS
 from rhythm_checks import rhythm_checks, settings as rhythm_settings, track_mode, scene_mode
+from variation_checks import variation_checks
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -112,8 +118,10 @@ def speech_parameters(text):
     dense = density == "密" if density is not None else bool(
         re.search(r"(?:^|[·/；;、\s])(?:密度\s*)?密(?:$|[·/；;、\s])", legacy))
     # Density changes occupancy, not delivery speed. A dense scene can contain
-    # slow lines. Faster rates require an explicit production estimate.
-    defaults = (4.0, 2.5, 0.75 if dense else 2 / 3)
+    # slow lines. Slower or faster rates are explicit E-layer choices.
+    # English 3.5 words/s = normal exchange (1.4.0; measured >= 3.6 / 4.1 usable in
+    # validation-log D10a/b). 2.5 is the American-English mean [一手] and a floor, not the default.
+    defaults = (4.0, 3.5, 0.75 if dense else 2 / 3)
     values = []
     for key, default in zip(("语速字每秒", "语速词每秒", "台词占比上限"), defaults):
         raw = field(key)
@@ -296,10 +304,16 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     warns.extend(dw)
     info(f"台词估时 {total_speech:.1f}s")
     # W22-W26 duration / rhythm review hints (lower side of time use; W05 keeps the upper side).
+    variation = []
     if artifact == "production" and shots and not is_edit:
         rw, ri, _ = rhythm_checks(shots, dialogue, dur if dur is not None else shots[-1][2], metadata_text)
         warns.extend(rw)
         for line in ri:
+            info(line)
+        # W30-W33 variation track (both 节奏档 sets): what changes from shot to shot.
+        vw, vi, variation = variation_checks(shots, metadata_text)
+        warns.extend(vw)
+        for line in vi:
             info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:
@@ -381,7 +395,7 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         fidelity_errors, fidelity = check_record(record, beats, dur)
         errors.extend(fidelity_errors)
     return {"file": str(path), "errors": errors, "warnings": warns, "info": infos, "lens": lens,
-            "task": task, "parameters": parameter_state, "dialogue": dialogue,
+            "task": task, "parameters": parameter_state, "dialogue": dialogue, "variation": variation,
             "assets": {"declared": sorted(f"{kind}{n}" for kind, n in declared), "used": sorted(f"{kind}{n}" for kind, n in used)},
             "fidelity_scope": "original_exact" if record and record.get("mode") == "raw" else "beat_text_only; other prose and source semantics require review" if record else "not_checked",
             "ext_phrases": {},  # retained return key for 2.2 callers; no word-frequency judging

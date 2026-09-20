@@ -60,12 +60,12 @@ class TimelineTests(unittest.TestCase):
     def test_mixed_language_and_nested_direction_quotes(self):
         result = run(prompt('台词（A，0-10s，中英混合）："等等 please wait."（"等等"重读）。'))
         self.assertEqual(len(result['dialogue']), 1)
-        self.assertAlmostEqual(result['dialogue'][0]['estimate'], 2/4+2/2.5)
+        self.assertAlmostEqual(result['dialogue'][0]['estimate'], 2/4+2/3.5)   # 1.4.0 default 3.5 words/s
 
     def test_english_speech(self):
         result = run(prompt('Mara says (English, 0-4s): "Please stay."'))
         self.assertEqual(result['dialogue'][0]['speaker'], 'Mara')
-        self.assertEqual(result['dialogue'][0]['estimate'], .8)
+        self.assertAlmostEqual(result['dialogue'][0]['estimate'], 2/3.5)   # 1.4.0 default 3.5 words/s
 
     def test_overlap_is_review_not_silently_deleted(self):
         result = run(prompt('台词（A，0-4s）："别走。" 台词（B，3-5s）："我没走。"'))

@@ -3,7 +3,7 @@
 T1–T9 是按任务裁剪的本地生产骨架，基于官方的素材指代、概述、情节和贯穿细节结构；编辑/转场不强填虚构镜头或起始画面。参数和真实素材记录见 `references/production-workflow.md`，仅套模板不等于生产就绪。
 `{}` 内为槽位，全部来自分镜卡 C/E 层。校验脚本识别【】标签，请保留。
 
-**不以导演、影片、摄影师名字代替可执行描述；通用技术名可配说明使用**（校验 W13）。透镜只写在文末 E 层参数表的「透镜」行，供多文件校验用。E 层可选节奏字段（`duration-rhythm.md` §六）：`节奏档`（对话 / 表演）、`台词填充率`（默认 0.9；1.0 = 窗口 = 词数 ÷ 语速向上取整）、`台词轨`（窗口 / 连续；对话场默认连续）、`动作节拍秒数`、`台词密度`、`台词占比上限`，以及各阈值覆盖项；11 镜以上写「切点理由」行回应 W04。
+**不以导演、影片、摄影师名字代替可执行描述；通用技术名可配说明使用**（校验 W13）。透镜只写在文末 E 层参数表的「透镜」行，供多文件校验用。E 层节奏与变化字段（`duration-rhythm.md` §六）：`峰值镜 | N`（每条 clip 必填：最大物理动作或最大信息变化所在的镜，W32）、`语速词每秒`（默认 3.5；慢戏写 2.5–3 并在「语速理由」写说法；有成片按 `measure_clip.py` 校准值回填）、`节奏档`（对话 / 表演——选检查集，不是开关：对话 = W22–W33，表演 = W24 + W30–W33）、`无声段理由`（表演档必填，每段无声一个功能词）、`台词填充率`（默认 0.9；1.0 = 窗口 = 词数 ÷ 语速向上取整）、`台词轨`（窗口 / 连续；对话场默认连续）、`动作节拍秒数`、`台词密度`、`台词占比上限`，以及各阈值覆盖项；11 镜以上写「切点理由」行回应 W04。每镜在景别标注之后同一行带变化字段 `【变化：景别 全→近｜机位 固定→推｜光 正→侧｜幅度 1→3】`（首镜写基线值；`=` 表示不变；重复构图加 `｜新增 X`；不要另起一行——行首的【】会被当作段落边界）。
 
 ---
 
@@ -39,10 +39,10 @@ raw 原文直接交付所选完整正文，不套 P 骨架。production 可在�
 【严格排除】{可选：媒介/风格排除，如"黑白、手绘、线稿、分镜稿、塑料 CG"；不写行为}
 【起始状态】{A 外观锁}在画面{左/右}，面朝{方向}，手里{持物}；{B 外观锁}在画面{左/右}…；机位{景别+角度}；{空间陈设两项}。
 【分镜时间线】
-镜头1（0-{a}s）：【{景别}，{机高/角度}，{运镜与终点}，{构图位置}】（≤40 字）{运镜动机的展开}；{主要事件（一个）+ 记忆点细节（至多一个）}。视线：{…}。表情：{部位描述，只在可见景别}。台词（{角色}，{台词起}-{台词止}s，{语言}）："{逐字}"（{音量/语速/停顿}）；此时{另一角色}闭着嘴，{听者动作}。声音：{环境/动作音}。
-镜头2（{a}-{b}s）：…
+镜头1（0-{a}s）：【{景别}，{机高/角度}，{运镜与终点}，{构图位置}】（≤40 字）【变化：景别 {基线}｜机位 {基线}｜光 {基线}｜幅度 {0-3}】{运镜动机的展开}；{主要事件（一个）+ 记忆点细节（至多一个）}。视线：{…}。表情：{部位描述，只在可见景别}。台词（{角色}，{台词起}-{台词止}s，{语言}）："{逐字}"（{音量/语速/停顿}）；此时{另一角色}闭着嘴，{听者动作}。声音：{环境/动作音}。
+镜头2（{a}-{b}s）：【…】【变化：景别 {上镜}→{本镜}｜机位 {上镜}→{本镜}｜光 =｜幅度 {n}→{m}】…
 …
-镜头N（{…}-{时长}s）：…结束时{结束状态}。
+镜头N（{…}-{时长}s）：【…】【变化：…｜新增 {重复构图时多出来的那样东西}】…结束时{结束状态}。
 【贯穿要求】{A 外观锁}；{B 外观锁}；{人物空间与屏幕方向，随已确认走位更新}；主光源始终来自{方向}；{物件恒定属性及分段状态，不与动作矛盾}；{节奏指令（对话场）：每句在窗口起点即开口，语速约 {N} 词/秒，句内连读、句尾不拖音，上一人话音落下时下一人已起音；换镜硬切；动作正常速度、利落}；{声音策略：无 bgm，只生成环境音、动作音与台词}；不要字幕。
 ```
 
@@ -148,11 +148,11 @@ OVERVIEW: {duration}-second {aspect} {medium}, {location + time}, {one-line even
 LOOK: {medium/texture}; key light: {source + direction + quality}; {palette}; {depth of field/lens feel}.
 OPENING STATE: {A lock} stands frame-left facing {…}, holding {…}; {B lock} frame-right…; camera {shot size + angle}; {two set details}.
 TIMELINE:
-Shot 1 (0-{a}s): [{shot size}, {angle}, {one move}, {frame position}] {action chain}. Eyeline: {…}. Face: {part-level}. {A} says (English, {speech_start}-{speech_end}s, {volume/pace/pause}): "{exact line}"; {B}'s mouth stays closed, {listener action}. Sound: {…}.
-Shot 2 ({a}-{b}s): …
+Shot 1 (0-{a}s): [{shot size}, {angle}, {one move}, {frame position}] [CHANGE: size {baseline} | camera {baseline} | light {baseline} | amp {0-3}] {action chain}. Eyeline: {…}. Face: {part-level}. {A} says (English, {speech_start}-{speech_end}s, {volume/pace/pause}): "{exact line}"; {B}'s mouth stays closed, {listener action}. Sound: {…}.
+Shot 2 ({a}-{b}s): [{…}] [CHANGE: size {prev}→{this} | camera {prev}→{this} | light = | amp {n}→{m}] …
 GLOBAL RULES: {A lock}; {B lock}; {screen direction follows the confirmed blocking}; key light always from {direction}; {prop state}; no music, only room tone, action sounds and dialogue; no subtitles.
 ```
 
 ## E 参数与交付状态
 
-每条生产 Prompt 后附 S6 的 E 表，任务类型使用 production-workflow.md 的 task 标识，填写实际 role、ratio、duration、输出格式。T2 中的侧面图/音频、T4 的额外角色图均按现有资源选用，不要求凑齐。文件级生产记录不粘贴进模型 Prompt。
+每条生产 Prompt 后附 S6 的 E 表，任务类型使用 production-workflow.md 的 task 标识，填写实际 role、ratio、duration、输出格式；节奏与变化行示例：`| 峰值镜 | 4（转身贴近：全片最大物理动作，配唯一一次推） |`、`| 语速词每秒 | 3.5 |`、`| 节奏档 | 对话 |`、`| 无声段理由 | 开头 2 s 建立；结尾 2 s 出画停留 |`。T2 中的侧面图/音频、T4 的额外角色图均按现有资源选用，不要求凑齐。文件级生产记录不粘贴进模型 Prompt。

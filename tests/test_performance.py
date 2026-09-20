@@ -199,10 +199,12 @@ class PerformanceTests(unittest.TestCase):
         self.assertTrue(timing_errors(split_beats("0–10秒："), 10))
 
     def test_high_suppressed_does_not_change_speech_estimate(self):
-        self.assertEqual(speech_parameters("| 参数 | 强度高 · 内收 · 已知 · 对等 · 温 · 稀 |"), (4.0, 2.5, 2/3))
-        self.assertEqual(speech_parameters("| 参数 | 强度高 · 外放 · 已知 · 对等 · 灼 · 密 |"), (4.0, 2.5, .75))
-        self.assertEqual(speech_parameters("| 参数 | 高 · 密 |\n| 台词密度 | 无 |"), (4.0, 2.5, 2/3))
-        self.assertEqual(speech_parameters("| 语速字每秒 | 3 |\n| 台词占比上限 | 0.5 |"), (3, 2.5, .5))
+        # 1.4.0: English default 3.5 words/s (normal exchange; 2.5 = American-English mean, a floor).
+        self.assertEqual(speech_parameters("| 参数 | 强度高 · 内收 · 已知 · 对等 · 温 · 稀 |"), (4.0, 3.5, 2/3))
+        self.assertEqual(speech_parameters("| 参数 | 强度高 · 外放 · 已知 · 对等 · 灼 · 密 |"), (4.0, 3.5, .75))
+        self.assertEqual(speech_parameters("| 参数 | 高 · 密 |\n| 台词密度 | 无 |"), (4.0, 3.5, 2/3))
+        self.assertEqual(speech_parameters("| 语速字每秒 | 3 |\n| 台词占比上限 | 0.5 |"), (3, 3.5, .5))
+        self.assertEqual(speech_parameters("| 语速词每秒 | 2.5 |"), (4.0, 2.5, 2/3))   # slow scene: explicit
 
     def test_bad_speech_settings_rejected(self):
         for text in ("| 语速字每秒 | 0 |", "| 语速词每秒 | nan |", "| 台词占比上限 | 2 |"):

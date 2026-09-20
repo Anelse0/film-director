@@ -1,4 +1,9 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.3.0 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.4.0 baseline.
+
+1.4.0 (2026-09-20): variation track (S5 §5.1f, director-grammar §4.1), W30-W33 (variation_checks.py), 节奏档 as a
+check set, English speech default 3.5 words/s, measure_clip visual variation profile; hashes for validate_prompt.py,
+rhythm_checks.py (new to the zone), variation_checks.py (new), stage-5, stage-6, stage-7, capabilities, genre-packs,
+prompt-templates and shot-card re-set in the same commit with a CHANGELOG entry.
 
 1.3.0 (2026-09-19): continuous dialogue track (W29), track-sum duration derivation, speech-rate calibration;
 validate_prompt.py, stage-5, stage-6 and prompt-templates hashes re-set in the same commit
@@ -35,24 +40,26 @@ PROTECTED = {
     'references/emotion-performance.md': 'a150f6047b6a484a6ab858a93773d9c28fab022ac274bcc358dd20684468d8d0',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': 'df8bc48db59bc120f728d8ad1901048332c890819324512d721fc0b4886795de',
-    'references/stage-5-directing-storyboard.md': 'd9342edfd09d351c09ff656bd03cd4205658944153e14bb580bc1c9dcada2071',
+    'references/stage-5-directing-storyboard.md': '63d0d8a1ddabce70af5cf85daf28943bfe3e58331d0d890b7bdcfce73790edc0',
     'references/stage-5b-reference-assets.md': 'ee87fc676e3128def78a2aaa220688fe68b472768e669934ff52e5b4c01e7a77',
-    'references/stage-6-prompt-compiler.md': '7e566f7c0e38afe6259cea2ae41cd1dbb0a901502781942c7530fa1b9df3184a',
-    'references/stage-7-qa-continuity.md': '45af4617f62108b03b15d8c373a973a4511d53e0ae7ddea6ce63cfd54965b98d',
+    'references/stage-6-prompt-compiler.md': '4cd8c05338737b9d6aa7d0a1f14ca8d1a62f298ec884dd6a278561fef3651bba',
+    'references/stage-7-qa-continuity.md': '63f426ec0d62784725a710c0711fe29c04c80bde5c51bce17b85e86f4fc0fe60',
     'references/production-workflow.md': 'db8cc8de428952283a2cda4d7d23e0b1b0f4784ab18c54b57f674ca93eac6cfd',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
-    'references/seedance-2.5-capabilities.md': '1ea545f25935b5a256f14061a0e8ba8ca5dd95535074547bf4d335a9353399fd',
+    'references/seedance-2.5-capabilities.md': 'a754e6299e90842df9ec17f31d278e8b28c51d05f2e432774b3a78530a347807',
     'references/camera-vocabulary.md': '06a5c14733a3c2cffb5c8dcaa02d107e6ab9f57982dfae0708b06b1583a3b93e',
     'references/externalization-lexicon.md': '292b8363a566a18aae1eae2b3e2c085760930d2dfb608b2dc3040288cb03bbbb',
-    'references/genre-packs.md': '9b12fbcc6ce13d60d086021b981274f1a24e89f9091d34e3b734f31b8dd4e231',
+    'references/genre-packs.md': '998602b50c9773ebac196991dd52bee21352695e4e64507215c90df5b60f5d0d',
     'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
-    'templates/prompt-templates.md': '335f6ec400294447c77d623a74b16c72d9cf6744bcb62d3207ebd2189a79707d',
+    'templates/prompt-templates.md': 'fddb5e2f3e9b48ecfab7ae322d9bec1ea93e1510c5ffd3eb61c5baddff7e8b7b',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '7adc7226bf0b7648ecc2f2320db3edefe317297bf7486645271d9f87d8bb56fd',
-    'templates/shot-card.md': '53c840ba177e68edc9f80d5d994a0e0520fbeba9b1c0bf46954167d76d3394e8',
+    'templates/shot-card.md': '76c6e2a7fc622140a90a2de5ede90ec143324322295dae6711fdd9bbe3ac2d1b',
     'templates/reference-asset-brief.md': 'adc6b7c7c52c169d31ee7ba83111293496e7133572a7bedc08bf4a08d251df0b',
     'templates/asset-registry.md': '996818cda8aa55796820ae96c808c56459198f8f465b4e4924196d7ed8cc2943',
-    'scripts/validate_prompt.py': '8ee40e55ac9b2399a81804782f744fefa6f3771f5f34202de233fc334ac7706f',
+    'scripts/rhythm_checks.py': 'b1293f1d3f91eaad415e8a984abaf9fcc4344b4736351c6dba7fbf4fba3575f3',
+    'scripts/variation_checks.py': 'c1a95f98ff786b8479ed7aa169e27a306d4d31d1c6feb28e6b2e9b031e350ef0',
+    'scripts/validate_prompt.py': 'f06a2ee656c3a060dd193777ddd1f33322787c6605cdd20a0c318abd23049287',
     'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
     'scripts/production_contract.py': '963653540c39519d99a731749736e96b39bed17005305af1082c857af5426bfa',
     'scripts/production_preflight.py': '80379ec01b3f952ee82cc1611e38b555ad41838bd0bb6f0ac52ddb5453605702',

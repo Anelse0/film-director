@@ -1,8 +1,8 @@
 # film-director
 
-版本 **1.1.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜（含导演语法：景别 / 运镜 / 动线 / 剪辑 / 决策载体）、参考资产计划、Prompt 编译、连续性与质量检查。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+版本 **1.4.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜（含导演语法：景别 / 运镜 / 动线 / 剪辑 / 决策载体）、时长与节奏（两条时间轨 + 变化轨）、参考资产计划、Prompt 编译、连续性与质量检查、成片实测。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
 
-1.1.0 是导演语法与官方对齐版本：能力表按火山方舟在线文档（API 文档、教程、2.0 指南 FAQ）复核；新增 `references/director-grammar.md`（一手来源的导演决策规则）与"决策载体"步骤（关键帧 / 白模 / 动作视频承载精确构图与运镜时序）；台词每秒预算有语音学依据；退役 W19、按官方范例调整 W04；修正 2.3.1 遗留的机械映射。**工程完成（测试通过）；效果提升未验证**——没有生成对照成片，见 `tests/acceptance-1.1.0/`。
+1.4.0 把"镜与镜之间的变化"做成与时间平权的第三条设计轨：每条 clip 先声明峰值镜（E 层 `峰值镜 | N`），每镜声明四维变化 `【变化：景别 全→近｜机位 固定→推｜光 正→侧｜幅度 1→3】`；校验新增 W30–W33（连续零变化 / 无镜长对比 / 未声明峰值 / 峰值落在全景或越肩），`节奏档` 改为选检查集（对话 = W22–W33，表演 = W24 + W30–W33）；英文语速默认 3.5 词/s（2.5 = 均值 = 下限）；`measure_clip.py` 输出视觉变化谱（抽帧拼图 / 相邻镜直方图距离 / 镜内运动）对照变化轨，指出"平在设计还是渲染"。**工程完成（测试通过）；效果为非盲呈现改善**——触发案例的 v3 尚未生成对照，见 `CHANGELOG.md` 与 `references/validation-log.md`。
 
 创意前端（概念、故事、剧本、台词创作与改写）由独立的 [film-creative](https://github.com/Anelse0/film-creative) Skill 承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
 
@@ -28,7 +28,8 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `references/emotion-performance.md` | 原文/微调/重组，强度与克制独立，高光时间编排及保真 |
 | `references/performance-record.md` | 可选编译前记录与自动检查接口 |
 | `references/stage-4-performance.md` | S4 表演外化与台词的模型执行约束 |
-| `references/stage-5-directing-storyboard.md` | S5 导演与分镜：决策载体、走位表、镜头设计顺序、每镜负载 |
+| `references/stage-5-directing-storyboard.md` | S5 导演与分镜：决策载体、走位表、变化轨（§5.1f 峰值镜 + 四维变化）、镜头设计顺序、每镜负载 |
+| `references/duration-rhythm.md` | 时长与节奏：clip 时长从内容推导、台词窗口 / 连续台词轨、镜长分布、无声段、变化轨、W22–W33 阈值与理由、语速校准 |
 | `references/director-grammar.md` | S5 主参考：景别 / 运镜 / 动线 / 剪辑 / 构图 / 光 / 载体 / 类型语法，每条附一手来源与核实状态 |
 | `references/director-lenses.md` | S5 透镜：场景问题 → 作用机制 → 选择 → 边界 → 语法依据 |
 | `references/camera-vocabulary.md` | 镜头语汇：景别 / 机高 / 焦距与景深 / 运镜与终点 / 构图 / 转场 / 光 / 声音符号 |
@@ -45,7 +46,8 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `references/source-analysis.md` | 审计 / 更新来源时 |
 | `templates/*` | 分镜卡 / Prompt / 资产简报 / 登记表 / 生产记录骨架（`script-scene.md` 为输入格式参照） |
 | `scripts/emotion_library.py` | 按编号或关键词读取完整条目，`--list` 查看索引 |
-| `scripts/validate_prompt.py` | S6 之后必跑 |
+| `scripts/validate_prompt.py` | S6 之后必跑；W22–W29 时间轨、W30–W33 变化轨（`rhythm_checks.py` / `variation_checks.py`） |
+| `scripts/measure_clip.py` | 有成片时：切点 / 有声占比 / 语速校准 / 视觉变化谱对照 Prompt 的时间轨与变化轨（需 ffmpeg） |
 | `examples/example-01-kitchen-keys*.md` | 完整走查 + 通过校验的 Prompt |
 | `examples/example-02-one-scene-three-lenses.md` | 同一场戏三个透镜的对照，含一版通过校验的 Prompt |
 | `examples/example-03-yogurt-comedy*.md` | 喜剧走查（三拍 + 反讽落差），通过校验 |
@@ -64,6 +66,7 @@ python3 scripts/validate_prompt.py <prompt.md> [--duration N] [--json]
 python3 scripts/validate_prompt.py <fragment.md> --artifact performance --duration 10
 python3 scripts/validate_prompt.py <fragment.md> --artifact performance --record <record.json>
 python3 scripts/validate_prompt.py <original.txt> --artifact raw --entry-id 6
+python3 scripts/measure_clip.py <成片.mp4> --prompt <prompt.md> [--frames DIR]
 ```
 
 退出码 0 只代表无确定性错误，不代表表演或视频质量通过。多文件默认按连续片段做提示，独立 A/B 对照加 `--batch independent`。Python 3.9+，基础脚本仅用标准库；真实媒体预检另需 PATH 中的 ffprobe（测试另用 ffmpeg）。
@@ -95,7 +98,7 @@ python3 scripts/validate_prompt.py <prompt.md> --production-record <production.j
 
 - 语义化版本，记录在 `VERSION` 与 `CHANGELOG.md`。
 - 每次改动跑 `bash tests/run_tests.sh`；GitHub Actions 在 push 与 PR 时自动跑。
-- 生产/表演核心文件由 `tests/test_protected_zone.py` 哈希锁定（1.1.0 基线；1.0.0 基线取自 v2.3.1）；有意变更属于独立的生产版本发布，需同步更新哈希并在 CHANGELOG 说明。
+- 生产/表演核心文件由 `tests/test_protected_zone.py` 哈希锁定（1.4.0 基线；历史基线 1.0.0 取自 v2.3.1）；有意变更属于独立的生产版本发布，需同步更新哈希并在 CHANGELOG 说明。
 
 ## 维护
 
