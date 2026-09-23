@@ -1,5 +1,10 @@
 """film-director protected zone: production/performance core hash-locked at the 1.4.0 baseline.
 
+1.6.0 (2026-09-23): every clip delivers at least one change (hard rule 20) -- stage-5 §5.1 rule 6, §5.1f peak
+event chosen from the delivered rows, §5.9 row; stage-7 §7.1 review row and §7.2 diagnosis row. Additions only:
+no existing clause removed (variation track, W24/W30-W33 unchanged). stage-5 and stage-7 hashes re-set in the
+same commit with a CHANGELOG entry.
+
 1.4.0 (2026-09-20): variation track (S5 §5.1f, director-grammar §4.1), W30-W33 (variation_checks.py), 节奏档 as a
 check set, English speech default 3.5 words/s, measure_clip visual variation profile; hashes for validate_prompt.py,
 rhythm_checks.py (new to the zone), variation_checks.py (new), stage-5, stage-6, stage-7, capabilities, genre-packs,
@@ -40,10 +45,10 @@ PROTECTED = {
     'references/emotion-performance.md': 'a150f6047b6a484a6ab858a93773d9c28fab022ac274bcc358dd20684468d8d0',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': 'df8bc48db59bc120f728d8ad1901048332c890819324512d721fc0b4886795de',
-    'references/stage-5-directing-storyboard.md': '63d0d8a1ddabce70af5cf85daf28943bfe3e58331d0d890b7bdcfce73790edc0',
+    'references/stage-5-directing-storyboard.md': '301cd44278eb2c4a26ea48eb85de3f595cfe1a089a06987aa7ec225148a18157',
     'references/stage-5b-reference-assets.md': 'ee87fc676e3128def78a2aaa220688fe68b472768e669934ff52e5b4c01e7a77',
     'references/stage-6-prompt-compiler.md': '4cd8c05338737b9d6aa7d0a1f14ca8d1a62f298ec884dd6a278561fef3651bba',
-    'references/stage-7-qa-continuity.md': '63f426ec0d62784725a710c0711fe29c04c80bde5c51bce17b85e86f4fc0fe60',
+    'references/stage-7-qa-continuity.md': '442b7553d6945fcb5069714d38e12d14c579575c694cd2538a1554c1fa22c562',
     'references/production-workflow.md': 'db8cc8de428952283a2cda4d7d23e0b1b0f4784ab18c54b57f674ca93eac6cfd',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
     'references/seedance-2.5-capabilities.md': 'a754e6299e90842df9ec17f31d278e8b28c51d05f2e432774b3a78530a347807',

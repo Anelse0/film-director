@@ -27,7 +27,7 @@ description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词�
 
 - **接受的输入**：剧本场景文本（`03_script/scene-XX.md` 格式或任何来源的等价场景稿；film-creative 3.7+ 的剧本页正文前带"事件轨"，3.6 为"场面轨"）、场景参数卡、`ip.md` / 人物外观与地点描述、已有分镜卡或镜头表、既有 Prompt 与成片反馈、表演测试请求。输入不要求来自 film-creative；用户直接给一段场景文本同样有效。
 - **剧本层缺口只登记不代写**：缺场景、缺台词、故事不成立时列缺口交回用户或 film-creative；用户说"台词就这样"时锁定台词，只补表演。
-- **场面轨是参考，不是锁定**（用户 2026-09-23 定："不想锁定，只需要告知即可，包含哪些场地/场景"；film-creative 3.7 起合进"事件轨"，一行一次变化，地点 / 活动 / 时间 / 估时照读，同样是参考）：它告诉本 skill 这场有哪些场地 / 场景、每段在做什么、剧本估多长。S5 可以重分段、换子空间、换活动乃至换地点，不必先问；场级方案里写一行"与场面轨的差异：…"（改了哪个场地 / 分段 / 活动、为什么；没改写"无"）。分镜合计比剧本估时多 20% 以上时在方案里标出提醒用户，照常继续，不退回（`references/duration-rhythm.md` §十一，`scripts/scene_track.py`）。改动要不要回写剧本页由用户决定。
+- **场面轨是参考，不是锁定**（用户 2026-09-23 定："不想锁定，只需要告知即可，包含哪些场地/场景"；film-creative 3.7 起合进"事件轨"，一行一次变化，地点 / 活动 / 时间 / 估时照读，同样是参考）：它告诉本 skill 这场有哪些场地 / 场景、每段在做什么、剧本估多长。S5 可以重分段、换子空间、换活动乃至换地点，不必先问；场级方案里写一行"与场面轨的差异：…"（改了哪个场地 / 分段 / 活动、为什么；没改写"无"）。分镜合计比剧本估时多 20% 以上时在方案里标出提醒用户，照常继续，不退回（`references/duration-rhythm.md` §十一，`scripts/scene_track.py`）。改动要不要回写剧本页由用户决定。每条 clip 在场级方案里写它交付事件轨哪几行，余韵行不单独成 clip（硬规则 20）。
 - **锁定**：输入剧本中已确认的台词是锁定内容，编译与外化不得擅改（硬规则 7）；场地与场景安排按上一条作参考；表演目的需要的嘴部状态、动作标注是新增外化信息，不是改台词。
 
 ## 流水线
@@ -43,7 +43,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | S1 资源读取 | `references/stage-1-intake.md` | 资产登记 + 缺口清单 + 场面轨 / 事件轨参考清单（有则列：场地 / 场景、段、剧本估时） | |
 | S2 任务识别 | 同上 §任务识别 ＋ `references/scene-parameters.md` §一 | 任务类型 · 运行模式 · 入口阶段 · clip 数 · 锁定判定 · **场景参数卡** | |
 | S4 表演外化 | `references/stage-4-performance.md` ＋ `references/emotion-performance.md` | 有序表演块（C 层）及内部核对记录 | |
-| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-grammar.md`（景别 / 运镜 / 动线 / 剪辑 / 载体的决策规则）＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` ＋ `references/duration-rhythm.md`（clip 时长从内容推导、台词窗口、镜长分布、无声段） | `04_shots/scene-XX-clipYY.md` 分镜卡（五层）+ 走位表 + 决策载体 + **变化轨**（峰值镜 + 每镜四维变化：景别 / 机位或运镜 / 光 / 动作幅度，`duration-rhythm.md` §二）；多 clip 场的场级方案写 clip 切分与合计、合计 / 剧本估时、"与场面轨的差异"一行（§十一） | ▮（与 S5b 一起） |
+| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-grammar.md`（景别 / 运镜 / 动线 / 剪辑 / 载体的决策规则）＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` ＋ `references/duration-rhythm.md`（clip 时长从内容推导、台词窗口、镜长分布、无声段） | `04_shots/scene-XX-clipYY.md` 分镜卡（五层）+ 走位表 + 决策载体 + **变化轨**（峰值镜 + 每镜四维变化：景别 / 机位或运镜 / 光 / 动作幅度，`duration-rhythm.md` §二）；多 clip 场的场级方案写 clip 切分（带 `交付变化` 列，硬规则 20）与合计、合计 / 剧本估时、"与场面轨的差异"一行（§十一） | ▮（与 S5b 一起） |
 | S5b 参考资产 | `references/stage-5b-reference-assets.md` | `05_assets/asset-plan.md`：资产清单 + 图像简报 + 上传顺序 | 等用户回填 |
 | S6 Prompt 编译 | `references/stage-6-prompt-compiler.md` ＋ `templates/prompt-templates.md` | `06_prompts/scene-XX-clipYY.prompt.md` | |
 | S7 检查 | `references/stage-7-qa-continuity.md` ＋ `scripts/validate_prompt.py`；有成片时 `scripts/measure_clip.py`（实测切点 / 有声占比 / 视觉变化谱对照 Prompt 的时间轨与变化轨） | `07_qa/…`；有成片时追加 `references/validation-log.md` | |
@@ -127,6 +127,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 17. **台词长度按预算。** 英文默认 3.5 词/s（常速交锋；短促可到 4；慢戏 2.5–3 须写明说法）、中文 4 字/s、占比 ≤2/3（`references/seedance-2.5-capabilities.md` §7）；2.5 词/s 是美式英语均值 `[一手]`，是下限不是默认；超预算先放宽窗口或拆镜，不改锁定台词、不自动提速。`[一手]` 语音学标准 + `[实测]` + `[推论]`
 18. **对话场一句不等于一镜，时长从内容推导。** 切点落在信息变化处（被点名的人、被提到的物、听者接住的一下、动作终点），一句可跨两镜、尾段画外；语速按成片校准（`scripts/measure_clip.py` 加 `--prompt`），对话场用 `台词轨 | 连续`（一句可溢出到下一镜 ≤1 s，W29 链式检查取代逐窗口 W05）；固定机位整句一镜 ≥4 s、窗口比估时宽 >1 s、无台词段无功能、30 s 未按内容推导都是校验 W22–W29 的审阅项，写明理由才保留（`references/duration-rhythm.md`）。`[官方范例]` + `[实测]` + `[推论]`
 19. **镜与镜之间必须有变化（变化轨，与两条时间轨平权）。** 每条 clip 先声明峰值事件（最大物理动作或最大信息变化）并写 E 层 `峰值镜 | N`，峰值镜拿最可见景别与本 clip 首要的有动机运镜；每镜在 C 层声明相对上一镜的四维变化 `【变化：景别 全→近｜机位 固定→推｜光 正→侧｜幅度 1→3】`；下限：镜长有对比（最长 ≥2× 最短）、至少两个维度在 clip 内各变一次、峰值不落在全景或越肩、无台词段同样受此约束（校验 W30–W33，`references/duration-rhythm.md` §二、S5 §5.1f）。成片 = 设计的实测（`validation-log.md` 2026-09-20）说明"画面没有变化"的问题在设计，不在渲染。`[实测]` + `[一手]` Lumet + `[推论]`
+20. **每条 clip 至少交付一次变化。** 场级方案的 clip 切分表写 `交付变化`：本条交付剧本事件轨哪几行（`第 3–6 行`；没有事件轨时分镜自己写"谁：进 → 出"）。余韵行不算交付、不单独成 clip，跟在它前面那次变化所在的 clip 尾部；同一变化只由一条 clip 交付；删掉这条 clip 观众少的，就是这几行的"删掉损失"（S5 §5.1 第 6 条，`scripts/scene_track.py`（剧本页 + `--plan` 场级方案））。这条管"这条 clip 该不该存在"，硬规则 19 的变化轨与 W24 无声段功能管"clip 里怎么拍"——两边照常都查，互不代替：峰值事件、观众问题、无声段理由都填满了的 clip 仍可能什么也没交付（THE ORDER EP03 场 4 clip04，用户 2026-09-23："这 16 s 存在的意义是？"）。`[用户判定]` + `[推论]`
 
 ## 默认输出契约
 
@@ -150,6 +151,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | "成片节奏慢 / 拖" | `scripts/measure_clip.py`（成片 + `--prompt`）量切点与有声占比 → 对照 `duration-rhythm.md` §八改窗口、无声段与减速词 → 重编译 |
 | "画面始终没有变化的感觉" | `scripts/measure_clip.py` 视觉变化谱（抽帧拼图 / 相邻镜直方图距离 / 镜内运动）对照变化轨 → 平在设计就回 S5 §5.1f 重排峰值镜与四维变化（W30–W33），平在渲染才换载体 / 抽卡 |
 | "这场分镜比剧本长很多 / 场地要不要换" | `scripts/scene_track.py`（参数：剧本页，`--clips` 分镜卡，`--plan` 场级方案） 列场面轨 / 事件轨参考清单、合计与比值；≥1.2 在方案里提醒用户，照常继续；换场地 / 分段自己定，写进"与场面轨的差异" |
+| "这 N 秒存在的意义是？" / "这条 clip 有什么用" | `scripts/scene_track.py`（剧本页 + `--plan` 场级方案） 看每条 clip 的交付变化与删掉损失 → 没交付变化就回 S5 §5.1 第 6 条：并进前一条 clip 尾部，或删掉并在差异行写"不拍"、提醒用户；是设计问题，不抽卡、不另造峰值 |
 | "把 @视频1 延长 / 改台词 / 换人" | S2 编辑-延长分支 → S6 |
 | "先出一个 prompt 看看效果" | 看一眼：跑到 S6，不落盘；纯表演走优先路由 |
 | "一次跑完 / 全部落盘" | 全流程 |
