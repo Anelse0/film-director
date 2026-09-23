@@ -15,6 +15,9 @@ W30-W33 (variation_checks.py) review the variation track — what changes betwee
 runs / too few changing dimensions / G6 repeat without a new element (W30), no shot-length contrast
 (W31), undeclared 峰值镜 or missing 【变化】 fields (W32), peak shot in a wide / OTS / fixed-while-
 others-move shot (W33). 节奏档 selects a check set (对话: W22-W33; 表演: W24 + W30-W33), never INFO-only.
+W34-W35 (camera_checks.py, 1.8.0) review camera-library use: a shot copying the library's generic
+Movement/Speed/Framing/End sentences or an English five-part skeleton inside a Chinese Prompt without a
+原文 declaration (W34); an unreadable or unresolvable E-layer 运镜来源 row (W35).
 English speech estimate defaults to 4 words/s (1.7.0, user; was 3.5 in 1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
@@ -31,6 +34,7 @@ from prompt_structure import Document, dialogue_checks
 from production_contract import metadata, task_type, parameters, roles_from_fields, check_parameters, TASKS
 from rhythm_checks import rhythm_checks, settings as rhythm_settings, track_mode, scene_mode
 from variation_checks import variation_checks
+from camera_checks import camera_checks
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -305,6 +309,7 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     info(f"台词估时 {total_speech:.1f}s")
     # W22-W26 duration / rhythm review hints (lower side of time use; W05 keeps the upper side).
     variation = []
+    camera = {}
     if artifact == "production" and shots and not is_edit:
         rw, ri, _ = rhythm_checks(shots, dialogue, dur if dur is not None else shots[-1][2], metadata_text)
         warns.extend(rw)
@@ -314,6 +319,11 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         vw, vi, variation = variation_checks(shots, metadata_text)
         warns.extend(vw)
         for line in vi:
+            info(line)
+        # W34-W35 camera library: fill the five parts per shot; verbatim only when declared 原文.
+        cw, ci, camera = camera_checks(shots, metadata_text)
+        warns.extend(cw)
+        for line in ci:
             info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:
@@ -395,7 +405,7 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         fidelity_errors, fidelity = check_record(record, beats, dur)
         errors.extend(fidelity_errors)
     return {"file": str(path), "errors": errors, "warnings": warns, "info": infos, "lens": lens,
-            "task": task, "parameters": parameter_state, "dialogue": dialogue, "variation": variation,
+            "task": task, "parameters": parameter_state, "dialogue": dialogue, "variation": variation, "camera": camera,
             "assets": {"declared": sorted(f"{kind}{n}" for kind, n in declared), "used": sorted(f"{kind}{n}" for kind, n in used)},
             "fidelity_scope": "original_exact" if record and record.get("mode") == "raw" else "beat_text_only; other prose and source semantics require review" if record else "not_checked",
             "ext_phrases": {},  # retained return key for 2.2 callers; no word-frequency judging

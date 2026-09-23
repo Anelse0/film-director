@@ -68,6 +68,8 @@
 | 急推变焦 | crash zoom | ⚠️ "极快推近到脸，半秒内完成" | — |
 | 变焦 | zoom | ✅ | 与推区分：变焦背景关系不变 |
 
+运镜库（1.8.0）：46 条五段写法（Camera / Movement / Speed / Framing / End）在 `assets/camera-library.json`，中文名、职能与本表对应见 `camera-index.json` 的 `vocab` 栏；用法见 `camera-library.md`。本表管术语与终点写法，库补"运动中什么保持不变"。
+
 速度用秒数（"3 秒缓推"）或官方范例的副词（"缓缓 / 快速 / 猛推"）；不用时间戳控频次 `[官方]`。
 
 ## 构图位置（写给模型）

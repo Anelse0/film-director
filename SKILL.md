@@ -43,7 +43,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | S1 资源读取 | `references/stage-1-intake.md` | 资产登记 + 缺口清单 + 场面轨 / 事件轨参考清单（有则列：场地 / 场景、段、剧本估时） | |
 | S2 任务识别 | 同上 §任务识别 ＋ `references/scene-parameters.md` §一 | 任务类型 · 运行模式 · 入口阶段 · clip 数 · 锁定判定 · **场景参数卡** | |
 | S4 表演外化 | `references/stage-4-performance.md` ＋ `references/emotion-performance.md` | 有序表演块（C 层）及内部核对记录 | |
-| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-grammar.md`（景别 / 运镜 / 动线 / 剪辑 / 载体的决策规则）＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` ＋ `references/duration-rhythm.md`（clip 时长从内容推导、台词窗口、镜长分布、无声段） | `04_shots/scene-XX-clipYY.md` 分镜卡（五层）+ 走位表 + 决策载体 + **变化轨**（峰值镜 + 每镜四维变化：景别 / 机位或运镜 / 光 / 动作幅度，`duration-rhythm.md` §二）；多 clip 场的场级方案写 clip 切分（带 `交付变化` 列，硬规则 20）与合计、合计 / 剧本估时、"与场面轨的差异"一行（§十一） | ▮（与 S5b 一起） |
+| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-grammar.md`（景别 / 运镜 / 动线 / 剪辑 / 载体的决策规则）＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` ＋ `references/camera-library.md`（运镜库：选定运镜后按五段填写）＋ `references/duration-rhythm.md`（clip 时长从内容推导、台词窗口、镜长分布、无声段） | `04_shots/scene-XX-clipYY.md` 分镜卡（五层）+ 走位表 + 决策载体 + **变化轨**（峰值镜 + 每镜四维变化：景别 / 机位或运镜 / 光 / 动作幅度，`duration-rhythm.md` §二）；多 clip 场的场级方案写 clip 切分（带 `交付变化` 列，硬规则 20）与合计、合计 / 剧本估时、"与场面轨的差异"一行（§十一） | ▮（与 S5b 一起） |
 | S5b 参考资产 | `references/stage-5b-reference-assets.md` | `05_assets/asset-plan.md`：资产清单 + 图像简报 + 上传顺序 | 等用户回填 |
 | S6 Prompt 编译 | `references/stage-6-prompt-compiler.md` ＋ `templates/prompt-templates.md` | `06_prompts/scene-XX-clipYY.prompt.md` | |
 | S7 检查 | `references/stage-7-qa-continuity.md` ＋ `scripts/validate_prompt.py`；有成片时 `scripts/measure_clip.py`（实测切点 / 有声占比 / 视觉变化谱对照 Prompt 的时间轨与变化轨） | `07_qa/…`；有成片时追加 `references/validation-log.md` | |
@@ -115,7 +115,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 5. **画面对象优先正向描述。** "不眨眼"等行为保持与排除对象不是同类；不能据一个否定词改写原文。能力边界查能力表，静态脚本不判任意否定语义。
 6. **台词逐字加引号、标注说话人与语言、给时间窗；非说话者写嘴部状态。** `[官方示例] + [第三方]`
 7. **表演有可见证据。** 保留速度、幅度、渐变与控制信息；删空泛替代，不按词性删细节。原文不润色，已有台词不因本规则被擅改。
-8. **每个镜头写景别、有动机与终点的运镜、起止状态。** 机器只在人物移动或人物内部变化时动，动就写动机、动作、终点（`references/director-grammar.md` §二）；冷门术语"术语 + 描述"。`[官方]` 复合运镜说明同步或先后；单一运镜只是降低复杂度的本地建议。机器不动时，变化要从景别 / 光 / 动作幅度 / 镜长来——每镜声明相对上一镜的四维变化（变化轨，硬规则 19）。
+8. **每个镜头写景别、有动机与终点的运镜、起止状态。** 机器只在人物移动或人物内部变化时动，动就写动机、动作、终点（`references/director-grammar.md` §二）；冷门术语"术语 + 描述"。`[官方]` 复合运镜说明同步或先后；单一运镜只是降低复杂度的本地建议。机器不动时，变化要从景别 / 光 / 动作幅度 / 镜长来——每镜声明相对上一镜的四维变化（变化轨，硬规则 19）。 运镜库（`references/camera-library.md`）只在动机定下后提供五段写法，填成这一镜的主体、方向、速度、保持不变的东西与终点；照抄通用句是 W34，原文只在用户指定时用。
 9. **每个 clip 的 Prompt 自足。** 外观锁、空间、光源、声音在每个 clip 重写。`[推论]`
 10. **手法服务需求。** 复用、重复、持续或创新按本次目标判断，不以配额或词频裁决。导演名字不作为风格捷径进入 Prompt（导演逻辑的研究与引用只在 `director-grammar.md` / `director-lenses.md` 与 A 层）；通用技术名如希区柯克变焦可配可见描述使用，透镜不覆盖锁定表演。
 11. **生产审阅看具体表现**：表演检查高光、衔接、可见性与保真，不要求每片都有反转或固定手法。
@@ -152,6 +152,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | "画面始终没有变化的感觉" | `scripts/measure_clip.py` 视觉变化谱（抽帧拼图 / 相邻镜直方图距离 / 镜内运动）对照变化轨 → 平在设计就回 S5 §5.1f 重排峰值镜与四维变化（W30–W33），平在渲染才换载体 / 抽卡 |
 | "这场分镜比剧本长很多 / 场地要不要换" | `scripts/scene_track.py`（参数：剧本页，`--clips` 分镜卡，`--plan` 场级方案） 列场面轨 / 事件轨参考清单、合计与比值；≥1.2 在方案里提醒用户，照常继续；换场地 / 分段自己定，写进"与场面轨的差异" |
 | "这 N 秒存在的意义是？" / "这条 clip 有什么用" | `scripts/scene_track.py`（剧本页 + `--plan` 场级方案） 看每条 clip 的交付变化与删掉损失 → 没交付变化就回 S5 §5.1 第 6 条：并进前一条 clip 尾部，或删掉并在差异行写"不拍"、提醒用户；是设计问题，不抽卡、不另造峰值 |
+| "用运镜库 / 这个运镜怎么写" | 先按 `references/director-grammar.md` §2.1–2.2 定动机与类别，再 `scripts/camera_library.py`（`--query` / `--slots`）取一条，按五段填成本镜内容（`references/camera-library.md`）；E 层写运镜来源 |
 | "把 @视频1 延长 / 改台词 / 换人" | S2 编辑-延长分支 → S6 |
 | "先出一个 prompt 看看效果" | 看一眼：跑到 S6，不落盘；纯表演走优先路由 |
 | "一次跑完 / 全部落盘" | 全流程 |

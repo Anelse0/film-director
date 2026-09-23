@@ -1,6 +1,8 @@
 # film-director
 
-版本 **1.7.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜（含导演语法：景别 / 运镜 / 动线 / 剪辑 / 决策载体）、时长与节奏（两条时间轨 + 变化轨）、参考资产计划、Prompt 编译、连续性与质量检查、成片实测。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+版本 **1.8.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜（含导演语法：景别 / 运镜 / 动线 / 剪辑 / 决策载体）、时长与节奏（两条时间轨 + 变化轨）、参考资产计划、Prompt 编译、连续性与质量检查、成片实测。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+
+1.8.0 接入运镜库：`assets/camera-library.json` 是《AI 运镜提示词库》的原样副本（46 条，Camera / Movement / Speed / Framing / End 五段，保护区锁定），`references/camera-index.json` 是中文阅读索引。S5 先定动机与运动类别，再从库里取一条，按五段填成这一镜的主体、方向、速度、保持不变的东西与终点；原文只在用户指定时用。校验新增 W34（照抄通用句 / 中文 Prompt 夹英文五段骨架）与 W35（E 层运镜来源不成立）。
 
 1.7.0 英文语速默认 4 词/s（用户定；慢戏 2.5–3、短促 4.5 显式写），校验估时随之改变。
 
@@ -39,6 +41,8 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `scripts/scene_track.py` | 剧本场面轨 / 事件轨的参考清单（场地 / 场景 / 段 / 估时）+ 分镜场级合计与比值（≥1.2 提醒）+ 方案"与场面轨的差异"行 + clip 切分表"交付变化"列（每条 clip 交付哪几行变化、删掉损失） |
 | `references/director-grammar.md` | S5 主参考：景别 / 运镜 / 动线 / 剪辑 / 构图 / 光 / 载体 / 类型语法，每条附一手来源与核实状态 |
 | `references/director-lenses.md` | S5 透镜：场景问题 → 作用机制 → 选择 → 边界 → 语法依据 |
+| `references/camera-library.md` | 运镜库用法：决策顺序（先动机后选条目）、五段填写、运镜来源（填写 / 原文 / 库外）、W34–W35 |
+| `references/camera-index.json` | 运镜库中文阅读索引：职能、什么时候不用、人物运动、载体、官方术语与词表对应 |
 | `references/camera-vocabulary.md` | 镜头语汇：景别 / 机高 / 焦距与景深 / 运镜与终点 / 构图 / 转场 / 光 / 声音符号 |
 | `references/stage-5b-reference-assets.md` | S5b 参考资产清单与图像简报（图 + 文核心） |
 | `references/stage-6-prompt-compiler.md` | S6 编译规范 |
@@ -52,6 +56,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `references/genre-packs.md` | 基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇 / 视觉喜剧 / 暧昧爱情时叠加：难题 → 机制 → 选择 → 风险 |
 | `references/source-analysis.md` | 审计 / 更新来源时 |
 | `templates/*` | 分镜卡 / Prompt / 资产简报 / 登记表 / 生产记录骨架（`script-scene.md` 为输入格式参照） |
+| `scripts/camera_library.py` | 运镜库查询：`--list` / `--query` / `--slots`（五段填写模板）/ `--raw`（原文） |
 | `scripts/emotion_library.py` | 按编号或关键词读取完整条目，`--list` 查看索引 |
 | `scripts/validate_prompt.py` | S6 之后必跑；W22–W29 时间轨、W30–W33 变化轨（`rhythm_checks.py` / `variation_checks.py`） |
 | `scripts/measure_clip.py` | 有成片时：切点 / 有声占比 / 语速校准 / 视觉变化谱对照 Prompt 的时间轨与变化轨（需 ffmpeg） |
