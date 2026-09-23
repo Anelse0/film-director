@@ -59,7 +59,7 @@
 | 斯坦尼康 / 平稳跟拍 | steadicam | ✅（官方范例直接用"斯坦尼康……缓缓推进"）；保守写"平稳跟拍" | — |
 | 固定机位 | locked / static | ✅ | "全程不动" |
 | 一镜到底 | one continuous take | ✅ | 写清中途的构图变化与秒数 |
-| 希区柯克变焦 | dolly zoom | ✅（热门） | "人物大小不变、背景被拉远" |
+| 希区柯克变焦 | dolly zoom | ✅（热门） | "机器后拉同时变焦推近，人物大小不变、背景变大压向人物"（前推 + 拉焦则背景变小退远；1.9.0 更正，见 `director-grammar.md` §2.2） |
 | 航拍 | aerial / drone | ✅ | — |
 | FPV | FPV | ✅ | — |
 | 子弹时间 | bullet time | ✅ | — |
@@ -68,7 +68,7 @@
 | 急推变焦 | crash zoom | ⚠️ "极快推近到脸，半秒内完成" | — |
 | 变焦 | zoom | ✅ | 与推区分：变焦背景关系不变 |
 
-运镜库（1.8.0）：46 条五段写法（Camera / Movement / Speed / Framing / End）在 `assets/camera-library.json`，中文名、职能与本表对应见 `camera-index.json` 的 `vocab` 栏；用法见 `camera-library.md`。本表管术语与终点写法，库补"运动中什么保持不变"。
+运镜库（1.8.0）：46 条五段写法（Camera / Movement / Speed / Framing / End）在 `assets/camera-library.json`，中文名、职能与本表对应见 `camera-index.json` 的 `vocab` 栏；用法见 `camera-library.md`。本表管术语与终点写法，库补"运动中什么保持不变"。支撑（手持 / 克制手持 / 肩扛 / 斯坦尼康 / 稳定器 / 轨道 / 摇臂 / 航拍 / 车载 / 身体固定）与运动质感怎么写成看得见的结果，见 `director-grammar.md` §2.5（1.9.0）。
 
 速度用秒数（"3 秒缓推"）或官方范例的副词（"缓缓 / 快速 / 猛推"）；不用时间戳控频次 `[官方]`。
 

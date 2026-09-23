@@ -88,6 +88,7 @@ def slots(entry, note):
              f"什么时候不用：{note.get('avoid', '—')}　人物：{note.get('subject', '—')}　载体：{note.get('carrier', '—')}"]
     for part in PARTS:
         lines.append(f"{part.capitalize()} → {SLOT_HINT[part]}：__　（库：{entry['components'][part]}）")
+    lines.append(f"层：{note.get('layer', '—')}　默认支撑：{note.get('support', '—')}（支撑与质感见 director-grammar §2.5）")
     lines.append(f"写法：{note.get('official', '—')}；词表：{note.get('vocab', '—')}")
     return "\n".join(lines)
 
