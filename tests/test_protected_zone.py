@@ -1,5 +1,8 @@
 """film-director protected zone: production/performance core hash-locked at the 1.4.0 baseline.
 
+1.6.1 (2026-09-23): stage-4 §4.5 English speech default 2.5 -> 3.5 words/s, left stale by 1.4.0 (hard rule 17,
+capabilities §7 and validate_prompt.py already used 3.5); stage-4 hash re-set in the same commit.
+
 1.6.0 (2026-09-23): every clip delivers at least one change (hard rule 20) -- stage-5 §5.1 rule 6, §5.1f peak
 event chosen from the delivered rows, §5.9 row; stage-7 §7.1 review row and §7.2 diagnosis row. Additions only:
 no existing clause removed (variation track, W24/W30-W33 unchanged). stage-5 and stage-7 hashes re-set in the
@@ -44,7 +47,7 @@ PROTECTED = {
     'assets/emotion-library.json': 'ef22ac8bfec33567344e13a927d47f7b577c3c6f07b110cc5a2e316523599977',
     'references/emotion-performance.md': 'a150f6047b6a484a6ab858a93773d9c28fab022ac274bcc358dd20684468d8d0',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
-    'references/stage-4-performance.md': 'df8bc48db59bc120f728d8ad1901048332c890819324512d721fc0b4886795de',
+    'references/stage-4-performance.md': '66a1a5738e90ef58d3598d706c5df9e11d3c5adb45d372000f43077f00a432d5',
     'references/stage-5-directing-storyboard.md': '301cd44278eb2c4a26ea48eb85de3f595cfe1a089a06987aa7ec225148a18157',
     'references/stage-5b-reference-assets.md': 'ee87fc676e3128def78a2aaa220688fe68b472768e669934ff52e5b4c01e7a77',
     'references/stage-6-prompt-compiler.md': '4cd8c05338737b9d6aa7d0a1f14ca8d1a62f298ec884dd6a278561fef3651bba',

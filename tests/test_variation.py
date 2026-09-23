@@ -69,6 +69,14 @@ class TriggerRegressionTests(unittest.TestCase):
         self.assertFalse(any(w.startswith('W22') for w in default['warnings']), default['warnings'])
         self.assertTrue(any('3.5 词/s' in i for i in default['info']))
 
+    def test_docs_state_the_same_english_default(self):
+        # 1.6.1: stage-4 §4.5 and scene-parameters still said "英文默认 2.5 词/s" after 1.4.0 moved the default.
+        for rel in ('SKILL.md', 'references/stage-4-performance.md', 'references/scene-parameters.md',
+                    'references/seedance-2.5-capabilities.md'):
+            text = (ROOT / rel).read_text(encoding='utf-8')
+            self.assertNotRegex(text, r'默认[^。；\n]{0,12}2\.5 ?词', rel)
+            self.assertRegex(text, r'3\.5 ?词', rel)
+
 
 class FieldGrammarTests(unittest.TestCase):
     def test_parse_field_arrows_unchanged_and_new(self):
