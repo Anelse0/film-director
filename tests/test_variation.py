@@ -59,23 +59,27 @@ class TriggerRegressionTests(unittest.TestCase):
         self.assertIn('W24', codes(result))
         self.assertIn('W32', codes(result))
 
-    def test_english_default_rate_is_3_5_and_the_photographer_line_fits(self):
+    def test_english_default_rate_is_4_and_the_photographer_line_fits(self):
         # "Now turn. Look at him. Like you hate him." = 9 words in a 3 s window:
-        # 3 words/s -> 3.0 s > 3 x 0.9 -> W05; 3.5 words/s -> 2.57 s -> fits, and no W22 (rec 3.0, window 3).
+        # 3 words/s -> 3.0 s > 3 x 0.9 -> W05; 4 words/s (1.7.0 default) -> 2.25 s -> fits,
+        # and no W22 (rec 2.5, window 3, slack 0.5).
         explicit = run(TRIGGER_SHAPE)
         self.assertTrue(any(w.startswith('W05 C') for w in explicit['warnings']), explicit['warnings'])
         default = run(TRIGGER_SHAPE.replace('| 语速词每秒 | 3 |\n', ''))
         self.assertFalse(any(w.startswith('W05') and '窗口' in w for w in default['warnings']), default['warnings'])
         self.assertFalse(any(w.startswith('W22') for w in default['warnings']), default['warnings'])
-        self.assertTrue(any('3.5 词/s' in i for i in default['info']))
+        self.assertTrue(any('，4 词/s' in i for i in default['info']), default['info'])
 
     def test_docs_state_the_same_english_default(self):
         # 1.6.1: stage-4 §4.5 and scene-parameters still said "英文默认 2.5 词/s" after 1.4.0 moved the default.
+        # 1.7.0: default is 4 words/s everywhere it is stated; no doc may still call 2.5 or 3.5 the default.
         for rel in ('SKILL.md', 'references/stage-4-performance.md', 'references/scene-parameters.md',
-                    'references/seedance-2.5-capabilities.md'):
+                    'references/seedance-2.5-capabilities.md', 'references/duration-rhythm.md',
+                    'references/stage-6-prompt-compiler.md', 'templates/prompt-templates.md'):
             text = (ROOT / rel).read_text(encoding='utf-8')
-            self.assertNotRegex(text, r'默认[^。；\n]{0,12}2\.5 ?词', rel)
-            self.assertRegex(text, r'3\.5 ?词', rel)
+            self.assertNotRegex(text, r'默认[^。；\n]{0,12}(?:2\.5|3\.5) ?词', rel)
+            self.assertNotRegex(text, r'(?:2\.5|3\.5)[（(]默认', rel)
+            self.assertRegex(text, r'默认[^。；\n]{0,12}4 ?词|4[（(]默认|默认 4[；，）)]', rel)
 
 
 class FieldGrammarTests(unittest.TestCase):

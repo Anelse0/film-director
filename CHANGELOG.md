@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.7.0 — 2026-09-23
+
+**英文语速默认值从 3.5 改为 4 词/s。** 用户定："默认改成 4"。1.6.1 按我对上一条指示的误读统一成了 3.5，这里更正。这次会改变校验行为：没写 `语速词每秒` 的 Prompt，W05 / W22 / W26 / W29 都改按 4 词/s 估时。保护区文件哈希在本提交重设。**工程完成：测试通过（126 项），已提交、打 tag v1.7.0、推送。效果未验证**：没有用 4 词/s 的默认值做过生成对照。
+
+### 依据
+- 用户判定 `[用户判定]`。
+- 实测 D10b 整段 ≥4.1 词/秒仍出片可用 `[实测]`（`validation-log.md`）。
+- THE ORDER 的分镜本来就按用户定的 4 词/秒排。
+- 2.5 仍是美式英语均值，也是下限；慢戏照旧显式写 2.5–3，并写「语速理由」。
+
+### Changed
+- `scripts/validate_prompt.py`（保护区）：`speech_parameters` 的英文默认值 3.5 → 4.0。估时 INFO 行变成"台词估算 4 字/s，4 词/s，…"。
+- `SKILL.md` 硬规则 17：默认 4 词/s，短促可到 4.5。
+- `references/seedance-2.5-capabilities.md`（保护区）：
+  - §7.2 默认 4；短促档改为 4.5 词/s，标 `[推论]`，理由是它落在实测整段 ≥4.1、单句约 4.7 的可用范围内；
+  - §7.3 预算表的三列改为 慢 2.5 / 默认 4 / 短促 4.5，按"窗口 × 语速 × 2/3"重算取整。"Now turn…"那句（9 词 / 3 s）按 4 词/s 估 2.25 s。
+- `references/duration-rhythm.md` §二 第 1、8 条，以及标题行。
+- `references/stage-4-performance.md` §4.5、`references/stage-6-prompt-compiler.md` 节奏指令与 E 表、`templates/prompt-templates.md` E 层说明与示例（均为保护区）；`references/scene-parameters.md`。
+- `references/validation-log.md` 标签变更登记加一行（3.5 → 4）。
+
+### Tests
+- `test_performance`：`speech_parameters` 的默认值改为 4.0，并新增一条"显式写 3.5 仍按 3.5"。
+- `test_production`：两处估时改为按 4 算。
+- `test_variation`：
+  - 摄影师那句按 4 词/s 仍放得下，也不报 W22（建议窗口 2.5 s，实际 3 s，松弛 0.5 s）；
+  - 文档一致性测试扩到 7 个文件：不能再有任何文档把 2.5 或 3.5 写成默认值，每个文件都要写明默认 4。
+- `test_protected_zone`：重设 validate_prompt.py、capabilities、stage-4、stage-6、prompt-templates 五个文件的哈希。
+
 ## 1.6.1 — 2026-09-23
 
 **S4 的英文语速默认值与硬规则统一为 3.5 词/s。** 只改文档，不改行为：`validate_prompt.py` 自 1.4.0 起就按 3.5 估时。**工程完成：测试通过（126 项），已提交、打 tag v1.6.1、推送。**

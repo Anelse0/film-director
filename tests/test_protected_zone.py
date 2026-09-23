@@ -1,5 +1,9 @@
 """film-director protected zone: production/performance core hash-locked at the 1.4.0 baseline.
 
+1.7.0 (2026-09-23): English speech default 3.5 -> 4 words/s (user decision; 短促 4.5 [推论]) in
+validate_prompt.py, capabilities §7.2-7.3, stage-4 §4.5, stage-6 and prompt-templates; hashes re-set in the
+same commit with a CHANGELOG entry.
+
 1.6.1 (2026-09-23): stage-4 §4.5 English speech default 2.5 -> 3.5 words/s, left stale by 1.4.0 (hard rule 17,
 capabilities §7 and validate_prompt.py already used 3.5); stage-4 hash re-set in the same commit.
 
@@ -47,19 +51,19 @@ PROTECTED = {
     'assets/emotion-library.json': 'ef22ac8bfec33567344e13a927d47f7b577c3c6f07b110cc5a2e316523599977',
     'references/emotion-performance.md': 'a150f6047b6a484a6ab858a93773d9c28fab022ac274bcc358dd20684468d8d0',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
-    'references/stage-4-performance.md': '66a1a5738e90ef58d3598d706c5df9e11d3c5adb45d372000f43077f00a432d5',
+    'references/stage-4-performance.md': 'b04d317cc1dd2ad609244acd6210c0d953e4c8df7484b13bc815bb76bb9c78b0',
     'references/stage-5-directing-storyboard.md': '301cd44278eb2c4a26ea48eb85de3f595cfe1a089a06987aa7ec225148a18157',
     'references/stage-5b-reference-assets.md': 'ee87fc676e3128def78a2aaa220688fe68b472768e669934ff52e5b4c01e7a77',
-    'references/stage-6-prompt-compiler.md': '4cd8c05338737b9d6aa7d0a1f14ca8d1a62f298ec884dd6a278561fef3651bba',
+    'references/stage-6-prompt-compiler.md': 'da51a360c5111c85211526cced1aca6e245d20601e1cc5126e7631eae29b8fc8',
     'references/stage-7-qa-continuity.md': '442b7553d6945fcb5069714d38e12d14c579575c694cd2538a1554c1fa22c562',
     'references/production-workflow.md': 'db8cc8de428952283a2cda4d7d23e0b1b0f4784ab18c54b57f674ca93eac6cfd',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
-    'references/seedance-2.5-capabilities.md': 'a754e6299e90842df9ec17f31d278e8b28c51d05f2e432774b3a78530a347807',
+    'references/seedance-2.5-capabilities.md': 'a95da7455c8cc3b5c9706380e4e8082cf29c4e73a7f753b24324b138f8080e26',
     'references/camera-vocabulary.md': '06a5c14733a3c2cffb5c8dcaa02d107e6ab9f57982dfae0708b06b1583a3b93e',
     'references/externalization-lexicon.md': '292b8363a566a18aae1eae2b3e2c085760930d2dfb608b2dc3040288cb03bbbb',
     'references/genre-packs.md': '998602b50c9773ebac196991dd52bee21352695e4e64507215c90df5b60f5d0d',
     'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
-    'templates/prompt-templates.md': 'fddb5e2f3e9b48ecfab7ae322d9bec1ea93e1510c5ffd3eb61c5baddff7e8b7b',
+    'templates/prompt-templates.md': '502af938d3bb774e054467f27d5057840fea248a375fe4f79c620a1dc474773e',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '7adc7226bf0b7648ecc2f2320db3edefe317297bf7486645271d9f87d8bb56fd',
     'templates/shot-card.md': '76c6e2a7fc622140a90a2de5ede90ec143324322295dae6711fdd9bbe3ac2d1b',
@@ -67,7 +71,7 @@ PROTECTED = {
     'templates/asset-registry.md': '996818cda8aa55796820ae96c808c56459198f8f465b4e4924196d7ed8cc2943',
     'scripts/rhythm_checks.py': 'b1293f1d3f91eaad415e8a984abaf9fcc4344b4736351c6dba7fbf4fba3575f3',
     'scripts/variation_checks.py': 'c1a95f98ff786b8479ed7aa169e27a306d4d31d1c6feb28e6b2e9b031e350ef0',
-    'scripts/validate_prompt.py': 'f06a2ee656c3a060dd193777ddd1f33322787c6605cdd20a0c318abd23049287',
+    'scripts/validate_prompt.py': '952fe9726e97469bf8755ec41e2a68f2f29ca8c4137f9bf8b2d5bbeb9a60d8a2',
     'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
     'scripts/production_contract.py': '963653540c39519d99a731749736e96b39bed17005305af1082c857af5426bfa',
     'scripts/production_preflight.py': '80379ec01b3f952ee82cc1611e38b555ad41838bd0bb6f0ac52ddb5453605702',

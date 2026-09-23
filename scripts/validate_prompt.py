@@ -15,7 +15,7 @@ W30-W33 (variation_checks.py) review the variation track — what changes betwee
 runs / too few changing dimensions / G6 repeat without a new element (W30), no shot-length contrast
 (W31), undeclared 峰值镜 or missing 【变化】 fields (W32), peak shot in a wide / OTS / fixed-while-
 others-move shot (W33). 节奏档 selects a check set (对话: W22-W33; 表演: W24 + W30-W33), never INFO-only.
-English speech estimate defaults to 3.5 words/s (1.4.0; 2.5 = American-English mean, a floor).
+English speech estimate defaults to 4 words/s (1.7.0, user; was 3.5 in 1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
 """
@@ -119,9 +119,9 @@ def speech_parameters(text):
         re.search(r"(?:^|[·/；;、\s])(?:密度\s*)?密(?:$|[·/；;、\s])", legacy))
     # Density changes occupancy, not delivery speed. A dense scene can contain
     # slow lines. Slower or faster rates are explicit E-layer choices.
-    # English 3.5 words/s = normal exchange (1.4.0; measured >= 3.6 / 4.1 usable in
-    # validation-log D10a/b). 2.5 is the American-English mean [一手] and a floor, not the default.
-    defaults = (4.0, 3.5, 0.75 if dense else 2 / 3)
+    # English 4 words/s = normal exchange (1.7.0, user decision; 1.4.0 had 3.5; measured >= 3.6 / 4.1
+    # usable in validation-log D10a/b). 2.5 is the American-English mean [一手] and a floor, not the default.
+    defaults = (4.0, 4.0, 0.75 if dense else 2 / 3)
     values = []
     for key, default in zip(("语速字每秒", "语速词每秒", "台词占比上限"), defaults):
         raw = field(key)
