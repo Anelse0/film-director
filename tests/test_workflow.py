@@ -14,7 +14,8 @@ class TaskMatrixTests(unittest.TestCase):
     def test_all_documented_tasks(self):
         cases = {
             't2v': ('无参考素材。', '', '16:9',10,''),
-            'r2v': ('图1 = 人物外观。','img1→reference_image','16:9',10,''),
+            # 1.10.0: an appearance image states its wardrobe source (E23); the old bare line is asserted below.
+            'r2v': ('图1 = 人物外观，参考面部、发型与图中衣服。','img1→reference_image','16:9',10,''),
             'motion': ('视频1 = 运镜参考。','vid1→reference_video','16:9',10,''),
             'keyframe': ('图1 = 第一关键帧。','img1→reference_image','16:9',10,'以图片1的顺序作为关键帧。\n'),
             'storyboard': ('图1 = 故事板。','img1→reference_image','16:9',10,''),
@@ -32,6 +33,9 @@ class TaskMatrixTests(unittest.TestCase):
                 if task == 'transition': body='将视频1和视频2无缝衔接，保留原视频内容。'
                 text = prefix+'【素材绑定】'+refs+'\n【总述】10秒，室内。\n【起始状态】人物居中。\n【分镜时间线】\n'+body+'\n【贯穿要求】无bgm，只有环境音；不要字幕。\n| 项 | 值 |\n| 任务类型 | '+task+' |\n| ratio | '+ratio+' |\n| duration | '+str(duration)+' |\n| 输出格式 | mov |\n| content.role | '+roles+' |'
                 self.assertEqual(run(text)['errors'],[])
+                if task == 'r2v':
+                    bare = run(text.replace(refs, '图1 = 人物外观。'))['errors']
+                    self.assertTrue(any(e.startswith('E23 图1') for e in bare), bare)
 
     def test_30s_design_locks(self):
         text = (ROOT/'examples/example-04-parameters-fight.prompt.md').read_text()

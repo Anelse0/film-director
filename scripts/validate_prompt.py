@@ -18,6 +18,10 @@ others-move shot (W33). 节奏档 selects a check set (对话: W22-W33; 表演: 
 W34-W35 (camera_checks.py, 1.8.0) review camera-library use: a shot copying the library's generic
 Movement/Speed/Framing/End sentences or an English five-part skeleton inside a Chinese Prompt without a
 原文 declaration (W34); an unreadable or unresolvable E-layer 运镜来源 row (W35).
+W36 / E23 (wardrobe_checks.py, 1.10.0, hard rule 21) check wardrobe per character: an appearance-image binding
+without a positive wardrobe source is E23 (衣着一律按 @服装图 / 参考面部、发型与图中衣服 / 衣着一律按每一镜的文字);
+a checked character's first appearance in 【起始状态】, a shot or 【贯穿要求】 without wardrobe, a numeric collective
+standing in for them, or a source conflict is W36. Extras (群演) may be written collectively.
 English speech estimate defaults to 4 words/s (1.7.0, user; was 3.5 in 1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
@@ -35,6 +39,7 @@ from production_contract import metadata, task_type, parameters, roles_from_fiel
 from rhythm_checks import rhythm_checks, settings as rhythm_settings, track_mode, scene_mode
 from variation_checks import variation_checks
 from camera_checks import camera_checks
+from wardrobe_checks import wardrobe_checks
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -325,6 +330,15 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         warns.extend(cw)
         for line in ci:
             info(line)
+    # E23 / W36 wardrobe per character (hard rule 21): the source is stated positively in the binding, and every
+    # checked character's first appearance in each unit carries its wardrobe. Edit tasks included (bindings only).
+    wardrobe = {}
+    if artifact == "production":
+        we, ww, wi, wardrobe = wardrobe_checks(text)
+        errors.extend(we)
+        warns.extend(ww)
+        for line in wi:
+            info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:
         if re.search(r"\d+\s*秒?内.{0,10}\d+\s*次|\d+\s*times? (?:per|in) \d+", body):
@@ -405,7 +419,7 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         fidelity_errors, fidelity = check_record(record, beats, dur)
         errors.extend(fidelity_errors)
     return {"file": str(path), "errors": errors, "warnings": warns, "info": infos, "lens": lens,
-            "task": task, "parameters": parameter_state, "dialogue": dialogue, "variation": variation, "camera": camera,
+            "task": task, "parameters": parameter_state, "dialogue": dialogue, "variation": variation, "camera": camera, "wardrobe": wardrobe,
             "assets": {"declared": sorted(f"{kind}{n}" for kind, n in declared), "used": sorted(f"{kind}{n}" for kind, n in used)},
             "fidelity_scope": "original_exact" if record and record.get("mode") == "raw" else "beat_text_only; other prose and source semantics require review" if record else "not_checked",
             "ext_phrases": {},  # retained return key for 2.2 callers; no word-frequency judging
