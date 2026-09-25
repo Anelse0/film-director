@@ -25,8 +25,12 @@ def prompt(refs, opening, shots, global_rules):
             f'【贯穿要求】{global_rules}；无bgm，只有环境音；不要字幕。\n')
 
 
-def check(text):
-    errors, warnings, infos, summary = wardrobe_checks(text)
+# IMAGE_CLOTHES below is v6: the user chose Theo's own appearance-image clothes, recorded in the E layer (W37).
+USER_SAID = '| 项 | 值 |\n|---|---|\n| 衣着来源 | Theo：形象图中的衣服（用户指定 2026-09-24） |\n'
+
+
+def check(text, metadata=USER_SAID):
+    errors, warnings, infos, summary = wardrobe_checks(text, text + '\n' + metadata)
     return errors, warnings
 
 
@@ -118,6 +122,30 @@ class BindingSourceTests(unittest.TestCase):
                      '@Priya-制片 = 女制片 Priya 外观，只参考面部、发型，不参考背景、姿势与服饰；'):
             with self.subTest(refs[:14]):
                 self.assertTrue(check(prompt(refs, '有人。', ['有人。'], '有人'))[0])
+
+
+class DefaultSeparationTests(unittest.TestCase):
+    """W37 (1.11.0, user 2026-09-25): appearance image and outfit image are separate unless the user says otherwise."""
+
+    def test_image_clothes_need_a_recorded_user_decision(self):
+        text = prompt(IMAGE_CLOTHES, '有人。', ['有人。'], '有人')
+        _, warnings = check(text, metadata='')
+        self.assertTrue(any(w.startswith('W37 @Theo') for w in warnings), warnings)
+        self.assertFalse(any(w.startswith('W37') for w in check(text)[1]))            # recorded for Theo
+        other = '| 衣着来源 | Rhett：形象图中的衣服（用户指定） |\n'
+        self.assertTrue(any(w.startswith('W37 @Theo') for w in check(text, metadata=other)[1]))   # someone else
+        unsigned = '| 衣着来源 | Theo：形象图中的衣服 |\n'
+        self.assertTrue(any(w.startswith('W37 @Theo') for w in check(text, metadata=unsigned)[1]))
+
+    def test_styling_image_counts_as_image_clothes(self):
+        refs = '图1 = Isaiah 出场态造型参考（含面部与身形；湿发贴额、上身赤裸、白毛巾裹腰）；'
+        self.assertTrue(any(w.startswith('W37 图1') for w in check(prompt(refs, '有人。', ['有人。'], '有人'), '')[1]))
+
+    def test_default_sources_are_not_w37(self):
+        for refs in (OUTFIT_IMAGE, TEXT_ONLY,
+                     '图1 = Noah 人物形象，只参考面部与发型，不参考背景与姿势；图2 = Noah 礼服，只参考服装；'):
+            with self.subTest(refs=refs[:20]):
+                self.assertFalse(any(w.startswith('W37') for w in check(prompt(refs, '有人。', ['有人。'], '有人'), '')[1]))
 
 
 class PerShotTests(unittest.TestCase):
@@ -297,6 +325,12 @@ class WiringTests(unittest.TestCase):
         self.assertIn('- 衣着（', card)
         self.assertIn('服装图', self.read('templates/asset-registry.md'))
         self.assertIn('服装图', self.read('templates/reference-asset-brief.md'))
+        # 1.11.0 default: appearance and outfit images apart unless the user says so (W37)
+        self.assertIn('默认形象图与服装图分开', skill)
+        self.assertIn('（仅用户指定', card)
+        self.assertIn('**只有用户指定**', s5b)
+        self.assertIn('| 衣着来源 |', s6)
+        self.assertIn('W37', s7)
         caps = self.read('references/seedance-2.5-capabilities.md')
         self.assertIn('形象图里的衣服会被带进成片', caps)
         log = self.read('references/validation-log.md')

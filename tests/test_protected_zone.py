@@ -1,5 +1,10 @@
 """film-director protected zone: production/performance core hash-locked at the 1.4.0 baseline.
 
+1.11.0 (2026-09-25): wardrobe default -- appearance and outfit images apart unless the user says so (W37 in
+wardrobe_checks.py, E-layer 衣着来源 row read through validate_prompt.py); stage-5b §5b.1/§5b.3a, stage-6 §6.2/§6.5,
+stage-7 §7.1, prompt-templates, shot-card, reference-asset-brief and asset-registry. In-line additions except the
+three-source table labels; hashes re-set in the same commit with a CHANGELOG entry.
+
 1.10.0 (2026-09-24): wardrobe per character, per shot (hard rule 21) -- scripts/wardrobe_checks.py (E23 / W36) joins
 the zone and is wired into validate_prompt.py; stage-5 §5.0/§5.5/§5.6/§5.9/§5.10, stage-5b §5b.1/§5b.2/§5b.3a/§5b.5,
 stage-6 §6.1/§6.2/§6.3/§6.6, stage-7 §7.1/§7.2/§7.3, production-workflow step 1, capabilities §4.2, prompt-templates
@@ -71,9 +76,9 @@ PROTECTED = {
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': 'b04d317cc1dd2ad609244acd6210c0d953e4c8df7484b13bc815bb76bb9c78b0',
     'references/stage-5-directing-storyboard.md': '86fce52587d9ceb3ebc58c64c7ee1694a7133ec4693258ef7e008abdb0ccde4b',
-    'references/stage-5b-reference-assets.md': 'b873eea81044ec8b64a43176b77cb71fa06cfca382e9ba7c538aad47f10530b7',
-    'references/stage-6-prompt-compiler.md': '98f0a1477ec3ae3d42ea45f63ddecf7bd9cf9d2e4006ad3438ba1a81a36a01b0',
-    'references/stage-7-qa-continuity.md': '9a0b4cb767e4fcfaa8c462935eba4e5845d68d145f35aa62bb79e0d4d594879c',
+    'references/stage-5b-reference-assets.md': 'aa0bf1aead92c3e0e413e5ecfc9c0c6ad28feec33c7a6aba39ac564a174fcac6',
+    'references/stage-6-prompt-compiler.md': '99d21be692487ee932c35f47f0f7a479fd78853b3b4007c04e9815dfb53dbde4',
+    'references/stage-7-qa-continuity.md': '67d4b08f0c89087c554b88428c504c98ecfaa5f4f6fd92c8b1156562bf7e9cc9',
     'references/production-workflow.md': 'c7d74cf72b2c114aa94af102cd3dc962927bda75e268c3a1c964aba8b07df589',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
     'references/seedance-2.5-capabilities.md': '17044a111383df9b067991115e7af249f4863ffa242a005e6ac0d47bdac26e52',
@@ -81,15 +86,15 @@ PROTECTED = {
     'references/externalization-lexicon.md': '292b8363a566a18aae1eae2b3e2c085760930d2dfb608b2dc3040288cb03bbbb',
     'references/genre-packs.md': '998602b50c9773ebac196991dd52bee21352695e4e64507215c90df5b60f5d0d',
     'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
-    'templates/prompt-templates.md': 'b6b8fbf0d87308bc1a01898a63fdc33a4a2a9715231b8b4347522173d75cb12e',
+    'templates/prompt-templates.md': '252b7b42800a7b84d28e85615069b4df4562bc2a83a3a8e897e969feaa2bc635',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '7adc7226bf0b7648ecc2f2320db3edefe317297bf7486645271d9f87d8bb56fd',
-    'templates/shot-card.md': 'bb69b5bbdfdcca51c48fcb6d4afb0b49dfdaace731e7897b85108e6c8710a00d',
-    'templates/reference-asset-brief.md': '9842a9584a8a901244b9c32816f8d33c27ced6f176f1100163f5d59bd6234d34',
-    'templates/asset-registry.md': 'cf56889a5cf61d08a55bb18931689ebdcab215a425beee6056a1f0d25aa64d74',
+    'templates/shot-card.md': 'ecc70d84cf92b2eb8b13bc9750822002f4b3a1aaf7e626e13a9b38cfd18e3b18',
+    'templates/reference-asset-brief.md': '4a6857d28f67688921b4ed5c1c2746be1e65c7e3389d7629c9b20c39fe216882',
+    'templates/asset-registry.md': '5455fd01c138723256c1f09eaf108d9372f2f8d8e6af01e6f08d7a93c1eb2dc9',
     'scripts/rhythm_checks.py': 'b1293f1d3f91eaad415e8a984abaf9fcc4344b4736351c6dba7fbf4fba3575f3',
     'scripts/variation_checks.py': 'c1a95f98ff786b8479ed7aa169e27a306d4d31d1c6feb28e6b2e9b031e350ef0',
-    'scripts/validate_prompt.py': '450ee7eebab5d65376a3bc4a6ea60bd196ad3a3bde8ab24e5d29d22f7a71c400',
+    'scripts/validate_prompt.py': '5561e5d0804ca5c0952e95ff1de3594e9c13cfef85a703dd376a5d84f4a898df',
     'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
     'scripts/production_contract.py': '963653540c39519d99a731749736e96b39bed17005305af1082c857af5426bfa',
     'scripts/production_preflight.py': '80379ec01b3f952ee82cc1611e38b555ad41838bd0bb6f0ac52ddb5453605702',
@@ -97,7 +102,7 @@ PROTECTED = {
     'assets/camera-library.json': '0f3136a56e593db3f721db97358681d641e6c941a0840df4fa5ea2ac9f0e88ec',
     'scripts/camera_library.py': '21667cbb3a16819478febb318faf9e19554b6b97a29ce1a1f979af7f65a231e7',
     'scripts/camera_checks.py': 'ebea54738b44af35096316a3687c174a2245e8fadaad06521172da0683d724f3',
-    'scripts/wardrobe_checks.py': '226082ba1583e9a164b4735249d73d64bdfa2a3afc3742a1fe936f3f9f0cbc20',
+    'scripts/wardrobe_checks.py': '2517c427bda9fc8176ac43098b3725affeda6359259884a124a1ce2ea09ef655',
     'scripts/performance_checks.py': '5a54ee7c0cb77b67466ee6f7102ded648220cf8b922fea7da186f68ccd869ae0',
 }
 

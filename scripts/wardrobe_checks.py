@@ -23,6 +23,10 @@ W36  in 【起始状态】, a shot, or 【贯穿要求】, a checked character's
      出画 / 的声音, a name that is only a gaze target (看向画左的 X / 抬眼看 X).
      Known misses: a garment that is a prop in the same clause (接过浴袍); a collective whose number happens to
      match the characters named; a character with neither an appearance image nor an appearance lock.
+W37  (1.11.0, user decision 2026-09-25) default: the appearance image gives face and hair only; wardrobe follows the
+     outfit image, or per-shot text when there is none. A character whose binding keeps the appearance image's own
+     clothes ("参考面部、发型与图中衣服" / "造型参考（含衣物）") needs the user's say-so recorded in the E-layer row
+     `| 衣着来源 | Theo：形象图中的衣服（用户指定） |` (the row stays out of the model's prompt). Missing → W37.
 Whether the wardrobe is the right one, and whether a change of clothes is continuous, is S7 review.
 """
 import re
@@ -70,6 +74,8 @@ SOURCE = [
     re.compile(r"(?<!ignore )\b(?:face|hair)\b(?:(?!ignore)[^;.\n])*?\b(?:wardrobe|outfit|clothing|clothes)\b", re.I),
 ]
 IMAGE_CLOTHES = SOURCE[2]
+STYLING = SOURCE[4]
+SOURCE_ROW = re.compile(r"^\|\s*衣着来源\s*\|\s*([^|\n]*)\|", re.M)
 # "Isa身穿@01_Sharks_outfit" / "wears Image2" count only outside a 不参考 / ignore clause
 # (v4 Theo: "不参考…图中黑色毛衣（身穿戏服@01_Theo_outfit）" is not a source).
 WEARS_SOURCE = re.compile(r"(?:身穿|穿着|穿上|换上|wears|wearing|dressed in)[^，。；,;\n]{0,6}?(?:@|图片?\s*\d|Image\s*\d|"
@@ -253,8 +259,11 @@ def appearances(body, pattern):
     return found
 
 
-def wardrobe_checks(text):
-    """→ (errors, warnings, infos, summary). `text` is the Prompt body without the E-layer table."""
+def wardrobe_checks(text, metadata_text=""):
+    """→ (errors, warnings, infos, summary). `text` is the Prompt body without the E-layer table; `metadata_text`
+    is the whole file, read only for the E-layer 衣着来源 row (W37)."""
+    row = SOURCE_ROW.search(metadata_text or "")
+    specified = [seg for seg in re.split(r"[；;]", row.group(1)) if "用户指定" in seg] if row else []
     errors, warnings = [], []
     characters, outfits, outfit_entries = [], [], []
     for token, entry in bindings(text):
@@ -280,9 +289,14 @@ def wardrobe_checks(text):
             only_negative = re.search(r"(?:不参考|ignore)[^；;。\n]*" + GARMENT, entry, re.I)
             errors.append(f"E23 {c['token']} 是人物形象图，【素材绑定】没有正向写本条衣着来源"
                           + ("（只写了不参考图中衣服，压不住形象图里的衣服）" if only_negative else "") +
-                          "：三选一写明——衣着一律按 @服装图 / 参考面部、发型与图中衣服：{衣物} / 衣着一律按每一镜的文字：{衣物}")
+                          "：默认写「衣着一律按 @服装图」，没有服装图写「衣着一律按每一镜的文字：{衣物}」；"
+                          "用户指定沿用形象图时才写「参考面部、发型与图中衣服：{衣物}」")
         elif c["image_clothes"] and c["bound_outfit"]:
             errors.append(f"E23 {c['token']} 的绑定同时给了两个衣着来源（图中衣服 + 服装图），只留一个")
+        elif (c["image_clothes"] or STYLING.search(own)) and not c["bound_outfit"] and \
+                not any(c["pattern"].search(seg) for seg in specified):
+            warnings.append(f"W37 {c['token']} 的衣着沿用形象图里的衣服，E 层没有登记用户指定——默认形象图与服装图分开"
+                            "（衣着按服装图，没有服装图按逐镜文字）；是用户定的，E 层写「| 衣着来源 | 名字：形象图中的衣服（用户指定） |」")
     known = re.compile("|".join(c["pattern"].pattern for c in characters), re.I) if characters else re.compile(r"(?!)")
     for name in lock_characters(text, known):
         characters.append({"token": name, "entry": "", "names": {name}, "pattern": re.compile(name_pattern(name), re.I),

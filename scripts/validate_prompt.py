@@ -22,6 +22,8 @@ W36 / E23 (wardrobe_checks.py, 1.10.0, hard rule 21) check wardrobe per characte
 without a positive wardrobe source is E23 (衣着一律按 @服装图 / 参考面部、发型与图中衣服 / 衣着一律按每一镜的文字);
 a checked character's first appearance in 【起始状态】, a shot or 【贯穿要求】 without wardrobe, a numeric collective
 standing in for them, or a source conflict is W36. Extras (群演) may be written collectively.
+W37 (1.11.0): wardrobe kept from the appearance image without an E-layer `| 衣着来源 | …（用户指定） |` row; the default
+is appearance and outfit images apart (outfit image, or per-shot text when there is none).
 English speech estimate defaults to 4 words/s (1.7.0, user; was 3.5 in 1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
@@ -334,7 +336,7 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     # checked character's first appearance in each unit carries its wardrobe. Edit tasks included (bindings only).
     wardrobe = {}
     if artifact == "production":
-        we, ww, wi, wardrobe = wardrobe_checks(text)
+        we, ww, wi, wardrobe = wardrobe_checks(text, metadata_text)
         errors.extend(we)
         warns.extend(ww)
         for line in wi:
