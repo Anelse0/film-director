@@ -16,7 +16,9 @@
 - 参考清单：本场有哪些场地 / 场景、几段（行）、有几次时间跳、剧本总估时（轨表"总估时"或各行估时之和；
   两种轨表都没有的旧稿回退到节拍表"总窗口 ≈ N s"）。地点以"同上 / 同前 / 连续 / 接上 / 紧接"开头的行沿用
   上一行的场地（1.13.0：film-creative 4.0 模板"地点沿用上一行写'同上'"；"同上，沿通道往出口"仍是同一处），
-  括号里的子空间照旧并到该场地下；第一行没有上一行可沿用，按原文列出。
+  括号里的子空间照旧并到该场地下；第一行没有上一行可沿用，按原文列出。地点栏空着（或"—"、只有括号）的行
+  同样沿用上一行（1.13.1）；这一行照常算一行——谁 / 变化 / 锚句 / 地点 / 活动任一格有字就是一行，与 film-creative
+  挑行一致。第一行就空着不算场地。
 - 设计卡（1.13.0）：film-creative 4.0+ 剧本页正文前的"## 设计"，只取"静音测试"一格列出——关掉声音也看得懂
   谁要、谁赢的那个动作，S5 定视觉重点与峰值事件时的候选（stage-5 §5.1b）。告知，不锁定：不报问题、不影响
   退出码；没有设计卡的旧稿、没填或写"本场不转"的卡照旧，只是不列。
@@ -46,6 +48,7 @@ TRACK_HEAD = re.compile(r'^##\s*(场面轨|事件轨)[^\n]*$', re.M)  # 3.6 场�
 COLS = (('seg', ('段', '#')), ('loc', ('地点',)), ('act', ('活动',)), ('time', ('时间',)), ('who', ('谁',)),
         ('new', ('新看见',)), ('anchor', ('锚句',)), ('est', ('估时',)), ('change', ('变化',)), ('loss', ('删掉损失',)))
 EVENT_ONLY = ('change', 'loss')  # 3.6 场面轨"主要活动（类别；变化写括号）"也含"变化"，只在事件轨里读
+ROW_KEYS = ('who', 'change', 'anchor', 'loc', 'act', 'new')  # 任一格有字就是一行（1.13.1 前地点空着整行跳过）
 EMPTY = {'', '—', '-', '无', '空', '__'}
 CONTINUOUS = ('连续', '接上', '同上', '同前', '紧接')  # 地点 / 时间沿用上一行（与 film-creative review_script 同一组）
 PARENS = re.compile(r'[（(][^)）]*[)）]')
@@ -86,8 +89,9 @@ def read_track(text):
                 if all(set(c) <= set('-: ') for c in cells):
                     continue
                 get = lambda k: cells[idx[k]] if idx[k] is not None and idx[k] < len(cells) else ''
-                if get('loc') and get('loc') not in EMPTY:
-                    rows.append({k: get(k) for k, _ in COLS})
+                row = {k: get(k) for k, _ in COLS}
+                if any(row[k] not in EMPTY for k in ROW_KEYS):  # 合计行、空编号行不算
+                    rows.append(row)
         tot = re.search(r'总估时\s*[≈约]?\s*(\d+(?:\.\d+)?)\s*s', sec)
         if tot:
             total, source = float(tot.group(1)), f'{kind}总估时'
@@ -110,18 +114,22 @@ def is_change(row):
 
 def reference_list(track):
     """本场有哪些场地 / 场景（按出现顺序去重，括号里的子空间并到同一场地下）。
-    地点以"同上 / 同前 / 连续 / 接上 / 紧接"开头的行沿用上一行的场地，括号里的子空间并到那个场地下。"""
+    地点空着（"—"、只有括号）或以"同上 / 同前 / 连续 / 接上 / 紧接"开头的行沿用上一行的场地，括号里的子空间并到
+    那个场地下；第一行就空着不算场地，第一行写"同上"按原文列出。"""
     places, jumps, prev = {}, 0, None
     for k, r in enumerate(track['rows']):
-        inherit = prev is not None and r['loc'].startswith(CONTINUOUS)
-        base = prev if inherit else _base(r['loc'])
-        prev = base
-        sub = PARENS.findall(r['loc'])
-        places.setdefault(base, [])
-        for s in (x for grp in sub for x in re.split(r'[、，,]', grp.strip('（）()'))):
-            s = s.strip()
-            if s and s not in places[base]:
-                places[base].append(s)
+        blank = _base(r['loc']) in EMPTY
+        if prev is not None and (blank or r['loc'].startswith(CONTINUOUS)):
+            base = prev
+        else:
+            base = None if blank else _base(r['loc'])
+        if base is not None:
+            prev = base
+            places.setdefault(base, [])
+            for s in (x for grp in PARENS.findall(r['loc']) for x in re.split(r'[、，,]', grp.strip('（）()'))):
+                s = s.strip()
+                if s and s not in places[base]:
+                    places[base].append(s)
         t = r['time'].strip()
         if k and t and t not in EMPTY and not t.startswith(CONTINUOUS):
             jumps += 1
@@ -296,10 +304,11 @@ def render(res):
     if res['segments']:
         places = '；'.join(p + (f"（{'、'.join(s)}）" if s else '') for p, s in res['places'].items())
         unit = '行' if res['track_kind'] == '事件轨' else '段'
-        out.append(f"{name} {res['track_kind']}（参考，不锁定）：{len(res['segments'])} {unit}，场地 / 场景 {len(res['places'])} 处——{places}"
+        where = f"场地 / 场景 {len(res['places'])} 处——{places}" if res['places'] else '地点栏都空着（按场景标题读场地）'
+        out.append(f"{name} {res['track_kind']}（参考，不锁定）：{len(res['segments'])} {unit}，{where}"
                    + (f"；时间跳 {res['jumps']} 次" if res['jumps'] else ''))
         for r in res['segments']:
-            out.append(f"  {r['seg'] or '·'}. {r['loc']} · {r['act']}" + (f" · {r['time']}" if r['time'] not in EMPTY else '')
+            out.append(f"  {r['seg'] or '·'}. {r['loc'] or '—'} · {r['act']}" + (f" · {r['time']}" if r['time'] not in EMPTY else '')
                        + (f" · 估 {r['est']} s" if r['est'] else ''))
     else:
         out.append(f'{name}：没有场面轨或事件轨（旧稿或非 film-creative 来源），按剧本正文与场景标题读场地。')

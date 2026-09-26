@@ -7,7 +7,8 @@
 clip04 只有余韵第 11 行（用户问"这 16 s 存在的意义是？"）。
 1.13.0: film-creative 4.0.0 的剧本页——地点写"同上"沿用上一行的场地（样本 offset-ep01-s06.md = Offset EP01 s06 v1.2
 项目快照 2026-09-26，1.12.0 把它列成 3 处场地）；正文前新增的"## 设计"只读"静音测试"一格（告知，不锁定）。
-项目里还没有带设计卡的剧本页，带卡样本是测试里插入的维护者合成设计卡，不是项目稿。"""
+项目里还没有带设计卡的剧本页，带卡样本是测试里插入的维护者合成设计卡，不是项目稿。
+1.13.1: 地点栏空着的行不再整行跳过（照常算一行、场地沿用上一行）。s06 的场级方案项目里没有，S06_PLAN 是维护者合成的。"""
 import io
 import json
 import sys
@@ -312,6 +313,64 @@ class SameAsAboveTests(unittest.TestCase):
     def test_first_row_has_nothing_to_inherit(self):
         places, _ = st.reference_list({'rows': [{'loc': '同上', 'time': '—'}, {'loc': '同上（门口）', 'time': '—'}]})
         self.assertEqual(places, {'同上': ['门口']})  # 已知边界：按原文列出，不去猜上一场
+
+
+S06_PLAN = ('| clip | 时长 | 交付变化 |\n|---|---|---|\n| s06-clip01 | 19 s | 第 1–4 行 |\n| s06-clip02 | 5 s | 第 5 行 |\n\n'
+            '与事件轨的差异：无\n')
+
+
+class EmptyLocationTests(unittest.TestCase):
+    """1.13.1：地点栏空着（空、"—"、"__"、只有括号）的行照常算一行，场地沿用上一行（film-creative 把空地点也当同一处）。
+    1.13.0 以前整行跳过：不进参考清单、不计入估时之和，`--plan` 引用它时误报"事件轨没有这一行"。"""
+
+    @staticmethod
+    def s06(d, cell, drop_total=False):
+        text = S06.read_text(encoding='utf-8')
+        assert '| 同上 | 套 T 恤 |' in text
+        text = text.replace('| 同上 | 套 T 恤 |', f'| {cell} | 套 T 恤 |', 1)
+        return tmp_file(d, 's06.md', text.replace('总估时 ≈ 26 s', '') if drop_total else text)
+
+    def test_blank_location_row_is_still_a_row(self):
+        with tempfile.TemporaryDirectory() as d:
+            plan = tmp_file(d, 'plan.md', S06_PLAN)
+            for cell in ('', '—', '-', '__'):
+                r = st.run(self.s06(d, cell), (), plan)
+                self.assertEqual([x['seg'] for x in r['segments']], ['1', '2', '3', '4', '5'], cell)
+                self.assertEqual(r['places'], {'后台通道，衣架旁': []}, cell)
+                self.assertEqual(r['problems'], [], cell)  # 1.13.0："交付变化写了第 3 行，事件轨没有这一行"
+                self.assertEqual([x['n'] for x in r['delivery'][0]['rows']], [1, 2, 3, 4])
+                self.assertFalse(any(x['missing'] for x in r['delivery'][0]['rows']))
+                self.assertIn(f"  3. {cell or '—'} · 套 T 恤 · 估 5 s", st.render(r))  # 逐行清单照原文，真空着显示"—"
+
+    def test_blank_location_row_counts_in_the_estimate_sum(self):
+        with tempfile.TemporaryDirectory() as d:
+            r = st.run(self.s06(d, '', drop_total=True))
+        self.assertEqual((r['script_total'], r['script_total_source']), (26.0, '事件轨各段估时之和'))  # 1.13.0 少算成 21
+
+    def test_parenthesis_only_location_is_a_subspace_of_the_previous_place(self):
+        with tempfile.TemporaryDirectory() as d:
+            r = st.run(self.s06(d, '（衣架另一头）'))
+        self.assertEqual(r['places'], {'后台通道，衣架旁': ['衣架另一头']})
+
+    def test_total_and_blank_numbered_rows_are_not_rows(self):
+        text = S06.read_text(encoding='utf-8').replace('总估时 ≈ 26 s', '')
+        last = next(x for x in text.splitlines() if x.startswith('| 5 |'))
+        tail = last + '\n| 6 |  |  |  |  |  |  |  |  |  |\n| 合计 | — | — | — | — | — | — | — | — | 26 |'
+        with tempfile.TemporaryDirectory() as d:
+            r = st.run(tmp_file(d, 's.md', text.replace(last, tail, 1)))
+        self.assertEqual([x['seg'] for x in r['segments']], ['1', '2', '3', '4', '5'])
+        self.assertEqual(r['script_total'], 26.0)
+
+    def test_first_row_blank_and_all_rows_blank(self):
+        places, _ = st.reference_list({'rows': [{'loc': '', 'time': '—'}, {'loc': '走廊', 'time': '—'}, {'loc': '—', 'time': '—'}]})
+        self.assertEqual(places, {'走廊': []})  # 第一行就空着不算场地
+        text = ('## 事件轨\n\n| # | 谁 → 对谁 | 变化：进 → 出（类别） | 地点（子空间） | 活动 | 时间 | 估时 s |\n'
+                '|---|---|---|---|---|---|---|\n| 1 | A → B | B：不知道 → 知道（信息） |  | 递信 | — | 5 |\n'
+                '| 2 | B → A | A：等回信 → 被拒（没得到；代价：白等一晚） | — | 撕信 | — | 4 |\n')
+        with tempfile.TemporaryDirectory() as d:
+            r = st.run(tmp_file(d, 's.md', text))
+        self.assertEqual((len(r['segments']), r['places'], r['script_total']), (2, {}, 9.0))
+        self.assertIn('事件轨（参考，不锁定）：2 行，地点栏都空着（按场景标题读场地）', st.render(r))
 
 
 class DesignCardTests(unittest.TestCase):
