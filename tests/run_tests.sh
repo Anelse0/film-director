@@ -22,7 +22,11 @@ check "example-03 exits 0" $rc "$out"
 echo "$out" | grep -q "0 error(s), 0 warning(s)"; check "example-03 clean" $? "$(echo "$out" | tail -1)"
 
 out=$($V examples/example-04-parameters-fight.prompt.md); rc=$?
-check "example-04 exits 0" $rc "$out"
+# 1.12.0: a pre-baseline 30 s design (5-6 s shots, 3 s held silence) -> rhythm-baseline ERRORs only, no format errors
+[ $rc -eq 1 ]; check "example-04 exits 1 on the rhythm baseline only" $? "rc=$rc"
+echo "$out" | grep -q "^ERROR E"; rc=$?
+[ "$rc" -ne 0 ]; check "example-04 has no format (E) errors" $? "$out"
+echo "$out" | grep -q "^ERROR R01"; check "example-04 baseline R01" $? "$out"
 echo "$out" | grep -q "W05\|W29\|台词轨"; check "original long line retains timing review (W05 / W29 / 台词轨)" $? "$out"
 
 out=$($V examples/example-05-stairwell-letter.prompt.md); rc=$?
@@ -32,6 +36,13 @@ echo "$out" | grep -q "0 error(s), 0 warning(s)"; check "example-05 clean (keyfr
 out=$($V examples/example-06-balcony-cigarette.prompt.md); rc=$?
 check "example-06 exits 0" $rc "$out"
 echo "$out" | grep -q "0 error(s), 0 warning(s)"; check "example-06 clean (romance)" $? "$(echo "$out" | tail -1)"
+
+# 1.12.0 user rhythm baseline: the Offset EP01 s04 v4 incident (2/2/2/6/2/6 s) fails; examples 01/03/05/06 stay clean above
+out=$($V tests/fixtures/rhythm/offset-ep01-s04-clip01-v4.prompt.md); rc=$?
+[ $rc -eq 1 ]; check "s04 v4 fails the rhythm baseline" $? "rc=$rc"
+for pat in "ERROR R01 镜头4 6s" "ERROR R01 镜头6 6s" "ERROR R02 开头" "ERROR R02 结尾" "WARN  W28 镜头4" "rhythm_baseline\": \"failed"; do
+  echo "$out" | grep -q "$pat"; check "s04 v4 has $pat" $? ""
+done
 
 out=$($V examples/bad-example.prompt.md); rc=$?
 [ $rc -eq 1 ]; check "bad-1 exits 1" $? "rc=$rc"

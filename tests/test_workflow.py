@@ -40,7 +40,11 @@ class TaskMatrixTests(unittest.TestCase):
     def test_30s_design_locks(self):
         text = (ROOT/'examples/example-04-parameters-fight.prompt.md').read_text()
         result = run(text)
-        self.assertEqual(result['errors'],[])
+        # 1.12.0: the example predates the user's rhythm baseline (5-6 s shots, a 3 s held silence, 30 s); its
+        # format stays clean and only the baseline reports it (R-codes), which is what the baseline is for.
+        self.assertEqual([e for e in result['errors'] if not e.startswith('R')],[])
+        self.assertTrue(any(e.startswith('R01') for e in result['errors']))
+        self.assertEqual(result['checks']['format'],'passed')
         # Original seven utterances are a content regression fixture, not rules.
         self.assertEqual([r['text'] for r in result['dialogue']],[
             '你连袜子都不会放了？','我明天六点的飞机。',

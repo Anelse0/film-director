@@ -14,6 +14,13 @@ references/duration-rhythm.md.
 W22-W29 here plus W30-W33 (variation_checks.py, wired by validate_prompt);
 表演 runs W24 in its silent-stretch-function form (E-layer 无声段理由) plus
 W30-W33. No mode reduces every check to INFO.
+
+1.12.0: W28 also fires for a fixed shot >= 4 s that holds several lines or sentences
+filling it (Offset EP01 s04 镜4: 6 s, two lines, three sentences, no W28 because the
+check required exactly one line); sentence_count() is shared with rhythm_baseline.py;
+"半拍" joins the slow cues ("两句之间停半拍"). The user's rhythm baseline itself
+(R01-R04, W38: 2-4 s shots, <= 2 s opening / ending silence, no gaps) lives in
+rhythm_baseline.py and runs beside W22-W29, which keep their thresholds.
 """
 import math
 import re
@@ -80,7 +87,7 @@ MODES = ("对话", "表演")
 # Tempo cues in the observable prose. Slow cues are legitimate directing; the
 # count only tells the reviewer where the "air" in a slow render was written.
 SLOW_CUES = ["不急", "放慢", "慢慢", "缓慢", "缓缓", "缓推", "缓拉", "缓摇", "停住", "停在", "停顿", "停留", "定格",
-             "留白", "静止", "不动", "沉默", "等他", "等她", "等着", "犹豫", "迟疑", "顿了", "顿一下", "停一拍",
+             "留白", "静止", "不动", "沉默", "等他", "等她", "等着", "犹豫", "迟疑", "顿了", "顿一下", "停一拍", "半拍",
              "slowly", "pause", "hold", "beat", "linger", "still"]
 FAST_CUES = ["紧接", "紧贴", "抢话", "抢在", "连读", "不停顿", "不留停顿", "立刻", "随即", "马上", "说完即",
              "利落", "快速", "干脆", "immediately", "hard cut", "overlap", "no pause"]
@@ -142,6 +149,13 @@ def tag_of(body):
     return (tag.group(1) or tag.group(2)) if tag else ""
 
 
+def sentence_count(text):
+    """Sentences in one quoted line (1.12.0): split on . ? ! before a space / quote / end, and on 。？！."""
+    text = re.sub(r"\b(Mr|Mrs|Ms|Dr|St|Jr|Sr|vs)\.", r"\1", text.strip())
+    parts = re.split(r"(?:[.?!]+(?=[\s”\"'’]|$)|[。？！]+)", text)
+    return max(1, sum(1 for p in parts if re.search(r"\w", p)))
+
+
 def rhythm_checks(shots, rows, duration, metadata_text):
     """shots: [(no, start, end, body)]; rows: dialogue rows from dialogue_checks."""
     cfg = settings(metadata_text)
@@ -181,6 +195,7 @@ def rhythm_checks(shots, rows, duration, metadata_text):
             warns.append(f"W23 镜头{no} 长 {length:g}s 且无台词、标注无运镜（写明观众这几秒在看什么，或缩短 / 拆镜）")
 
     # W28 one whole line held in one fixed shot for >= 4 s: the cut is waiting for the sentence
+    # (1.12.0: or several lines / sentences filling one fixed shot)
     if dialogue_led:
         for no, s, e, body in shots:
             length = e - s
@@ -189,6 +204,15 @@ def rhythm_checks(shots, rows, duration, metadata_text):
             if length >= cfg["整句一镜阈值"] and len(lines) == 1 and not any(w in tag for w in CAMERA_MOVES) \
                     and (lines[0]["end"] - lines[0]["start"]) >= length - 1e-9:
                 warns.append(f"W28 镜头{no} {length:g}s 固定机位只承载一整句（{lines[0]['speaker']}）：在信息变化处切——前半句画内、后半句画外落在听者 / 插入 / 视线对象，或换景别（duration-rhythm §九）")
+            # 1.12.0: several lines / sentences held in one fixed shot that they fill (within 1 s) -- the
+            # cut is waiting for the whole exchange. Same threshold and fixed-camera rule as above.
+            elif length >= cfg["整句一镜阈值"] and lines and not any(w in tag for w in CAMERA_MOVES):
+                n_sent = sum(sentence_count(r["text"]) for r in lines)
+                span = min(max(r["end"] for r in lines), e) - max(min(r["start"] for r in lines), s)
+                if (len(lines) >= 2 or n_sent >= 2) and span >= length - 1.0 - 1e-9:
+                    who = "、".join(dict.fromkeys(r["speaker"] for r in lines))
+                    warns.append(f"W28 镜头{no} {length:g}s 固定机位承载 {len(lines)} 段台词 / {n_sent} 句（{who}）：一镜多句同样是在等句号——"
+                                 f"按句拆镜，后一句或后半句画外落在听者 / 插入 / 动作上，或换景别（duration-rhythm §九）")
 
     # W24 silence outside dialogue windows (only for clips that have dialogue)
     stats = {"mode": mode}

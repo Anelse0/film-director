@@ -24,6 +24,14 @@ a checked character's first appearance in 【起始状态】, a shot or 【贯�
 standing in for them, or a source conflict is W36. Extras (群演) may be written collectively.
 W37 (1.11.0): wardrobe kept from the appearance image without an E-layer `| 衣着来源 | …（用户指定） |` row; the default
 is appearance and outfit images apart (outfit image, or per-shot text when there is none).
+R01-R04 / W38 (rhythm_baseline.py, 1.12.0): the user's rhythm baseline is the default for dialogue-led clips and its
+violations are ERRORs, not review hints -- a shot over 4 s (R01; exempt only by a verified E-layer 长镜理由 type), opening
+or ending silence over 2 s (R02), silence between lines over 2 s (R03), 节奏档 表演 declared on a dialogue-led clip (R04);
+R02-R04 are exempt only by | 基准豁免 | …（用户指定） |. W38 lists 1-2 s gaps, unnamed head / tail functions, a slow
+speech rate without 语速理由 and rows that would loosen the baseline. A project may tune it in the nearest
+rhythm-profile.md / production-profile.md (table header 节奏基准项); loosening needs a 来源 row naming the user.
+R-codes are errors (exit 1) but leave checks.format alone; checks.rhythm_baseline reports passed / failed / off /
+not_applicable for production prompts.
 English speech estimate defaults to 4 words/s (1.7.0, user; was 3.5 in 1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
@@ -42,6 +50,7 @@ from rhythm_checks import rhythm_checks, settings as rhythm_settings, track_mode
 from variation_checks import variation_checks
 from camera_checks import camera_checks
 from wardrobe_checks import wardrobe_checks
+from rhythm_baseline import baseline_checks, load_profile
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -317,10 +326,18 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     # W22-W26 duration / rhythm review hints (lower side of time use; W05 keeps the upper side).
     variation = []
     camera = {}
+    baseline = {"status": "not_applicable"}
     if artifact == "production" and shots and not is_edit:
         rw, ri, _ = rhythm_checks(shots, dialogue, dur if dur is not None else shots[-1][2], metadata_text)
         warns.extend(rw)
         for line in ri:
+            info(line)
+        # R01-R04 / W38 user rhythm baseline (1.12.0): errors for dialogue-led clips, beside W22-W29.
+        be, bw, bi, baseline = baseline_checks(shots, dialogue, dur if dur is not None else shots[-1][2], metadata_text,
+                                               load_profile(path))
+        errors.extend(be)
+        warns.extend(bw)
+        for line in bi:
             info(line)
         # W30-W33 variation track (both 节奏档 sets): what changes from shot to shot.
         vw, vi, variation = variation_checks(shots, metadata_text)
@@ -420,13 +437,17 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     if record is not None:
         fidelity_errors, fidelity = check_record(record, beats, dur)
         errors.extend(fidelity_errors)
+    checks = {"format": "failed" if any(e.startswith("E") for e in errors) else "passed",
+              "fidelity": fidelity, "performance": "needs_review", "render": "not_tested"}
+    if artifact == "production":
+        checks["rhythm_baseline"] = baseline.get("status", "not_applicable")   # 1.12.0
     return {"file": str(path), "errors": errors, "warnings": warns, "info": infos, "lens": lens,
             "task": task, "parameters": parameter_state, "dialogue": dialogue, "variation": variation, "camera": camera, "wardrobe": wardrobe,
+            "baseline": baseline,
             "assets": {"declared": sorted(f"{kind}{n}" for kind, n in declared), "used": sorted(f"{kind}{n}" for kind, n in used)},
             "fidelity_scope": "original_exact" if record and record.get("mode") == "raw" else "beat_text_only; other prose and source semantics require review" if record else "not_checked",
             "ext_phrases": {},  # retained return key for 2.2 callers; no word-frequency judging
-            "checks": {"format": "failed" if any(e.startswith("E") for e in errors) else "passed",
-                       "fidelity": fidelity, "performance": "needs_review", "render": "not_tested"}}
+            "checks": checks}
 
 
 def main(argv):

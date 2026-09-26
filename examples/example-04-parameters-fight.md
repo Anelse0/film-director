@@ -24,6 +24,6 @@
 
 ## 验收边界
 
-运行 `python3 scripts/validate_prompt.py examples/example-04-parameters-fight.prompt.md --json` 可复查时间、台词和参数。镜头3快速长句的估时警告应保留并排练核对；不能删原句或调快全场语速来消警告。镜头5快动作、画外截断和三秒沉默需要真实生成检验。
+运行 `python3 scripts/validate_prompt.py examples/example-04-parameters-fight.prompt.md --json` 可复查时间、台词和参数。镜头3快速长句的估时警告应保留并排练核对；不能删原句或调快全场语速来消警告。镜头5快动作、画外截断和三秒沉默需要真实生成检验。1.12.0 起：本例是 1.2 版的时间设计（30 s、5–6 s 的镜、镜头6 三秒沉默），在默认的用户节奏基准下报 R01 / R02 / R03（`references/duration-rhythm.md` §十二）；保留作参数对照，不是节奏样板。
 
 2.2.0 与 2.3.0 这一 Prompt 文件相同；2.3.1 纠正的是旧案例内部矛盾及后续规则/校验的退化，不把旧缺陷全部归因于2.3.0。详见 `production/acceptance-2.3.1.md`。

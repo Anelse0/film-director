@@ -1,6 +1,8 @@
 # film-director
 
-版本 **1.11.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜（含导演语法：景别 / 运镜 / 动线 / 剪辑 / 决策载体）、时长与节奏（两条时间轨 + 变化轨）、参考资产计划、Prompt 编译、连续性与质量检查、成片实测。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+版本 **1.12.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜（含导演语法：景别 / 运镜 / 动线 / 剪辑 / 决策载体）、时长与节奏（两条时间轨 + 变化轨）、参考资产计划、Prompt 编译、连续性与质量检查、成片实测。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+
+1.12.0 用户节奏基准写进 skill：对话档默认按用户基准校验（镜长 2–4 s、开头 / 结尾无声各 ≤2 s、句间不留空），违反报 ERROR——R01 单镜 >4 s、R02 首尾无声 >2 s、R03 句间无声 >2 s、R04 给对话场声明表演档；不能在 QA 写理由保留，只有 E 层 `长镜理由`（脚本按类型核对）与 `基准豁免`（用户指定）两条路；项目可在 `rhythm-profile.md` / `production-profile.md`（表头 `节奏基准项`）调整，放宽须写明用户定。W28 另查一镜多句；S5 排完时间线先逐镜核对，S7 用户说慢就整条重核（§7.5）。`scripts/rhythm_baseline.py`。触发：Offset EP01 s04（2/2/2/6/2/6 s，校验 0 error）。**工程完成；效果未验证**。
 
 1.11.0 衣着来源的默认值（用户定）：形象图与服装图分开——形象图只管面部与发型，衣着按服装图，没有服装图按逐镜文字；只有用户指定才沿用形象图里的衣服，并在 E 层 `| 衣着来源 | 名字：形象图中的衣服（用户指定） |` 登记。校验新增 W37（沿用形象图衣服却没登记）。
 
@@ -64,7 +66,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `templates/*` | 分镜卡 / Prompt / 资产简报 / 登记表 / 生产记录骨架（`script-scene.md` 为输入格式参照） |
 | `scripts/camera_library.py` | 运镜库查询：`--list` / `--query` / `--slots`（五段填写模板）/ `--raw`（原文） |
 | `scripts/emotion_library.py` | 按编号或关键词读取完整条目，`--list` 查看索引 |
-| `scripts/validate_prompt.py` | S6 之后必跑；W22–W29 时间轨、W30–W33 变化轨（`rhythm_checks.py` / `variation_checks.py`）、W34–W35 运镜库（`camera_checks.py`）、E23 / W36 / W37 衣着（`wardrobe_checks.py`） |
+| `scripts/validate_prompt.py` | S6 之后必跑；R01–R04 / W38 用户节奏基准（`rhythm_baseline.py`，ERROR）、W22–W29 时间轨、W30–W33 变化轨（`rhythm_checks.py` / `variation_checks.py`）、W34–W35 运镜库（`camera_checks.py`）、E23 / W36 / W37 衣着（`wardrobe_checks.py`） |
 | `scripts/measure_clip.py` | 有成片时：切点 / 有声占比 / 语速校准 / 视觉变化谱对照 Prompt 的时间轨与变化轨（需 ffmpeg） |
 | `examples/example-01-kitchen-keys*.md` | 完整走查 + 通过校验的 Prompt |
 | `examples/example-02-one-scene-three-lenses.md` | 同一场戏三个透镜的对照，含一版通过校验的 Prompt |
