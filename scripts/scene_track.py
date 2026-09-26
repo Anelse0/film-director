@@ -14,7 +14,12 @@
 台词仍是锁定输入。
 
 - 参考清单：本场有哪些场地 / 场景、几段（行）、有几次时间跳、剧本总估时（轨表"总估时"或各行估时之和；
-  两种轨表都没有的旧稿回退到节拍表"总窗口 ≈ N s"）。
+  两种轨表都没有的旧稿回退到节拍表"总窗口 ≈ N s"）。地点以"同上 / 同前 / 连续 / 接上 / 紧接"开头的行沿用
+  上一行的场地（1.13.0：film-creative 4.0 模板"地点沿用上一行写'同上'"；"同上，沿通道往出口"仍是同一处），
+  括号里的子空间照旧并到该场地下；第一行没有上一行可沿用，按原文列出。
+- 设计卡（1.13.0）：film-creative 4.0+ 剧本页正文前的"## 设计"，只取"静音测试"一格列出——关掉声音也看得懂
+  谁要、谁赢的那个动作，S5 定视觉重点与峰值事件时的候选（stage-5 §5.1b）。告知，不锁定：不报问题、不影响
+  退出码；没有设计卡的旧稿、没填或写"本场不转"的卡照旧，只是不列。
 - 场级合计：各分镜卡头部"clip 时长 N s"之和。合计 / 剧本估时 ≥ 1.2 → **提醒**（多出来的时间观众在看什么、
   是不是同一个画面拉长了），照常继续，不退回；回不回剧本层由用户定。1.2 按 THE ORDER 已出分镜的 5 场定：
   只有 EP03 场 4 的两版超出（1.28 / 1.30），其余 1.02–1.13（`[推论]`，见 references/duration-rhythm.md §十一）。
@@ -42,8 +47,10 @@ COLS = (('seg', ('段', '#')), ('loc', ('地点',)), ('act', ('活动',)), ('tim
         ('new', ('新看见',)), ('anchor', ('锚句',)), ('est', ('估时',)), ('change', ('变化',)), ('loss', ('删掉损失',)))
 EVENT_ONLY = ('change', 'loss')  # 3.6 场面轨"主要活动（类别；变化写括号）"也含"变化"，只在事件轨里读
 EMPTY = {'', '—', '-', '无', '空', '__'}
-CONTINUOUS = ('连续', '接上', '同上', '紧接')
+CONTINUOUS = ('连续', '接上', '同上', '同前', '紧接')  # 地点 / 时间沿用上一行（与 film-creative review_script 同一组）
 PARENS = re.compile(r'[（(][^)）]*[)）]')
+DESIGN_HEAD = re.compile(r'^##\s*设计(?=[\s（(]|$)[^\n]*$', re.M)  # film-creative 4.0+ 设计卡；"## 设计原则"一类不算
+SILENT_CELL = re.compile(r'静音测试[^：:\n]{0,8}[：:]\s*([^\n]*)')
 CLIP_LEN = re.compile(r'clip\s*时长\s*(\d+(?:\.\d+)?)\s*s')
 DIFF_LINE = re.compile(r'与(?:场面轨|事件轨)的差异\s*[:：]?\s*(.*)')
 DELIVER_COL = '交付变化'
@@ -102,10 +109,13 @@ def is_change(row):
 
 
 def reference_list(track):
-    """本场有哪些场地 / 场景（按出现顺序去重，括号里的子空间并到同一场地下）。"""
-    places, jumps = {}, 0
+    """本场有哪些场地 / 场景（按出现顺序去重，括号里的子空间并到同一场地下）。
+    地点以"同上 / 同前 / 连续 / 接上 / 紧接"开头的行沿用上一行的场地，括号里的子空间并到那个场地下。"""
+    places, jumps, prev = {}, 0, None
     for k, r in enumerate(track['rows']):
-        base = _base(r['loc'])
+        inherit = prev is not None and r['loc'].startswith(CONTINUOUS)
+        base = prev if inherit else _base(r['loc'])
+        prev = base
         sub = PARENS.findall(r['loc'])
         places.setdefault(base, [])
         for s in (x for grp in sub for x in re.split(r'[、，,]', grp.strip('（）()'))):
@@ -116,6 +126,21 @@ def reference_list(track):
         if k and t and t not in EMPTY and not t.startswith(CONTINUOUS):
             jumps += 1
     return places, jumps
+
+
+def read_design(text):
+    """film-creative 4.0+ 正文前的"## 设计"：只取"静音测试"一格。没有这一节（旧稿）返回 None；
+    有这一节但这一格没写、写"无"或还是模板占位（"__（靠哪个动作）"）时 silent_test 为 None。"""
+    m = DESIGN_HEAD.search(text)
+    if not m:
+        return None
+    sec = re.split(r'\n## ', text[m.end():], maxsplit=1)[0]
+    cell = SILENT_CELL.search(sec)
+    v = cell.group(1).strip() if cell else ''
+    outside = PARENS.sub('', v).strip()
+    if outside and (set(outside) <= set('_ ') or outside in EMPTY):
+        v = ''
+    return {'silent_test': v or None}
 
 
 def clip_total(paths):
@@ -229,10 +254,11 @@ def check_delivery(track, clips):
 
 
 def run(script, clips=(), plan=None):
-    track = read_track(Path(script).read_text(encoding='utf-8'))
+    text = Path(script).read_text(encoding='utf-8')
+    track = read_track(text)
     places, jumps = reference_list(track)
     res = {'script': str(script), 'track_kind': track['kind'], 'segments': track['rows'], 'places': places, 'jumps': jumps,
-           'script_total': track['total'], 'script_total_source': track['source'],
+           'script_total': track['total'], 'script_total_source': track['source'], 'design': read_design(text),
            'clips': [], 'production_total': None, 'ratio': None, 'reminder': None,
            'plan_diff': None, 'delivery': None, 'undelivered': [], 'delivery_reminder': None, 'problems': []}
     if clips:
@@ -279,6 +305,9 @@ def render(res):
         out.append(f'{name}：没有场面轨或事件轨（旧稿或非 film-creative 来源），按剧本正文与场景标题读场地。')
     if res['script_total'] is not None:
         out.append(f"剧本估时 {res['script_total']:g} s（{res['script_total_source']}）")
+    if res['design'] and res['design']['silent_test']:
+        out.append(f"设计卡·静音测试（告知，不锁定）：{res['design']['silent_test']}——关掉声音也看得懂谁要、谁赢的那个动作；"
+                   f"S5 定视觉重点与峰值事件时的候选，用不用由分镜定")
     if res['production_total'] is not None:
         out.append(f"分镜合计 {res['production_total']:g} s = " + ' + '.join(f'{s:g}' for _, s in res['clips'])
                    + (f"；合计 / 剧本估时 = {res['ratio']}" if res['ratio'] is not None else '；剧本没有估时，无法对照'))

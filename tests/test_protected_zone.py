@@ -1,5 +1,10 @@
 """film-director protected zone: production/performance core hash-locked at the 1.4.0 baseline.
 
+1.13.0 (2026-09-26): film-creative 4.0.0 hand-off -- stage-5 §5.1b gains one bullet: the script page's design card
+(`## 设计`) 静音测试 cell is a candidate for visual emphasis / the peak event, informational and not locked (no new
+required field; delivery, variation track, W24 / W30-W33 unchanged). One added line only: the 1.12.0 text is byte-identical
+with that line removed. stage-5 hash re-set in the same commit with a CHANGELOG entry; scene_track.py stays outside the zone.
+
 1.12.0 (2026-09-26): the user's rhythm baseline becomes the default for dialogue-led clips -- scripts/rhythm_baseline.py
 (R01-R04 errors, W38 notices, project profile 节奏基准项) joins the zone and is wired into validate_prompt.py
 (checks.rhythm_baseline; the checks dict moved into a variable, same expression); rhythm_checks.py W28 also covers several
@@ -82,7 +87,7 @@ PROTECTED = {
     'references/emotion-performance.md': 'a150f6047b6a484a6ab858a93773d9c28fab022ac274bcc358dd20684468d8d0',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': 'b04d317cc1dd2ad609244acd6210c0d953e4c8df7484b13bc815bb76bb9c78b0',
-    'references/stage-5-directing-storyboard.md': '1ce27f060aed3a59bff641e79dd00d23b71d16a7dc8126ff83fe21baaeb30e82',
+    'references/stage-5-directing-storyboard.md': 'dd10509a06f9b416918f02b2e6515b0a7a979e5768423a25a37fba31a5e68c5f',
     'references/stage-5b-reference-assets.md': 'aa0bf1aead92c3e0e413e5ecfc9c0c6ad28feec33c7a6aba39ac564a174fcac6',
     'references/stage-6-prompt-compiler.md': '99d21be692487ee932c35f47f0f7a479fd78853b3b4007c04e9815dfb53dbde4',
     'references/stage-7-qa-continuity.md': '4db36c7a96fb56dcfd195ff859538cf61ca0d74bb314d6663b5df17a27939e44',
