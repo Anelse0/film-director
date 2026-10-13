@@ -19,6 +19,10 @@ E23 (direction_checks.py) is the one heuristic ERROR, not a format fact: a towar
 shot that also names a landmark as ahead of the character (朝X走 / 前面的X / 退向X) without anchoring X to the
 camera (镜头身后 / 画面深处 / 画左右) in the same text unit — the model renders the character walking away, so
 the wording is fixed before a render; INFO when movement exists but 【贯穿要求】 has no 方向 line.
+W35 (tone_checks.py) reviews tone cues: freeze / slow head turn toward an off-screen arrival / stare + lowered
+voice / approach toward camera with no state / head-down-eyes-up or eyes-only glance read as suspense whatever
+the tone word says; WARN per shot when the prompt declares a light tone, or when such cues cluster with no tone
+declared; INFO when 悬疑 / 喜剧 is declared (freeze and deadpan are those genres' own devices).
 English speech estimate defaults to 3.5 words/s (1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
@@ -36,6 +40,7 @@ from production_contract import metadata, task_type, parameters, roles_from_fiel
 from rhythm_checks import rhythm_checks, settings as rhythm_settings, track_mode, scene_mode
 from variation_checks import variation_checks
 from direction_checks import direction_checks
+from tone_checks import tone_checks
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -324,6 +329,11 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         se, si = direction_checks(text, shots)
         errors.extend(se)
         for line in si:
+            info(line)
+        # W35 tone cues: suspense staging (freeze / slow turn / stare + whisper / stateless approach) in a non-suspense scene.
+        tw, ti = tone_checks(text, shots, metadata_text)
+        warns.extend(tw)
+        for line in ti:
             info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:

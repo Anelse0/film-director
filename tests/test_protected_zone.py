@@ -1,4 +1,9 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.4.1 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.4.2 baseline.
+
+1.4.2 (2026-10-13): tone-cue rule (S4 §4.4b: freeze / slow turn / stare + whisper / stateless approach / head-down-
+eyes-up read as suspense whatever the tone word says; lexicon 发现（轻松） row; genre-packs G2/G5 notes; stage-5 §5.1e/§5.9;
+stage-7 §7.2) and W35 in the new tone_checks.py (added to the zone) wired into validate_prompt.py; hashes re-set in the
+same change with a CHANGELOG entry. Trigger: offset EP05 s03-clip02 v1 ending rendered "like a thriller".
 
 1.4.1 (2026-10-13): spatial-direction rule (landmark position and character movement both relative to the camera;
 stage-5 §5.2/§5.5/§5.9, stage-6 §6.2/§6.6, stage-7 §7.2, prompt-templates T1) and E23 + 方向句 INFO in the new
@@ -44,17 +49,17 @@ PROTECTED = {
     'assets/emotion-library.json': 'ef22ac8bfec33567344e13a927d47f7b577c3c6f07b110cc5a2e316523599977',
     'references/emotion-performance.md': 'a150f6047b6a484a6ab858a93773d9c28fab022ac274bcc358dd20684468d8d0',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
-    'references/stage-4-performance.md': 'df8bc48db59bc120f728d8ad1901048332c890819324512d721fc0b4886795de',
-    'references/stage-5-directing-storyboard.md': '89399bf6a240017ff5018b3932b1ccf28bb33c46d742222001183effbab70ee5',
+    'references/stage-4-performance.md': '59fa747507929046b4c9947416b885214780a96a76df7d567bdeeefa49ab7fc4',
+    'references/stage-5-directing-storyboard.md': '8a15583ce53d8b4d5fd11bd58576439222cb328511a64f205b33e2d253d55484',
     'references/stage-5b-reference-assets.md': 'ee87fc676e3128def78a2aaa220688fe68b472768e669934ff52e5b4c01e7a77',
     'references/stage-6-prompt-compiler.md': 'f27a7dcdc83db7dab4e9640cc75b453a5e7fd41a07f92b73eb10f724ea19a5ef',
-    'references/stage-7-qa-continuity.md': '6f7079aefcbcf7303165fb9a5aa320fd33f3db7d8eb767fd34cd71d94f989121',
+    'references/stage-7-qa-continuity.md': '072e9d22e309b7ca34750e68a3c37e6aa7a0e93ecf4d13c7e66bf336626353b3',
     'references/production-workflow.md': 'db8cc8de428952283a2cda4d7d23e0b1b0f4784ab18c54b57f674ca93eac6cfd',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
     'references/seedance-2.5-capabilities.md': 'a754e6299e90842df9ec17f31d278e8b28c51d05f2e432774b3a78530a347807',
     'references/camera-vocabulary.md': '06a5c14733a3c2cffb5c8dcaa02d107e6ab9f57982dfae0708b06b1583a3b93e',
-    'references/externalization-lexicon.md': '292b8363a566a18aae1eae2b3e2c085760930d2dfb608b2dc3040288cb03bbbb',
-    'references/genre-packs.md': '998602b50c9773ebac196991dd52bee21352695e4e64507215c90df5b60f5d0d',
+    'references/externalization-lexicon.md': '9bbec13c8ef242385b915d6e77711401e0a5e3ac92afceb51520e9a77a6b22db',
+    'references/genre-packs.md': 'e8bf4dd45abb22776ac4dec2490551e1a9aedddfd26cca459bc6557df3c95513',
     'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
     'templates/prompt-templates.md': '69682b3a47f48fd53858a44226a88bfd7b53b975f7c1bb632b75f659ff07856e',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
@@ -65,7 +70,8 @@ PROTECTED = {
     'scripts/rhythm_checks.py': 'b1293f1d3f91eaad415e8a984abaf9fcc4344b4736351c6dba7fbf4fba3575f3',
     'scripts/variation_checks.py': 'c1a95f98ff786b8479ed7aa169e27a306d4d31d1c6feb28e6b2e9b031e350ef0',
     'scripts/direction_checks.py': 'fdbd694059a9ca156946345ef4ac29ae95ad10fa22aea5fe52be20969fbf55ea',
-    'scripts/validate_prompt.py': '8160c2affe20f511e38d19543978e958bbf489c425e0ac90bfcaa88a3c6888a8',
+    'scripts/tone_checks.py': '77225c6785b9c729bc737b16ccfe0593cf18919a59d6f237397f4fe61901b2b5',
+    'scripts/validate_prompt.py': 'd965720d4f1f0c0b7b12e728ba5c17ed7413c2914ff3caa52c8ed87d00006798',
     'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
     'scripts/production_contract.py': '963653540c39519d99a731749736e96b39bed17005305af1082c857af5426bfa',
     'scripts/production_preflight.py': '80379ec01b3f952ee82cc1611e38b555ad41838bd0bb6f0ac52ddb5453605702',
