@@ -1,4 +1,8 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.6.1 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.6.2 baseline.
+
+1.6.2 (2026-10-13): wording that read as "trim performance" removed from stage-4 §4.4 / §4.4c, stage-5 §5.6,
+stage-6 §6.2 and the T1 template (brevity applies to camera prose and background activity only; several beats per
+shot are written in full). Hashes re-set with a CHANGELOG entry.
 
 1.6.1 (2026-10-13): W38 length budget raised to 3,000 CJK / 6,000 EN words (user: the agent was still trimming
 performance); INFO line no longer quotes the official 500-character figure. Hashes for guide_checks.py, stage-6 and
@@ -59,10 +63,10 @@ PROTECTED = {
     'assets/emotion-library.json': 'ef22ac8bfec33567344e13a927d47f7b577c3c6f07b110cc5a2e316523599977',
     'references/emotion-performance.md': 'c12d54b915edccc49a0d4f9c31428f1c2d4f15dbe525e85c46a4df8649714089',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
-    'references/stage-4-performance.md': '0e88bfe2ba623f09bded41dec918fe784f3c9cdb4dd47a3d4bb76c488e3a1b9f',
-    'references/stage-5-directing-storyboard.md': '409faef71233281a38617b3539f6af409bf09ffe6e92cefecc08c8bf8a393fce',
+    'references/stage-4-performance.md': 'ddb2c761a20c58fc045194597f384b760b35351aedc1f0e2d82de892a40a20a6',
+    'references/stage-5-directing-storyboard.md': 'c2a2d331867aa027ca5403f9a5ccc4001ef6415808c47004e348a41df378a33c',
     'references/stage-5b-reference-assets.md': 'adb664063a78470fb4fd35ae7f5aa0a75b7c57ebfe5852a9a8606e294f3c2551',
-    'references/stage-6-prompt-compiler.md': '6828b8855bc285afd79b96c6e09bf55cfbd1259add445734604b94e864294c0f',
+    'references/stage-6-prompt-compiler.md': 'fb581bf14bda8e17fe054112dd0179f5aef18836c56aab3167ed8e2c7a382944',
     'references/stage-7-qa-continuity.md': '27ad5f36967aa943a8541e00376cd1561a4f5522791d6fdb1c24e56bba788623',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
@@ -71,7 +75,7 @@ PROTECTED = {
     'references/externalization-lexicon.md': 'd89d0cc4ea98e63c9673984c84abd4081729ddaff2057616af582f141891f9da',
     'references/genre-packs.md': 'e8bf4dd45abb22776ac4dec2490551e1a9aedddfd26cca459bc6557df3c95513',
     'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
-    'templates/prompt-templates.md': '04c4a1bf700cc20adcdaa67549de6ce8f197429538acc79f3e37927259d06102',
+    'templates/prompt-templates.md': 'a694e4809d62a97460fe561bea5cd368176638bfd32dfb275c611e9e29088ea2',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '96e7fcb783028d6c258005c962c18b9f2cdbd3bc36d52596bc7a5568900b838b',
     'templates/shot-card.md': '64ebb3d3550e8168e3427005b1bf66f6e4baeacca90b3c97b57609c55278629d',
