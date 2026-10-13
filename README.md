@@ -1,8 +1,10 @@
 # film-director
 
-版本 **1.4.0**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜（含导演语法：景别 / 运镜 / 动线 / 剪辑 / 决策载体）、时长与节奏（两条时间轨 + 变化轨）、参考资产计划、Prompt 编译、连续性与质量检查、成片实测。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
+版本 **1.4.1**。Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导演与分镜（含导演语法：景别 / 运镜 / 动线 / 剪辑 / 决策载体）、时长与节奏（两条时间轨 + 变化轨）、参考资产计划、Prompt 编译、连续性与质量检查、成片实测。调用：`/film-director` 或在对话中描述任务（拆分镜、转 Prompt、表演测试、改成片）。
 
 1.4.0 把"镜与镜之间的变化"做成与时间平权的第三条设计轨：每条 clip 先声明峰值镜（E 层 `峰值镜 | N`），每镜声明四维变化 `【变化：景别 全→近｜机位 固定→推｜光 正→侧｜幅度 1→3】`；校验新增 W30–W33（连续零变化 / 无镜长对比 / 未声明峰值 / 峰值落在全景或越肩），`节奏档` 改为选检查集（对话 = W22–W33，表演 = W24 + W30–W33）；英文语速默认 3.5 词/s（2.5 = 均值 = 下限）；`measure_clip.py` 输出视觉变化谱（抽帧拼图 / 相邻镜直方图距离 / 镜内运动）对照变化轨，指出"平在设计还是渲染"。**工程完成（测试通过）；效果为非盲呈现改善**——触发案例的 v3 尚未生成对照，见 `CHANGELOG.md` 与 `references/validation-log.md`。
+
+1.4.1 加方向检查：人物朝向 / 远离画外地标（门、车、吧台、窗）时，地标与运动都以镜头为参照（在镜头身后 / 画面深处 / 画左右；朝镜头走来 / 背对镜头走远），场景图定了机位朝向时【贯穿要求】写一句方向；校验新增 E23（ERROR：朝镜头走的镜里地标没标相对镜头的位置，停下改写再生成）与方向句 INFO。触发案例：offset EP05 clip01 v2 成片人物走反方向（`references/validation-log.md` 2026-10-13）。
 
 创意前端（概念、故事、剧本、台词创作与改写）由独立的 [film-creative](https://github.com/Anelse0/film-creative) Skill 承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
 
@@ -46,7 +48,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `references/source-analysis.md` | 审计 / 更新来源时 |
 | `templates/*` | 分镜卡 / Prompt / 资产简报 / 登记表 / 生产记录骨架（`script-scene.md` 为输入格式参照） |
 | `scripts/emotion_library.py` | 按编号或关键词读取完整条目，`--list` 查看索引 |
-| `scripts/validate_prompt.py` | S6 之后必跑；W22–W29 时间轨、W30–W33 变化轨（`rhythm_checks.py` / `variation_checks.py`） |
+| `scripts/validate_prompt.py` | S6 之后必跑；W22–W29 时间轨、W30–W33 变化轨、E23 方向（`rhythm_checks.py` / `variation_checks.py` / `direction_checks.py`） |
 | `scripts/measure_clip.py` | 有成片时：切点 / 有声占比 / 语速校准 / 视觉变化谱对照 Prompt 的时间轨与变化轨（需 ffmpeg） |
 | `examples/example-01-kitchen-keys*.md` | 完整走查 + 通过校验的 Prompt |
 | `examples/example-02-one-scene-three-lenses.md` | 同一场戏三个透镜的对照，含一版通过校验的 Prompt |

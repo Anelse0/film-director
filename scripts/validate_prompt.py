@@ -15,6 +15,10 @@ W30-W33 (variation_checks.py) review the variation track — what changes betwee
 runs / too few changing dimensions / G6 repeat without a new element (W30), no shot-length contrast
 (W31), undeclared 峰值镜 or missing 【变化】 fields (W32), peak shot in a wide / OTS / fixed-while-
 others-move shot (W33). 节奏档 selects a check set (对话: W22-W33; 表演: W24 + W30-W33), never INFO-only.
+E23 (direction_checks.py) is the one heuristic ERROR, not a format fact: a toward-camera / backward-tracking
+shot that also names a landmark as ahead of the character (朝X走 / 前面的X / 退向X) without anchoring X to the
+camera (镜头身后 / 画面深处 / 画左右) in the same text unit — the model renders the character walking away, so
+the wording is fixed before a render; INFO when movement exists but 【贯穿要求】 has no 方向 line.
 English speech estimate defaults to 3.5 words/s (1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
@@ -31,6 +35,7 @@ from prompt_structure import Document, dialogue_checks
 from production_contract import metadata, task_type, parameters, roles_from_fields, check_parameters, TASKS
 from rhythm_checks import rhythm_checks, settings as rhythm_settings, track_mode, scene_mode
 from variation_checks import variation_checks
+from direction_checks import direction_checks
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -314,6 +319,11 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         vw, vi, variation = variation_checks(shots, metadata_text)
         warns.extend(vw)
         for line in vi:
+            info(line)
+        # E23 spatial direction: landmark position and movement both relative to the camera (ERROR by decision).
+        se, si = direction_checks(text, shots)
+        errors.extend(se)
+        for line in si:
             info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:
