@@ -68,15 +68,21 @@ G6_RE = re.compile(r"\|\s*透镜\s*\|[^|\n]*\bL19\b|\|\s*(?:类型|类型包|基
 
 
 def size_rank(value):
-    """Visibility rank of a size word (last size word wins: '全景缓推到中景' ends in 中景)."""
+    """Visibility rank of a size word (last size word wins: '全景缓推到中景' ends in 中景).
+
+    1.6.0: the winner is the occurrence that ENDS last, longest key on a tie — so 中近 / 中近景 rank 3
+    instead of being read as the trailing 近 / 近景 (rank 4)."""
     if not value:
         return None
     low = value.lower()
     best = None
     for key, rank in SIZE_RANK:
         pos = low.rfind(key)
-        if pos >= 0 and (best is None or pos > best[0] or (pos == best[0] and len(key) > best[2])):
-            best = (pos, rank, len(key))
+        if pos < 0:
+            continue
+        end = pos + len(key)
+        if best is None or end > best[0] or (end == best[0] and len(key) > best[2]):
+            best = (end, rank, len(key))
     return best[1] if best else None
 
 
@@ -97,14 +103,39 @@ def tag_of(body):
     return (tag.group(1) or tag.group(2)) if tag else ""
 
 
+TRACK_ROW_RE = re.compile(r"\|\s*变化轨\s*\|\s*([^|\n]+)\|")
+SHOT_PREFIX_RE = re.compile(r"^\s*(?:镜头|镜|Shot)\s*(\d+)\s*[：:]?\s*", re.I)
+
+
+def parse_track_row(metadata_text):
+    """E-layer row `| 变化轨 | 镜1：景别 …｜机位 …｜光 …｜幅度 …；镜2：… |` → {shot_no: parsed}; None when absent.
+
+    1.6.0: the variation track is declared here (and in the shot card), not inside the Prompt body —
+    the inline 【变化：…】 field is C/E metadata the model would otherwise read as instructions."""
+    m = TRACK_ROW_RE.search(metadata_text)
+    if not m:
+        return None
+    out = {}
+    for chunk in re.split(r"[；;]", m.group(1)):
+        chunk = chunk.strip()
+        pm = SHOT_PREFIX_RE.match(chunk)
+        if not pm:
+            continue
+        out[int(pm.group(1))] = parse_field_text(chunk[pm.end():], separators=r"[｜|]")
+    return out
+
+
 def parse_field(body):
-    """Return {dim: (from, to, changed)} plus '新增' and 'raw', or None when the shot has no field."""
+    """Return {dim: (from, to, changed)} plus '新增' and 'raw', or None when the shot has no inline field (legacy form)."""
     m = FIELD_RE.search(body)
     if not m:
         return None
-    raw = m.group(1) or m.group(2)
+    return parse_field_text(m.group(1) or m.group(2))
+
+
+def parse_field_text(raw, separators=r"[｜|；;]"):
     parsed = {"raw": raw.strip(), "新增": None}
-    for item in re.split(r"[｜|；;]", raw):
+    for item in re.split(separators, raw):
         item = item.strip()
         if not item:
             continue
@@ -140,11 +171,13 @@ def profile(shots, metadata_text):
     """Per-shot variation profile: declared or inferred dimensions, change flags, size rank, camera, OTS."""
     rows = []
     prev = None
+    track = parse_track_row(metadata_text)
     for no, s, e, body in shots:
         tag = tag_of(body)
-        field = parse_field(body)
-        row = {"no": int(no), "start": s, "end": e, "declared": field is not None, "changes": {}, "新增": None,
-               "repeat_of": None}
+        field = (track or {}).get(int(no)) or parse_field(body)
+        source = "E 层" if track and int(no) in track else ("行内" if field else "推断")
+        row = {"no": int(no), "start": s, "end": e, "declared": field is not None, "source": source, "changes": {},
+               "新增": None, "repeat_of": None}
         repeat = REPEAT_RE.search(body)
         if repeat:
             row["repeat_of"] = int(next(g for g in repeat.groups() if g))
@@ -225,8 +258,11 @@ def variation_checks(shots, metadata_text):
     elif peak not in {r["no"] for r in rows}:
         warns.append(f"W32 峰值镜 {peak} 不在分镜时间线里（镜头 {[r['no'] for r in rows]}）")
     if undeclared:
-        warns.append(f"W32 镜头 {undeclared} 缺【变化：景别 a→b｜机位 a→b｜光 a→b｜幅度 n→m】字段"
-                     f"（S5 变化轨；缺字段时只能按标注推断景别 / 机位两维，光与幅度不可检）")
+        if parse_track_row(metadata_text) is None:
+            warns.append(f"W32 镜头 {undeclared} 无变化声明：E 层无 `变化轨` 行（1.6.0 起写 `| 变化轨 | 镜1：景别 …｜机位 …｜光 …｜幅度 …；镜2：… |`，"
+                         f"不进 Prompt 正文；缺声明时只能按标注推断景别 / 机位两维，光与幅度不可检）")
+        else:
+            warns.append(f"W32 E 层 `变化轨` 行缺镜头 {undeclared}（每镜一段，`镜N：景别 a→b｜机位 a→b｜光 a→b｜幅度 n→m`）")
 
     # W30 zero-change runs (from the second shot on)
     run, run_start = 0, None
@@ -288,6 +324,7 @@ def variation_checks(shots, metadata_text):
     # INFO profile
     counts = {d: sum(1 for r in rows[1:] if r["changes"].get(d)) for d in DIMS}
     marks = " · ".join(f"镜{r['no']} {change_marks(r)}{'' if r['declared'] else '(推断)'}" for r in rows[1:])
+    marks += f"；声明来源 {' / '.join(sorted({r['source'] for r in rows}))}"
     if peak is None:
         peak_txt = "未声明"
     else:

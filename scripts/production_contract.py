@@ -58,12 +58,17 @@ def task_type(fields, text):
     return None
 
 
+NAME_PATTERN = r'@[^\s：:=＝，。；、（）()【】\[\]"“”→@,;!?<>|]+'
+
+
 def roles_from_fields(fields):
+    """`content.role 映射 | img1→reference_image, @Theo-基础形象→reference_image …` (numbered or @名 keys)."""
     raw = fields.get('content.role 映射', fields.get('content.role', ''))
     roles = {}
     consumed = []
-    for match in re.finditer(rf'({ASSET_PATTERN})\s*(?:→|=|:)\s*([a-z_]+)', raw, re.I):
-        ident = asset_id(match[1])
+    for match in re.finditer(rf'({ASSET_PATTERN}|{NAME_PATTERN})\s*(?:→|=|:)\s*([a-z_]+)', raw, re.I):
+        token = match[1]
+        ident = token if token.startswith('@') and not re.fullmatch(ASSET_PATTERN, token, re.I) else asset_id(token)
         if ident in roles: raise ValueError(f'duplicate role: {ident}')
         roles[ident] = match[2]
         consumed.append((match.start(), match.end()))
@@ -110,6 +115,11 @@ def check_parameters(task, params, roles, strict=False):
     if task in {'edit','extend'} and fmt == 'mp4':
         warnings.append('W22 编辑/延长建议输入输出 MOV；MP4 不是硬错误')
     for ident, role in roles.items():
+        if ident.startswith('@'):
+            # A platform asset name carries no media kind; the preflight resolves it against the record.
+            if role not in set(REF_ROLES.values()) | {'first_frame', 'last_frame'}:
+                errors.append(f'E22 {ident} 的 role 不是有效的 content.role')
+            continue
         kind = re.sub(r'\d+', '', ident)
         allowed = {REF_ROLES.get(kind)}
         if task == 'first_last' and kind == 'img': allowed |= {'first_frame','last_frame'}

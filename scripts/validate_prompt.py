@@ -23,6 +23,12 @@ W35 (tone_checks.py) reviews tone cues: freeze / slow head turn toward an off-sc
 voice / approach toward camera with no state / head-down-eyes-up or eyes-only glance read as suspense whatever
 the tone word says; WARN per shot when the prompt declares a light tone, or when such cues cluster with no tone
 declared; INFO when 悬疑 / 喜剧 is declared (freeze and deadpan are those genres' own devices).
+1.6.0 (guide_checks.py, official FAQ): W36 delivery notes after a quoted line / re-quoted fragments (subtitle trigger),
+W37 audio policy at start and end with music synonyms enumerated, W38 length budget (INFO always; WARN > 1,500 CJK /
+900 EN words, E-layer 字数上限 / 词数上限), W39 character assets in first-appearance order and E-layer 上传与角色 order,
+W40 intensity labels (眼睛发光 trigger), W41 declared-but-unreferenced assets. Assets may be numbered (图1 / @图片1) or
+named (`@Theo-基础形象：…` declaration lines, `@Theo-基础形象` references). The variation track is read from the E-layer
+`变化轨` row first (inline 【变化：…】 fields are legacy).
 English speech estimate defaults to 3.5 words/s (1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
@@ -41,6 +47,7 @@ from rhythm_checks import rhythm_checks, settings as rhythm_settings, track_mode
 from variation_checks import variation_checks
 from direction_checks import direction_checks
 from tone_checks import tone_checks
+from guide_checks import guide_checks
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -85,9 +92,27 @@ SECTION_ALIASES = {
     "global": ["【贯穿要求】", "GLOBAL RULES"],
 }
 
-ASSET_REF_RE = re.compile(r"(?:@?图片?|@?视频|@?音频|image|img|video|vid|audio|aud)\s*(\d+)", re.I)
+ASSET_REF_RE = re.compile(r"(?:@?\[?图片?|@?\[?视频|@?\[?音频|image|img|video|vid|audio|aud)\s*(\d+)\]?", re.I)
 ASSET_DECL_RE = re.compile(r"(?:@?图片?|@?视频|@?音频|image|img|video|vid|audio|aud)\s*(\d+)(?:\s*[-–至到]\s*(?:图片?|image|img)?\s*(\d+))?(?=\s*(?:=|＝|:|：|为))", re.I)
+# 1.6.0: platform asset names (`@Theo-基础形象：…` declaration lines, `@Theo-基础形象` references) beside the numbered form.
+NAME_DECL_RE = re.compile(r"^\s*@(?P<name>[^\s：:=＝，。；、（）()【】\[\]\"“”→@,;!?<>|]+)\s*(?:：|:|=|＝)", re.M)
+NAME_REF_RE = re.compile(r"@(?P<name>[^\s：:=＝，。；、（）()【】\[\]\"“”→@,;!?<>|]+)")
+NUMBERED_NAME_RE = re.compile(r"^(?:图片?|视频|音频|image|img|video|vid|audio|aud)\s*\d+$", re.I)
+KIND_MAP = {"图片": "img", "图": "img", "image": "img", "img": "img", "视频": "vid", "video": "vid",
+            "vid": "vid", "音频": "aud", "audio": "aud", "aud": "aud"}
 QUOTE_RE = re.compile(r"[“\"]([^”\"]{1,400})[”\"]")
+
+
+def asset_kind(raw):
+    return KIND_MAP.get(re.sub(r"[\d@\s\[\]]", "", raw).lower(), re.sub(r"[\d@\s\[\]]", "", raw).lower())
+
+
+def resolve_name(name, declared_names):
+    """Exact name, else the longest declared name that prefixes it (`@Theo-基础形象的脸` → `@Theo-基础形象`)."""
+    if name in declared_names:
+        return name
+    candidates = [d for d in declared_names if name.startswith(d)]
+    return max(candidates, key=len) if candidates else None
 
 
 def find_section(text, key):
@@ -196,46 +221,76 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         if not re.search(r"以图片?\s*\d+(?:(?:\s*[至到\-–、,，]\s*图片?\s*\d+)+)?\s*的顺序作为关键帧", first):
             err("E08", "关键帧任务首句须明确图片编号与顺序（单图或有序多图）")
 
-    # E05 asset refs
-    refs_block = ""
+    # E05 asset refs — numbered (图1 / image1 / @图片1 / @[图片1]) and named (@Theo-基础形象) forms
+    refs_block, refs_start, refs_end = "", 0, 0
     for alias in SECTION_ALIASES["refs"]:
         if alias in text:
             start = text.index(alias)
-            lines = text[start:].splitlines(keepends=True)
-            kept = [lines[0]]
-            for line in lines[1:]:
-                if not line.strip() or ASSET_DECL_RE.match(line.lstrip()):
-                    kept.append(line)
-                else:
-                    break
-            refs_block = ''.join(kept)
+            # The binding section runs to the next section label; inside it every numbered declaration
+            # (图1 = …) and every @名 mention counts as a declaration, whether one per line or in prose.
+            stop = re.search(r"^\s*(?:【[^】]+】|(?:OVERVIEW|LOOK|EXCLUDE|OPENING STATE|TIMELINE|GLOBAL RULES|AUDIO)\s*:)",
+                             text[start + len(alias):], re.M | re.I)
+            refs_end = start + len(alias) + (stop.start() if stop else len(text) - start - len(alias))
+            refs_block, refs_start = text[start:refs_end], start
             break
-    declared = set()
+    declared_rows = []          # [{"id", "kind", "line", "order"}] in declaration order
+    declared = set()            # (kind, n) for numbered assets; ("name", "@名") for named ones
     for m in ASSET_DECL_RE.finditer(refs_block):
         a, b = int(m.group(1)), m.group(2)
-        first_ref = ASSET_REF_RE.match(m.group(0))
-        kind = re.sub(r"\d+|@|\s", "", first_ref.group(0)).lower()
-        kind = {"图片": "img", "图": "img", "image": "img", "img": "img", "视频": "vid", "video": "vid",
-                "vid": "vid", "音频": "aud", "audio": "aud", "aud": "aud"}.get(kind, kind)
-        if b:
-            for n in range(a, int(b) + 1):
+        kind = asset_kind(ASSET_REF_RE.match(m.group(0)).group(0))
+        line_end = refs_block.find("\n", m.end())
+        line = refs_block[m.start(): line_end if line_end > 0 else len(refs_block)]
+        for n in (range(a, int(b) + 1) if b else [a]):
+            if (kind, n) not in declared:
                 declared.add((kind, n))
-        else:
-            declared.add((kind, a))
+                declared_rows.append({"id": f"{kind}{n}", "kind": kind, "line": line, "order": m.start()})
+    name_lines = {}
+    for m in NAME_DECL_RE.finditer(refs_block):          # one declaration per line: `@名：…` / `@名 = …`
+        name = m.group("name")
+        if NUMBERED_NAME_RE.match(name) or name in name_lines:
+            continue
+        line_end = refs_block.find("\n", m.end())
+        name_lines[name] = (m.start(), refs_block[m.start(): line_end if line_end > 0 else len(refs_block)])
+    for m in NAME_REF_RE.finditer(refs_block):           # prose declarations: any other @名 mentioned in the section
+        name = m.group("name")
+        if NUMBERED_NAME_RE.match(name) or name in name_lines:
+            continue
+        line_start = refs_block.rfind("\n", 0, m.start()) + 1
+        line_end = refs_block.find("\n", m.end())
+        name_lines[name] = (m.start(), refs_block[line_start: line_end if line_end > 0 else len(refs_block)])
+    for name, (pos, line) in name_lines.items():
+        declared.add(("name", "@" + name))
+        declared_rows.append({"id": "@" + name, "kind": "name", "order": pos, "line": line})
+    declared_rows.sort(key=lambda d: d["order"])
+    declared_names = {d["id"][1:] for d in declared_rows if d["kind"] == "name"}
     # The keyframe sentence expresses order, not an upload declaration.
     # Its references must still appear in REFERENCES like all other assets.
     # Cross-references inside the binding section also need declarations.
-    body_after_refs = text
-    used = set()
-    for m in ASSET_REF_RE.finditer(body_after_refs):
-        kind = re.sub(r"\d+|@|\s", "", m.group(0)).lower()
-        kind = {"图片": "img", "图": "img", "image": "img", "img": "img", "视频": "vid", "video": "vid",
-                "vid": "vid", "音频": "aud", "audio": "aud", "aud": "aud"}.get(kind, kind)
-        used.add((kind, int(m.group(1))))
-    missing = sorted(used - declared)
+    used, used_outside, missing_names = set(), {}, []
+    for m in ASSET_REF_RE.finditer(text):
+        key = (asset_kind(m.group(0)), int(m.group(1)))
+        used.add(key)
+        if not refs_start <= m.start() < refs_end:
+            used_outside.setdefault(f"{key[0]}{key[1]}", m.start())
+    for m in NAME_REF_RE.finditer(text):
+        name = m.group("name")
+        if NUMBERED_NAME_RE.match(name):
+            continue
+        resolved = resolve_name(name, declared_names)
+        if resolved is None:
+            if "@" + name not in missing_names:
+                missing_names.append("@" + name)
+            continue
+        used.add(("name", "@" + resolved))
+        if not refs_start <= m.start() < refs_end:
+            used_outside.setdefault("@" + resolved, m.start())
+    missing = sorted(f"{k}{n}" for k, n in used - declared if k != "name") + missing_names
     if missing:
-        err("E05", f"引用了未声明的素材：{', '.join(f'{k}{n}' for k, n in missing)}")
-    info(f"素材声明 {len(declared)} 个，引用 {len(used)} 个")
+        err("E05", f"引用了未声明的素材：{', '.join(missing)}")
+    n_named = sum(1 for d in declared_rows if d["kind"] == "name")
+    info(f"素材声明 {len(declared)} 个（编号 {len(declared) - n_named} / @名 {n_named}），正文引用 {len(used_outside)} 个")
+    opening_pos = next((text.index(a) for a in SECTION_ALIASES["opening"] if a in text), 0)
+    assets_info = {"declared": declared_rows, "used_outside": used_outside, "opening_pos": opening_pos}
 
     # timestamps
     shots = split_shots(text)
@@ -335,6 +390,11 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         warns.extend(tw)
         for line in ti:
             info(line)
+        # W36–W41 official-guide FAQ alignment (dialogue tag, audio policy placement, length, asset order, intensity words).
+        gw, gi = guide_checks(text, metadata_text, shots, dialogue, assets_info)
+        warns.extend(gw)
+        for line in gi:
+            info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:
         if re.search(r"\d+\s*秒?内.{0,10}\d+\s*次|\d+\s*times? (?:per|in) \d+", body):
@@ -416,7 +476,8 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         errors.extend(fidelity_errors)
     return {"file": str(path), "errors": errors, "warnings": warns, "info": infos, "lens": lens,
             "task": task, "parameters": parameter_state, "dialogue": dialogue, "variation": variation,
-            "assets": {"declared": sorted(f"{kind}{n}" for kind, n in declared), "used": sorted(f"{kind}{n}" for kind, n in used)},
+            "assets": {"declared": sorted(d["id"] for d in declared_rows),
+                       "used": sorted(f"{kind}{n}" if kind != "name" else n for kind, n in used)},
             "fidelity_scope": "original_exact" if record and record.get("mode") == "raw" else "beat_text_only; other prose and source semantics require review" if record else "not_checked",
             "ext_phrases": {},  # retained return key for 2.2 callers; no word-frequency judging
             "checks": {"format": "failed" if any(e.startswith("E") for e in errors) else "passed",

@@ -54,13 +54,20 @@ def preflight(record_path, prompt_path, validation):
         for key, value in parameters(fields).items():
             if value is not None and value != params.get(key):
                 errors.append(f'P02 Prompt 与生产记录参数 {key} 不一致')
-        roles, ids = {}, []
+        roles, ids, names = {}, [], {}
         counts = {'img':0, 'vid':0, 'aud':0}
         lengths = {'vid':0., 'aud':0.}
         frame_sizes = {}
         for asset in assets:
             if not isinstance(asset, dict): raise ValueError('素材条目必须为对象')
             ident = asset_id(asset.get('id', ''))
+            # 1.6.0: optional platform asset name ("@Theo-基础形象") for prompts that bind by @名.
+            name = asset.get('name')
+            if name is not None:
+                if not isinstance(name, str) or not name.startswith('@') or len(name) < 2:
+                    raise ValueError(f'{ident} 的 name 必须是以 @ 开头的平台素材名')
+                if name in names: raise ValueError(f'素材名重复：{name}')
+                names[name] = ident
             if ident in ids: raise ValueError(f'素材编号重复：{ident}')
             ids.append(ident)
             kind = re.sub(r'\d+', '', ident)
@@ -110,11 +117,27 @@ def preflight(record_path, prompt_path, validation):
                 if task in {'edit','extend'} and kind == 'vid' and path.suffix.lower() != '.mov':
                     warnings.append(f'P04 {ident} 编辑/延长建议使用 MOV 输入')
             checked_assets.append({'id':ident, 'path':str(path), 'role':role})
-        if set(ids) != set(validation.get('assets', {}).get('declared', [])):
+        declared = list(validation.get('assets', {}).get('declared', []))
+        declared_names = [d for d in declared if d.startswith('@')]
+        declared_numbers = [d for d in declared if not d.startswith('@')]
+        if declared_names:
+            # Name-bound prompt: every declared @名 must be a record asset with that name, and the record order
+            # must follow the E-layer 上传与角色 row (编号 = 上传顺序).
+            if set(declared_names) != set(names):
+                errors.append('P03 上传清单的 name 与 Prompt 的 @素材名不一致')
+            if declared_numbers and not set(declared_numbers) <= set(ids):
+                errors.append('P03 上传清单与 Prompt 素材绑定不一致')
+            from guide_checks import upload_order
+            order = [n for n in upload_order(text) if n.startswith('@')]
+            if order and order != [a.get('name') for a in assets if a.get('name')]:
+                errors.append('P03 上传清单顺序与 E 层 上传与角色 行不一致')
+        elif set(ids) != set(declared):
             errors.append('P03 上传清单与 Prompt 素材绑定不一致')
         prompt_roles = roles_from_fields(fields)
-        if prompt_roles and prompt_roles != roles:
-            errors.append('P02 Prompt 与实际上传 role 映射不一致')
+        if prompt_roles:
+            named_roles = {names.get(k, k): v for k, v in prompt_roles.items()}
+            if named_roles != roles:
+                errors.append('P02 Prompt 与实际上传 role 映射不一致')
         for kind, maximum in [('img',30),('vid',10),('aud',10)]:
             if counts[kind] > maximum: errors.append(f'P04 {kind} 数量超过指南上限 {maximum}')
         if len(ids) > 50: errors.append('P04 参考素材合计超过 50')

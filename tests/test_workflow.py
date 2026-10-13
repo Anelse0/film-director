@@ -63,12 +63,29 @@ class RealMediaTests(unittest.TestCase):
             source=folder/'upstream.md'
             source.write_text('技术夹具：参考灰色图的颜色，10秒固定空画面；不是角色身份或艺术效果验收。')
             prompt=folder/'clip.md'
-            prompt.write_text('【素材绑定】图1 = 灰色调参考。\n【总述】10秒16:9，灰色空画面。\n【起始状态】均匀灰色画面。\n【分镜时间线】\n镜头1（0-10s）：【全景，固定】保持图1的灰色调。\n【贯穿要求】只有均匀灰色画面，无bgm，无对白；不要字幕。\n| 项 | 值 |\n| 任务类型 | r2v |\n| ratio | 16:9 |\n| duration | 10 |\n| 输出格式 | mp4 |\n| content.role | img1→reference_image |')
+            prompt.write_text('【素材绑定】图1 = 灰色调参考。\n【总述】10秒16:9，灰色空画面；声音：无 bgm，只有环境音。\n【起始状态】均匀灰色画面。\n【分镜时间线】\n镜头1（0-10s）：【全景，固定】保持图1的灰色调。\n【贯穿要求】只有均匀灰色画面；无 bgm：不要音乐、背景音乐、配乐，只有环境音，无对白；不要字幕。\n| 项 | 值 |\n| 任务类型 | r2v |\n| ratio | 16:9 |\n| duration | 10 |\n| 输出格式 | mp4 |\n| content.role | img1→reference_image |')
             record={'version':1,'adapter':'ark-seedance-2.5-guide','task':'r2v','prompt_sha256':digest(prompt),'parameters':{'ratio':'16:9','duration':10,'output_format':'mp4'},'assets':[{'id':'img1','path':image.name,'sha256':digest(image),'role':'reference_image','purpose':'真实PNG技术夹具，仅用于颜色绑定'}],'upstream':[{'path':source.name,'sha256':digest(source)}],'reviews':[{'category':c,'status':'not_applicable','reviewer':'integration-fixture','evidence':'技术颜色输入测试，无人物表演或戏剧质量结论。'} for c in ('creative','performance','continuity')],'warning_decisions':[]}
             path=folder/'record.json';path.write_text(json.dumps(record))
             result=preflight(path,prompt,validate(prompt))
             self.assertEqual(result['status'],'passed',result)
             image.write_bytes(b'corrupt')
             self.assertTrue(any('SHA-256' in e for e in preflight(path,prompt,validate(prompt))['errors']))
+
+    def test_name_bound_prompt_matches_record_by_name_and_order(self):
+        # 1.6.0: prompts that bind assets by platform @名 are matched to record assets carrying `name`.
+        with tempfile.TemporaryDirectory() as temp:
+            folder=Path(temp)
+            image=folder/'reference.png'
+            subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','color=c=gray:s=32x32','-frames:v','1',str(image)],check=True,capture_output=True)
+            source=folder/'upstream.md'; source.write_text('技术夹具：灰色参考，10秒固定空画面。')
+            prompt=folder/'clip.md'
+            prompt.write_text('【素材绑定】\n@灰图：灰色调参考，只参考颜色。\n【总述】10秒16:9，灰色空画面；声音：无 bgm，只有环境音。\n【起始状态】均匀灰色画面（@灰图）。\n【分镜时间线】\n镜头1（0-10s）：【全景，固定】保持 @灰图 的灰色调。\n【贯穿要求】只有均匀灰色画面；无 bgm：不要音乐、背景音乐、配乐，只有环境音，无对白；不要字幕。\n| 项 | 值 |\n| 任务类型 | r2v |\n| ratio | 16:9 |\n| duration | 10 |\n| 输出格式 | mp4 |\n| content.role 映射 | @灰图→reference_image |\n| 上传与角色 | @灰图 |')
+            asset={'id':'img1','name':'@灰图','path':image.name,'sha256':digest(image),'role':'reference_image','purpose':'真实PNG技术夹具'}
+            record={'version':1,'adapter':'ark-seedance-2.5-guide','task':'r2v','prompt_sha256':digest(prompt),'parameters':{'ratio':'16:9','duration':10,'output_format':'mp4'},'assets':[asset],'upstream':[{'path':source.name,'sha256':digest(source)}],'reviews':[{'category':c,'status':'not_applicable','reviewer':'integration-fixture','evidence':'技术颜色输入测试。'} for c in ('creative','performance','continuity')],'warning_decisions':[]}
+            path=folder/'record.json'; path.write_text(json.dumps(record))
+            result=preflight(path,prompt,validate(prompt))
+            self.assertEqual(result['status'],'passed',result)
+            record['assets'][0]['name']='@别的图'; path.write_text(json.dumps(record))
+            self.assertTrue(any('@素材名' in e for e in preflight(path,prompt,validate(prompt))['errors']))
 
 if __name__ == '__main__': unittest.main()

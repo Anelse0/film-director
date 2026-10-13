@@ -11,6 +11,7 @@
   "assets": [
     {
       "id": "img1",
+      "name": "@角色A-基础形象",
       "path": "../assets/actual-character.png",
       "sha256": "REPLACE_WITH_ACTUAL_SHA256",
       "role": "reference_image",

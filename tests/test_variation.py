@@ -141,7 +141,7 @@ class W30W33Tests(unittest.TestCase):
                 '【近景，固定】', '【特写，固定】【变化：景别 近→特｜机位 =｜光 正→侧｜幅度 1→2】']
         result = run(shots_text(tags, [2, 4, 2, 4]))
         self.assertTrue(any(w.startswith('W32 未声明峰值镜') for w in result['warnings']))
-        self.assertTrue(any('镜头 [3] 缺【变化' in w for w in result['warnings']))
+        self.assertTrue(any('镜头 [3] 无变化声明' in w for w in result['warnings']), result['warnings'])
         result2 = run(shots_text(tags, [2, 4, 2, 4]) + '| 峰值镜 | 9 |\n')
         self.assertTrue(any('峰值镜 9 不在' in w for w in result2['warnings']))
 
