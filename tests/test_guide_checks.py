@@ -95,10 +95,11 @@ class W38Tests(unittest.TestCase):
         base = run(numbered())
         self.assertTrue(any(i.startswith('篇幅') and '贯穿要求' in i for i in base['info']))
         self.assertNotIn('W38', codes(base))
-        filler = '人物放在画面中间区域。' * 200   # ~2,200 CJK characters
+        filler = '人物放在画面中间区域。' * 300   # ~3,300 CJK characters, above the 3,000 budget
         long = numbered().replace('不要字幕。\n', '不要字幕。' + filler + '\n')
         self.assertIn('W38', codes(run(long)))
-        self.assertNotIn('W38', codes(run(long + '| 字数上限 | 3000 |\n')))
+        self.assertNotIn('W38', codes(run(long + '| 字数上限 | 4000 |\n')))
+        self.assertTrue(any('不是目标' in i and '500' not in i for i in base['info'] if i.startswith('篇幅')))
         cjk, words, per = length_profile('【总述】十个字十个字十个字十个\n【贯穿要求】五个字五个字')
         self.assertEqual((cjk, [p[0] for p in per]), (23, ['总述', '贯穿要求']))   # labels count: the model reads them too
 
@@ -182,7 +183,7 @@ class WiringTests(unittest.TestCase):
         return (ROOT / name).read_text(encoding='utf-8')
 
     def test_documents_carry_the_release(self):
-        self.assertEqual(self.read('VERSION').strip(), '1.6.0')
+        self.assertEqual(self.read('VERSION').strip(), '1.6.1')
         for code in NEW_CODES:
             self.assertIn(f'| {code} |', self.read('references/duration-rhythm.md'), code)
         self.assertIn('## 8.', self.read('references/seedance-2.5-capabilities.md'))

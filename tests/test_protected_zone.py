@@ -1,4 +1,8 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.6.0 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.6.1 baseline.
+
+1.6.1 (2026-10-13): W38 length budget raised to 3,000 CJK / 6,000 EN words (user: the agent was still trimming
+performance); INFO line no longer quotes the official 500-character figure. Hashes for guide_checks.py, stage-6 and
+prompt-templates re-set with a CHANGELOG entry.
 
 1.6.0 (2026-10-13): official-guide (2026-10 edition, 70 pages) alignment — variation fields move to the E-layer 变化轨 row
 (variation_checks.py reads it first; size_rank fixed for 中近), W36–W41 + INFO in the new guide_checks.py (added to the zone),
@@ -58,7 +62,7 @@ PROTECTED = {
     'references/stage-4-performance.md': '0e88bfe2ba623f09bded41dec918fe784f3c9cdb4dd47a3d4bb76c488e3a1b9f',
     'references/stage-5-directing-storyboard.md': '409faef71233281a38617b3539f6af409bf09ffe6e92cefecc08c8bf8a393fce',
     'references/stage-5b-reference-assets.md': 'adb664063a78470fb4fd35ae7f5aa0a75b7c57ebfe5852a9a8606e294f3c2551',
-    'references/stage-6-prompt-compiler.md': '876f441a98d1a9ed34d0958fa9475abed275727cc94809e21361ae0c197c0153',
+    'references/stage-6-prompt-compiler.md': '6828b8855bc285afd79b96c6e09bf55cfbd1259add445734604b94e864294c0f',
     'references/stage-7-qa-continuity.md': '27ad5f36967aa943a8541e00376cd1561a4f5522791d6fdb1c24e56bba788623',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
@@ -67,7 +71,7 @@ PROTECTED = {
     'references/externalization-lexicon.md': 'd89d0cc4ea98e63c9673984c84abd4081729ddaff2057616af582f141891f9da',
     'references/genre-packs.md': 'e8bf4dd45abb22776ac4dec2490551e1a9aedddfd26cca459bc6557df3c95513',
     'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
-    'templates/prompt-templates.md': '5c97552eaf065bf4584455f33b24721bfa786417c7e612543dfeb66949890d82',
+    'templates/prompt-templates.md': '04c4a1bf700cc20adcdaa67549de6ce8f197429538acc79f3e37927259d06102',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '96e7fcb783028d6c258005c962c18b9f2cdbd3bc36d52596bc7a5568900b838b',
     'templates/shot-card.md': '64ebb3d3550e8168e3427005b1bf66f6e4baeacca90b3c97b57609c55278629d',
@@ -77,7 +81,7 @@ PROTECTED = {
     'scripts/variation_checks.py': '9fde36c69d27498554202688126dec827b743457c657d04107f666cf4c399882',
     'scripts/direction_checks.py': 'fdbd694059a9ca156946345ef4ac29ae95ad10fa22aea5fe52be20969fbf55ea',
     'scripts/tone_checks.py': '77225c6785b9c729bc737b16ccfe0593cf18919a59d6f237397f4fe61901b2b5',
-    'scripts/guide_checks.py': 'cb8f840edd62dfb45bd83e6d49ec94015ddbddacc2f7634ea0c6b64153163f84',
+    'scripts/guide_checks.py': 'ad774a394df0121c5c142fdba0025d9a360ccbd4ccdf2d9d24537f36a1bff5ac',
     'scripts/validate_prompt.py': '86d8eb3a015071e2031063cbfca8f9abd836cf523fcbd83046f93a12b99fa78e',
     'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
     'scripts/production_contract.py': 'adb40d1e05ecb6d298e2bb295a8ef325941812f00a89f9000fe03477a58b780f',

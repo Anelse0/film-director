@@ -10,8 +10,8 @@ Every item here is a review hint derived from an `[官方]` FAQ entry; none is a
                                     enumerate music synonyms (音乐、背景音乐、BGM、配乐、器乐、旋律、铺底音).
   W38  篇幅                         API doc recommends ≤500 Chinese characters / ≤1000 English words; the longest
                                     official example is about 1,300 characters. INFO always; WARN above the budget
-                                    (default 2,000 CJK / 4,000 EN words, E-layer `字数上限` / `词数上限` override).
-                                    The trim order never names performance.
+                                    (default 3,000 CJK / 6,000 EN words, E-layer `字数上限` / `词数上限` override).
+                                    The trim order never names performance; performance is translated, never cut.
   W39  素材顺序                     FAQ 角色对应错误: character assets in first-appearance order; the E-layer
                                     `上传与角色` row in the same order as 【素材绑定】.
   W40  强情绪词                     FAQ 情绪过度响应（眼睛发光）: 狂热 / 极度 … → ordinary descriptions; guard line
@@ -30,8 +30,10 @@ SECTION_LABELS = [
     ("严格排除", ("【严格排除】", "EXCLUDE")), ("起始状态", ("【起始状态】", "OPENING STATE")),
     ("分镜", ("【分镜时间线】", "TIMELINE")), ("贯穿要求", ("【贯穿要求】", "GLOBAL RULES")),
 ]
-# User decision 2026-10-13: a first, loose budget (4× the official recommendation; the guide's own 500 字 : 1000 词 ratio).
-CJK_LIMIT, EN_LIMIT = 2000, 4000
+# User decisions 2026-10-13: first budget 2,000 / 4,000 (4× the official recommendation, the guide's own 500 字 : 1000 词
+# ratio); raised to 3,000 / 6,000 the same day because the agent was still trimming performance to chase the number.
+# The budget is a review threshold, never a target: the INFO line states it without the official figure.
+CJK_LIMIT, EN_LIMIT = 3000, 6000
 OFFICIAL_NOTE = "官方建议 ≤500 字 / ≤1000 词，官方最长范例约 1300 字"
 
 POST_QUOTE_RE = re.compile(r"[\"”]\s*[（(]([^）)\n]{1,120})[）)]")
@@ -220,13 +222,13 @@ def guide_checks(text, metadata_text, shots, dialogue, assets):
     cjk, words, per = length_profile(text)
     cjk_limit, en_limit = limits(metadata_text)
     breakdown = " · ".join(f"{label} {c if c else w}{'字' if c else '词'}" for label, c, w in per)
-    infos.append(f"篇幅：中文 {cjk} 字 / 英文 {words} 词（{breakdown}）；{OFFICIAL_NOTE}")
+    infos.append(f"篇幅：中文 {cjk} 字 / 英文 {words} 词（{breakdown}）；预算 {cjk_limit} 字 / {en_limit} 词（W38 阈值，不是目标；表演不为篇幅删）")
     over_cjk = cjk > cjk_limit and cjk >= words
     over_en = words > en_limit and words > cjk
     if over_cjk or over_en:
         measure = f"中文 {cjk} 字 > {cjk_limit}" if over_cjk else f"英文 {words} 词 > {en_limit}"
         warns.append(f"W38 篇幅 {measure}（{OFFICIAL_NOTE}）：先删 变化字段 → 引号后的语气括号 → 图里已有的外观复述 → 逐镜重复的光与机位；"
-                     f"不删 人物一致性、表演约束、声音要求、画面基调（E 层 `字数上限` / `词数上限` 可覆盖）")
+                     f"不删 人物一致性、表演约束、声音要求、画面基调，表演只翻译不删不缩写（S4 §4.4c）；写明理由可在 E 层 `字数上限` / `词数上限` 放宽")
 
     # W39 asset order: characters by first appearance; E-layer upload row = declaration order
     declared = assets.get("declared", [])
