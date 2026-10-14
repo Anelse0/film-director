@@ -1,4 +1,13 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.6.2 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.7.0 baseline.
+
+1.7.0 (2026-10-13): three review codes from the offset EP05 s03 clip03 review — W43 focus / soft-layer placement per
+on-screen character shot (focus_checks.py, new to the zone), W44 intent in the dialogue bracket without an eye beat and
+actions written into the bracket (subtext_checks.py, new), W45 sustained wearing-state deviation while the character's
+binding lines use the image-equals-state wording (costume_checks.py, new); shot tags may run to 80 characters
+(validate_prompt / rhythm_checks / variation_checks / tone_checks), 过肩 added to the OTS regex, W36 / W38 messages
+extended (guide_checks). The fourth planned item (借秒 / W42) was paused by the user and is not in the release. Stage-4 /
+5 / 5b / 6 / 7, emotion-performance, camera-vocabulary, templates and the examples carry the rules; hashes re-set in
+the same change with a CHANGELOG entry.
 
 1.6.2 (2026-10-13): wording that read as "trim performance" removed from stage-4 §4.4 / §4.4c, stage-5 §5.6,
 stage-6 §6.2 and the T1 template (brevity applies to camera prose and background activity only; several beats per
@@ -61,32 +70,35 @@ ROOT = Path(__file__).resolve().parents[1]
 
 PROTECTED = {
     'assets/emotion-library.json': 'ef22ac8bfec33567344e13a927d47f7b577c3c6f07b110cc5a2e316523599977',
-    'references/emotion-performance.md': 'c12d54b915edccc49a0d4f9c31428f1c2d4f15dbe525e85c46a4df8649714089',
+    'references/emotion-performance.md': '9b7a06b48c4885b07ea02d79da4f28fd1ec5f80f01f9b1a6f4e5f0be92cc7878',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
-    'references/stage-4-performance.md': 'ddb2c761a20c58fc045194597f384b760b35351aedc1f0e2d82de892a40a20a6',
-    'references/stage-5-directing-storyboard.md': 'c2a2d331867aa027ca5403f9a5ccc4001ef6415808c47004e348a41df378a33c',
-    'references/stage-5b-reference-assets.md': 'adb664063a78470fb4fd35ae7f5aa0a75b7c57ebfe5852a9a8606e294f3c2551',
-    'references/stage-6-prompt-compiler.md': 'fb581bf14bda8e17fe054112dd0179f5aef18836c56aab3167ed8e2c7a382944',
-    'references/stage-7-qa-continuity.md': '27ad5f36967aa943a8541e00376cd1561a4f5522791d6fdb1c24e56bba788623',
+    'references/stage-4-performance.md': 'f32a6a6e907363ac20e26125277c096c823e460340c75fa352d8e88513e7e495',
+    'references/stage-5-directing-storyboard.md': 'cabfa4689a438f74ec8ba9ef872c5d73d506707a48528f4114a18894bc9c26c1',
+    'references/stage-5b-reference-assets.md': '38c893fcdfe03dbf2238cecdd7d5cc8559f4b2593a87e9b2cd87be493d3bc81e',
+    'references/stage-6-prompt-compiler.md': '69b4c4372e40117ef45169422f4ba2ca1128e8f1ace8a4b3036e3a3f4f4efed6',
+    'references/stage-7-qa-continuity.md': 'eb901b272544797804e8a202083ba1a133e0c177fa971d42466f9a67848a64e6',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
     'references/seedance-2.5-capabilities.md': 'b1cf9cec6593a12c0a51ccb3f6d4818a2c90eda35de9e7a90a857e27563f92eb',
-    'references/camera-vocabulary.md': '06a5c14733a3c2cffb5c8dcaa02d107e6ab9f57982dfae0708b06b1583a3b93e',
+    'references/camera-vocabulary.md': '2910da6bcebe1d4603e712a30db195504edfbf0ddfc22aa823adbf996be4582c',
     'references/externalization-lexicon.md': 'd89d0cc4ea98e63c9673984c84abd4081729ddaff2057616af582f141891f9da',
     'references/genre-packs.md': 'e8bf4dd45abb22776ac4dec2490551e1a9aedddfd26cca459bc6557df3c95513',
     'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
-    'templates/prompt-templates.md': 'a694e4809d62a97460fe561bea5cd368176638bfd32dfb275c611e9e29088ea2',
+    'templates/prompt-templates.md': '2433dc53d6c3e66adcfc82aaa879391b1451ca932627d5dd5b3934e29a7a9a38',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '96e7fcb783028d6c258005c962c18b9f2cdbd3bc36d52596bc7a5568900b838b',
-    'templates/shot-card.md': '64ebb3d3550e8168e3427005b1bf66f6e4baeacca90b3c97b57609c55278629d',
-    'templates/reference-asset-brief.md': 'adc6b7c7c52c169d31ee7ba83111293496e7133572a7bedc08bf4a08d251df0b',
-    'templates/asset-registry.md': '7a1e9813f78101d145a21f56f425c15b1c75faf31d3890528407f95a03f15a4b',
-    'scripts/rhythm_checks.py': 'b1293f1d3f91eaad415e8a984abaf9fcc4344b4736351c6dba7fbf4fba3575f3',
-    'scripts/variation_checks.py': '9fde36c69d27498554202688126dec827b743457c657d04107f666cf4c399882',
+    'templates/shot-card.md': '91655dd74fa05903db459ddddbf1c835af1f94ccffff365ea5f3a84ddeef8664',
+    'templates/reference-asset-brief.md': '106e08747fd39ce900ca928afef2244ce8071c0ea43fec328581352ce552b441',
+    'templates/asset-registry.md': '2b478992e56c0d08bd99e66b04aa3933f9bd6dc46b0ca2eb507ae68632df0bba',
+    'scripts/rhythm_checks.py': '24f4836a1d98b46acfeb1cf95c2f50a5f89f633b2412dd4ffc5d9a10628e61be',
+    'scripts/variation_checks.py': '11a116c63f7e32a988da9eedb465d89ad8a3d73b92d7ceeb804c3e487a74c19f',
     'scripts/direction_checks.py': 'fdbd694059a9ca156946345ef4ac29ae95ad10fa22aea5fe52be20969fbf55ea',
-    'scripts/tone_checks.py': '77225c6785b9c729bc737b16ccfe0593cf18919a59d6f237397f4fe61901b2b5',
-    'scripts/guide_checks.py': 'ad774a394df0121c5c142fdba0025d9a360ccbd4ccdf2d9d24537f36a1bff5ac',
-    'scripts/validate_prompt.py': '86d8eb3a015071e2031063cbfca8f9abd836cf523fcbd83046f93a12b99fa78e',
+    'scripts/tone_checks.py': '565322afadb5a468b6ed86049058e56d49a883f9b437e92f0b1e771eda262482',
+    'scripts/guide_checks.py': '7e6532c1235348714e9bf953067c45ac83bf9116d459e6e752c5107b2c533845',
+    'scripts/focus_checks.py': '5b5d3110f22c58c272f3c24aa7533e75b9b91f46f951589a829c0eef25a6106c',
+    'scripts/subtext_checks.py': '0b0c355961c2de5878a306aba1fc5c124e5be334a7182d0477d30a60782ecdca',
+    'scripts/costume_checks.py': 'dd11f7a23d3a252378d6f415a7310e16d0bf0811b3f5df29629b6957c74955fc',
+    'scripts/validate_prompt.py': '45e6bfaa222cf52576125790e424307b98f105350b777572073ae0932577722b',
     'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
     'scripts/production_contract.py': 'adb40d1e05ecb6d298e2bb295a8ef325941812f00a89f9000fe03477a58b780f',
     'scripts/production_preflight.py': 'aab550991f000dac727f744f1c603a5a1519f1adf44d2e288e11c9d3cc859c0d',

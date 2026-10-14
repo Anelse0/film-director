@@ -84,7 +84,7 @@ def own_text(unit):
 
 
 def shot_tag(unit):
-    m = re.search(r"【([^】]{2,60})】|\[([^\]]{2,80})\]", unit[:120])
+    m = re.search(r"【([^】]{2,80})】|\[([^\]]{2,100})\]", unit[:120])
     return (m.group(1) or m.group(2)) if m else ""
 
 

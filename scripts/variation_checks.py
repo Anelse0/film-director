@@ -59,7 +59,7 @@ CAMERA_MOVES = [
     "push", "pull", "pan", "tilt", "truck", "track", "orbit", "crane", "dolly", "handheld", "zoom", "whip", "arc",
 ]
 FIXED_WORDS = ["固定", "locked", "static", "fixed"]
-OTS_RE = re.compile(r"越[^，,。；;】｜|\n]{0,10}肩|over[- ]the[- ]shoulder|\bOTS\b", re.I)
+OTS_RE = re.compile(r"[越过][^，,。；;】｜|\n]{0,10}肩|over[- ]the[- ]shoulder|\bOTS\b", re.I)
 PEAK_RE = re.compile(r"\|\s*峰值镜\s*\|\s*([^|\n]+)\|")
 REPEAT_RE = re.compile(
     r"(?:构图)?与镜头\s*(\d+)\s*(?:同构图|相同|一致|同一构图)|同镜头?\s*(\d+)\s*(?:的)?构图|镜头\s*(\d+)\s*同构图"
@@ -99,7 +99,7 @@ def camera_of(text):
 
 
 def tag_of(body):
-    tag = re.search(r"【([^】]{2,60})】|\[([^\]]{2,80})\]", body[:80])
+    tag = re.search(r"【([^】]{2,80})】|\[([^\]]{2,100})\]", body[:120])
     return (tag.group(1) or tag.group(2)) if tag else ""
 
 

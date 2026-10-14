@@ -200,8 +200,8 @@ def guide_checks(text, metadata_text, shots, dialogue, assets):
     notes = post_quote_notes(text)
     if notes:
         warns.append(f"W36 台词引号后追加语气 / 音色 / 动作括号 {len(notes)} 处（如「{notes[0]}」）：官方 FAQ 字幕约束不生效——"
-                     f"台词后复述词语并追加语气、表情、动作描述会诱发字幕；写到冒号前：台词（角色，a-bs，语言，语气 / 音量 / 语速）：\"…\"，"
-                     f"引号后只接「；此时 B 闭着嘴」")
+                     f"台词后复述词语并追加语气、表情、动作描述会诱发字幕；语气 / 音色写到冒号前：台词（角色，a-bs，语言，语气 / 音量 / 语速）：\"…\"，"
+                     f"动作写进镜头行作开口前的一拍（不是搬进括号，W44）；引号后只接「；此时 B 闭着嘴」")
     frags = requoted_fragments(text)
     if frags:
         warns.append(f"W36 台词之后复述了台词片段「{frags[0]}」等 {len(frags)} 处：官方 FAQ 字幕约束不生效——"
@@ -228,7 +228,7 @@ def guide_checks(text, metadata_text, shots, dialogue, assets):
     if over_cjk or over_en:
         measure = f"中文 {cjk} 字 > {cjk_limit}" if over_cjk else f"英文 {words} 词 > {en_limit}"
         warns.append(f"W38 篇幅 {measure}（{OFFICIAL_NOTE}）：先删 变化字段 → 引号后的语气括号 → 图里已有的外观复述 → 逐镜重复的光与机位；"
-                     f"不删 人物一致性、表演约束、声音要求、画面基调，表演只翻译不删不缩写（S4 §4.4c）；写明理由可在 E 层 `字数上限` / `词数上限` 放宽")
+                     f"不删 人物一致性、表演约束、声音要求、画面基调、每镜的焦点在谁、穿着的分段状态，表演只翻译不删不缩写（S4 §4.4c）；写明理由可在 E 层 `字数上限` / `词数上限` 放宽")
 
     # W39 asset order: characters by first appearance; E-layer upload row = declaration order
     declared = assets.get("declared", [])

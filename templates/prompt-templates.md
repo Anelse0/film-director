@@ -3,7 +3,7 @@
 T1–T9 是按任务裁剪的本地生产骨架，基于官方的素材指代、概述、情节和贯穿细节结构；编辑/转场不强填虚构镜头或起始画面。参数和真实素材记录见 `references/production-workflow.md`，仅套模板不等于生产就绪。
 `{}` 内为槽位，全部来自分镜卡 C/E 层。校验脚本识别【】标签，请保留。
 
-**不以导演、影片、摄影师名字代替可执行描述；通用技术名可配说明使用**（校验 W13）。透镜只写在文末 E 层参数表的「透镜」行，供多文件校验用。E 层节奏与变化字段（`duration-rhythm.md` §六）：`峰值镜 | N`（每条 clip 必填：最大物理动作或最大信息变化所在的镜，W32）、`语速词每秒`（默认 3.5；慢戏写 2.5–3 并在「语速理由」写说法；有成片按 `measure_clip.py` 校准值回填）、`节奏档`（对话 / 表演——选检查集，不是开关：对话 = W22–W33，表演 = W24 + W30–W33）、`无声段理由`（表演档必填，每段无声一个功能词）、`台词填充率`（默认 0.9；1.0 = 窗口 = 词数 ÷ 语速向上取整）、`台词轨`（窗口 / 连续；对话场默认连续）、`动作节拍秒数`、`台词密度`、`台词占比上限`，以及各阈值覆盖项；11 镜以上写「切点理由」行回应 W04。变化字段（1.6.0）**不进 Prompt 正文**：分镜卡的四维变化汇总为 E 层 `| 变化轨 | 镜1：景别 …｜机位 …｜光 …｜幅度 …；镜2：… |`（首镜写基线值；`=` 不变；重复构图 `｜新增 X`）。台词的语气 / 音量 / 语速写在冒号前的括号里，引号后不接括号、不复述片段（W36）；声音策略在【总述】末尾一句 + 【贯穿要求】穷举同义词（W37）；篇幅每条给 INFO，超 3000 字 / 6000 词给 W38（E 层 `字数上限` 可改；预算不是目标，表演不为篇幅删）；素材可用编号（图1）或平台 @名（`@Theo-基础形象：…` 行，人物按首次出场顺序，E 层 `上传与角色` 行给顺序，W39 / W41）。
+**不以导演、影片、摄影师名字代替可执行描述；通用技术名可配说明使用**（校验 W13）。透镜只写在文末 E 层参数表的「透镜」行，供多文件校验用。E 层节奏与变化字段（`duration-rhythm.md` §六）：`峰值镜 | N`（每条 clip 必填：最大物理动作或最大信息变化所在的镜，W32）、`语速词每秒`（默认 3.5；慢戏写 2.5–3 并在「语速理由」写说法；有成片按 `measure_clip.py` 校准值回填）、`节奏档`（对话 / 表演——选检查集，不是开关：对话 = W22–W33，表演 = W24 + W30–W33）、`无声段理由`（表演档必填，每段无声一个功能词）、`台词填充率`（默认 0.9；1.0 = 窗口 = 词数 ÷ 语速向上取整）、`台词轨`（窗口 / 连续；对话场默认连续）、`动作节拍秒数`、`台词密度`、`台词占比上限`，以及各阈值覆盖项；11 镜以上写「切点理由」行回应 W04。变化字段（1.6.0）**不进 Prompt 正文**：分镜卡的四维变化汇总为 E 层 `| 变化轨 | 镜1：景别 …｜机位 …｜光 …｜幅度 …；镜2：… |`（首镜写基线值；`=` 不变；重复构图 `｜新增 X`）。台词的语气 / 音量 / 语速写在冒号前的括号里，引号后不接括号、不复述片段（W36）；声音策略在【总述】末尾一句 + 【贯穿要求】穷举同义词（W37）；篇幅每条给 INFO，超 3000 字 / 6000 词给 W38（E 层 `字数上限` 可改；预算不是目标，表演不为篇幅删）；素材可用编号（图1）或平台 @名（`@Theo-基础形象：…` 行，人物按首次出场顺序，E 层 `上传与角色` 行给顺序，W39 / W41）。1.7.0：标注末尾写「焦点在 X」，过肩 / 前景写虚实与位置，默认景深在【画面基调】（W43）；台词括号可写情绪 / 口气词，意图词（真诚 / 不推销 / 认出）不是去处——近景以内同镜要有这个人的眼神拍子、动作不进括号（W44）；服装图与穿着状态不同时绑定行写状态、【贯穿要求】写分段状态（W45）。
 
 ---
 
@@ -38,7 +38,7 @@ raw 原文直接交付所选完整正文，不套 P 骨架。production 可在�
 @{服装名}：{角色A} 身上唯一的服装。
 @{场景名}：{地点} 的空间、陈设、材质与光色参考：{认得出位置的布局}。画面按 {画幅} 构图。
 ```
-正文只用 @名（"{角色A}（@{角色A}-基础形象，穿 @{服装名}）"）；E 层 `| 上传与角色 | @{角色A}-基础形象、@{服装名}、@{场景名} |`。
+正文只用 @名（"{角色A}（@{角色A}-基础形象，穿 @{服装名}）"）；E 层 `| 上传与角色 | @{角色A}-基础形象、@{服装名}、@{场景名} |`。服装图与场内穿着状态不同（脱下 / 敞开 / 卷袖）时，人物行写「{角色A} 的衣着一律按每一镜的文字：上身 @{服装名} 的 {衬衫}，{外套} {落座时脱下搭在凳上}，下身 @{服装名} 的 {长裤}」，服装行写「@{服装名}：{角色A} 身上的 {衬衫与长裤}；{外套} 只在开场穿着、之后搭在凳上」，【起始状态】写开场状态，【贯穿要求】保持一致桶写分段状态；「不参考 X」只用于本条从不出现的衣物（W45）。
 
 ## T1 文生视频（无素材）—— 兜底，仅当 S5b 判定无资产且用户接受不一致风险
 
@@ -49,7 +49,7 @@ raw 原文直接交付所选完整正文，不套 P 骨架。production 可在�
 【严格排除】{可选：媒介/风格排除，如"黑白、手绘、线稿、分镜稿、塑料 CG"；不写行为}
 【起始状态】{A 外观锁}在画面{左/右}，面朝{方向}，手里{持物}；{B 外观锁}在画面{左/右}…；机位{景别+角度}；{空间陈设两项}。
 【分镜时间线】
-镜头1（0-{a}s）：【{景别}，{机高/角度}，{运镜与终点}，{构图位置}】（≤40 字）{运镜 + 终点一句}；{主要事件（一个）+ 记忆点细节（至多一个）}。视线：{看着 X（画左 / 画右 / 镜头后方）}。表演：{按 S4 §4.4c 翻译的拍子，逐拍一句：眼神先，一两个部位，先后；几拍写几句；只在可见景别写部位}。台词（{角色}，{台词起}-{台词止}s，{语言}，{语气 / 音量 / 语速}）："{逐字}"；此时{另一角色}闭着嘴，{听者动作}。声音：{环境/动作音}。
+镜头1（0-{a}s）：【{景别}，{机高/角度}，{运镜与终点}，{构图位置}，焦点在 {X（部位）}】（≤60 字）{运镜 + 终点一句}；{虚实：有一层虚时写哪一层虚、在画面哪个角、占多少}；{主要事件（一个）+ 记忆点细节（至多一个）}。视线：{看着 X（画左 / 画右 / 镜头后方）}。表演：{按 S4 §4.4c 翻译的拍子，逐拍一句：眼神先，一两个部位，先后；几拍写几句；只在可见景别写部位}。{开口前一拍：眼神 + 一个部位}。台词（{角色}，{台词起}-{台词止}s，{语言}，{音量 / 语速 / 音色 / 口气，可加情绪 / 态度词}）："{逐字}"；此时{另一角色}闭着嘴，{听者动作}。声音：{环境/动作音}。
 镜头2（{a}-{b}s）：【…】…
 …
 镜头N（{…}-{时长}s）：【…】…结束时{结束状态}。
@@ -158,7 +158,7 @@ OVERVIEW: {duration}-second {aspect} {medium}, {location + time}, {one-line even
 LOOK: {medium/texture}; key light: {source + direction + quality}; {palette}; {depth of field/lens feel}.
 OPENING STATE: {A lock} stands frame-left facing {…}, holding {…}; {B lock} frame-right…; camera {shot size + angle}; {two set details}.
 TIMELINE:
-Shot 1 (0-{a}s): [{shot size}, {angle}, {one move}, {frame position}] {move + end point}; {action chain}. Eyeline: {…}. Face: {one beat: eyes first, one or two parts, in sequence}. {A} says (English, {speech_start}-{speech_end}s, {volume/pace/tone}): "{exact line}"; {B}'s mouth stays closed, {listener action}. Sound: {…}.
+Shot 1 (0-{a}s): [{shot size}, {angle}, {one move}, {frame position}, focus on {X}] {move + end point}; {soft layer: which layer is soft, which corner, how much}; {action chain}. Eyeline: {…}. Face: {one beat: eyes first, one or two parts, in sequence}. {beat before the line: eyes + one part}. {A} says (English, {speech_start}-{speech_end}s, {volume/pace/voice}): "{exact line}"; {B}'s mouth stays closed, {listener action}. Sound: {…}.
 Shot 2 ({a}-{b}s): [{…}] …
 GLOBAL RULES: Consistency: {A lock}; {B lock}; only {N} people in frame; {prop state}. Space and camera: {screen direction follows the confirmed blocking}; {direction line}. Performance: {baseline state}; eyes always on a target; visible breathing; one small action per shot. Look: key light always from {direction}. Sound: no music, no background music, no score, no instrumental, no melody, no ambient pad; only room tone, action sounds and dialogue; no subtitles.
 (The CHANGE fields live in the E table: | 变化轨 | Shot 1: size {baseline} | camera {baseline} | light {baseline} | amp {0-3}; Shot 2: size {prev}→{this} | … |)

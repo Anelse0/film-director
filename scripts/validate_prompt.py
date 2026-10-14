@@ -29,6 +29,11 @@ W37 audio policy at start and end with music synonyms enumerated, W38 length bud
 W40 intensity labels (眼睛发光 trigger), W41 declared-but-unreferenced assets. Assets may be numbered (图1 / @图片1) or
 named (`@Theo-基础形象：…` declaration lines, `@Theo-基础形象` references). The variation track is read from the E-layer
 `变化轨` row first (inline 【变化：…】 fields are legacy).
+1.7.0: W43 (focus_checks.py) every on-screen character shot states 焦点在 X and any over-shoulder / soft layer says where it
+sits (E-layer 焦点理由 keeps a reviewed design); W44 (subtext_checks.py) actions written into the dialogue bracket, or an intent
+word in the bracket of a close shot with no eye beat for that speaker in the shot line (口气 words stay; one line per shot);
+W45 (costume_checks.py) a sustained wearing-state deviation while the character's binding lines use the image-equals-state
+wording (唯一的服装 / 一律按 @图; E-layer 穿着状态说明 keeps a reviewed design). Shot tags may run to 80 characters.
 English speech estimate defaults to 3.5 words/s (1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
@@ -48,6 +53,9 @@ from variation_checks import variation_checks
 from direction_checks import direction_checks
 from tone_checks import tone_checks
 from guide_checks import guide_checks
+from focus_checks import focus_checks
+from subtext_checks import subtext_checks
+from costume_checks import costume_checks
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -346,13 +354,13 @@ def validate(path, duration_override=None, artifact="production", record=None, e
 
     # Camera checks remain shot-level; dialogue below uses the smallest timed unit.
     for no, s, e, body in shots:
-        head = body[:80]
-        if not re.search(r"【[^】]{2,40}】|\[[^\]]{2,60}\]", head):
+        head = body[:120]   # 1.7.0: the tag ends with 焦点在 X and may run to 80 characters
+        if not re.search(r"【[^】]{2,80}】|\[[^\]]{2,100}\]", head):
             warn("W08", f"镜头{no} 段首缺少【景别，角度，运镜】标注")
         elif not any(w in head for w in SHOT_SIZE_WORDS):
             warn("W08", f"镜头{no} 标注里没有景别词")
         # 去掉与"推门""拉开"等动作误报：只在标注括号内统计
-        tag = re.search(r"【([^】]{2,60})】|\[([^\]]{2,80})\]", head)
+        tag = re.search(r"【([^】]{2,80})】|\[([^\]]{2,100})\]", head)
         tag_txt = (tag.group(1) or tag.group(2)) if tag else ""
         tag_moves = [w for w in CAMERA_MOVES if w in tag_txt]
         if len(tag_moves) > 2:
@@ -395,6 +403,20 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         warns.extend(gw)
         for line in gi:
             info(line)
+        # 1.7.0: W43 焦点与虚实 (focus_checks), W44 台词括号里的态度没有可见拍子 (subtext_checks), W45 服装参考与穿着状态
+        # (costume_checks). All review hints; E-layer overrides (焦点理由 / 穿着状态说明) documented in duration-rhythm §七.
+        fw, fi = focus_checks(text, shots, dialogue, metadata_text)
+        warns.extend(fw)
+        for line in fi:
+            info(line)
+        sw, si = subtext_checks(text, shots, dialogue)
+        warns.extend(sw)
+        for line in si:
+            info(line)
+        cw, ci = costume_checks(text, shots, assets_info, metadata_text)
+        warns.extend(cw)
+        for line in ci:
+            info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:
         if re.search(r"\d+\s*秒?内.{0,10}\d+\s*次|\d+\s*times? (?:per|in) \d+", body):
@@ -420,7 +442,7 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     # W17 同一运镜连续 ≥ 3 镜（只看段首标注）
     tag_moves_seq = []
     for no, s_, e_, body in shots:
-        tag = re.search(r"【([^】]{2,60})】|\[([^\]]{2,80})\]", body[:80])
+        tag = re.search(r"【([^】]{2,80})】|\[([^\]]{2,100})\]", body[:120])
         tag_txt = (tag.group(1) or tag.group(2)) if tag else ""
         mv = next((w for w in ["固定", "locked", "static"] if w in tag_txt), None) or \
              next((w for w in CAMERA_MOVES if w in tag_txt), None)

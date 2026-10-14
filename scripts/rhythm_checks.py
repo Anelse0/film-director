@@ -138,7 +138,7 @@ def union_length(intervals):
 
 
 def tag_of(body):
-    tag = re.search(r"【([^】]{2,60})】|\[([^\]]{2,80})\]", body[:80])
+    tag = re.search(r"【([^】]{2,80})】|\[([^\]]{2,100})\]", body[:120])
     return (tag.group(1) or tag.group(2)) if tag else ""
 
 

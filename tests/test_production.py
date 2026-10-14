@@ -18,7 +18,7 @@ from validate_prompt import validate
 def prompt(body, duration=10):
     return (f'【素材绑定】无参考素材。\n【总述】{duration}秒16:9，室内对话；声音：无 bgm，只有环境音与台词。\n'
             '【起始状态】A 居中。\n【分镜时间线】\n'
-            f'镜头1（0-{duration}s）：【近景，固定】\n{body}\n'
+            f'镜头1（0-{duration}s）：【近景，固定，焦点在 A 的脸】\n{body}\n'
             '【贯穿要求】无 bgm：不要音乐、背景音乐、配乐，只有环境音；不要字幕。')
 
 
