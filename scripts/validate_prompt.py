@@ -31,7 +31,8 @@ named (`@Theo-基础形象：…` declaration lines, `@Theo-基础形象` refere
 `变化轨` row first (inline 【变化：…】 fields are legacy).
 1.7.0: W43 (focus_checks.py) every on-screen character shot states 焦点在 X and any over-shoulder / soft layer says where it
 sits (E-layer 焦点理由 keeps a reviewed design); W44 (subtext_checks.py) actions written into the dialogue bracket, or an intent
-word in the bracket of a close shot with no eye beat for that speaker in the shot line (口气 words stay; one line per shot);
+word in the bracket of a close shot with no executable beat for that speaker in the shot line — 1.7.1: eye / face, hand /
+body, voice or pause, an action toward the other character, or a delivery word in the bracket (口气 words stay; one line per shot);
 W45 (costume_checks.py) a sustained wearing-state deviation while the character's binding lines use the image-equals-state
 wording (唯一的服装 / 一律按 @图; E-layer 穿着状态说明 keeps a reviewed design). Shot tags may run to 80 characters.
 English speech estimate defaults to 3.5 words/s (1.4.0; 2.5 = American-English mean, a floor).
@@ -403,7 +404,7 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         warns.extend(gw)
         for line in gi:
             info(line)
-        # 1.7.0: W43 焦点与虚实 (focus_checks), W44 台词括号里的态度没有可见拍子 (subtext_checks), W45 服装参考与穿着状态
+        # 1.7.0: W43 焦点与虚实 (focus_checks), W44 台词括号里的态度没有可执行拍子 (subtext_checks; 1.7.1 任一载体), W45 服装参考与穿着状态
         # (costume_checks). All review hints; E-layer overrides (焦点理由 / 穿着状态说明) documented in duration-rhythm §七.
         fw, fi = focus_checks(text, shots, dialogue, metadata_text)
         warns.extend(fw)

@@ -201,7 +201,7 @@ def guide_checks(text, metadata_text, shots, dialogue, assets):
     if notes:
         warns.append(f"W36 台词引号后追加语气 / 音色 / 动作括号 {len(notes)} 处（如「{notes[0]}」）：官方 FAQ 字幕约束不生效——"
                      f"台词后复述词语并追加语气、表情、动作描述会诱发字幕；语气 / 音色写到冒号前：台词（角色，a-bs，语言，语气 / 音量 / 语速）：\"…\"，"
-                     f"动作写进镜头行作开口前的一拍（不是搬进括号，W44）；引号后只接「；此时 B 闭着嘴」")
+                     f"动作写进镜头行（不是搬进括号，W44）；引号后只接「；此时 B 闭着嘴」")
     frags = requoted_fragments(text)
     if frags:
         warns.append(f"W36 台词之后复述了台词片段「{frags[0]}」等 {len(frags)} 处：官方 FAQ 字幕约束不生效——"
