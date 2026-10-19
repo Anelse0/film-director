@@ -1,5 +1,7 @@
-"""1.8.0 camera-position plan (S5 §5.1g): camera_plan_check.py only checks that the plan was done —
-section present, anchors give the reference view and frame sides, one filled row per shot, five review items answered."""
+"""1.8.0 camera-position plan (S5 §5.1g): camera_plan_check.py checks that the plan was done —
+section present, anchors give the reference view and frame sides, one filled row per shot, five review items answered.
+1.9.0: with absolute bearings in the anchors and the row's facing, C09 checks that the frame sides are right
+(W-C3 when bearings are missing, W-C4 bare "能" with no reach line, W-C5 corridor-relative wall names)."""
 import sys
 import tempfile
 import unittest
@@ -10,11 +12,13 @@ sys.path.insert(0, str(ROOT / 'scripts'))
 import camera_plan_check as cpc  # noqa: E402
 
 HEADER = '| 镜 | 机位在哪 | 朝哪拍 | 画左有什么 | 画右有什么 | 人物在画面哪里、脸朝哪 | 动作做得出来吗 | 和参考图视角 |\n|---|---|---|---|---|---|---|---|\n'
-ROW = '| {n} | 走廊里正对门 | 朝门 | 门 | 墙纸 | 中间，正面 | 能 | 一致 |\n'
+ROW = '| {n} | 走廊里正对门 | 朝北，朝门 | 门 | 墙纸 | 中间，正面 | 能 | 一致 |\n'
 REVIEW = ('### 核对\n\n1. 左右：一律画左 / 画右。\n2. 换边：无反打。\n3. 动作可行：都做得到。\n'
           '4. 参考图视角：和场景图一致。\n5. 上一条成片：首帧对上了。\n')
-ANCHORS = '### 空间锚点\n\n场景图视角：从走廊看门。门在画面中间，Theo 站的窄墙在画右。上一条成片末帧：无。\n\n'
-UPSTREAM = '### 空间锚点\n\n场景图视角：从走廊看门。门在画面中间，Theo 站的窄墙在画右。上一条成片末帧：clip01 成片末帧，门在 Theo 画左。\n\n'
+BEARING = '方位：门=北，西长墙=西，东长墙=东，东窄墙=东北，走廊另一头=南\n可达：站在东窄墙前，画左那只手够得到门板铰链一侧，够不到门把手。\n'
+ANCHORS = '### 空间锚点\n\n场景图视角：从走廊看门。门在画面中间，Theo 站的窄墙在画右。上一条成片末帧：无。\n' + BEARING + '\n'
+PRESENCE_ONLY = '### 空间锚点\n\n场景图视角：从走廊看门。门在画面中间，Theo 站的窄墙在画右。上一条成片末帧：无。\n\n'
+UPSTREAM = '### 空间锚点\n\n场景图视角：从走廊看门。门在画面中间，Theo 站的窄墙在画右。上一条成片末帧：clip01 成片末帧，门在 Theo 画左。\n' + BEARING + '\n'
 RECHECK = ('### 复核\n\n上一条成片：clip01.mp4（Prompt v1.4）\n末帧：门和名牌在 Theo 画左，墙纸在画右。\n'
            '对照：和起草时相反。\n改动：镜 1–8 镜像。\n\n')
 
@@ -96,12 +100,67 @@ class CameraPlanTests(unittest.TestCase):
     def test_wrong_case_d8_passes_presence_check(self):
         """Known gap, kept on purpose (user 2026-10-19): offset EP06 clip02 shot 2 writes the camera shifted to the
         corridor's left while the door sits left of centre. Facing the door, a camera shifted left sees the door right
-        of centre, so the row is wrong; the checker only checks that the row is filled, so it passes. Left as the wrong
-        case until a direction check (absolute bearings, proposal S1 / C08) exists."""
+        of centre, so the row is wrong. Written the 1.8.0 way (no bearings) the checker only checks that the row is
+        filled, so it still passes; 1.9.0 adds W-C3 to say the sides could not be checked."""
         row = '| 1 | 走廊里正对门，略偏走廊左侧 | 朝门 | 门（中间偏左） | Theo 中间偏右 | 两人对着 | 能 | 一致 |\n'
+        errors, warns = run(card(shots=(1,), rows=(), anchors=PRESENCE_ONLY).replace(HEADER, HEADER + row))
+        self.assertEqual(errors, [])
+        self.assertTrue(any(w.startswith('W-C3') for w in warns), warns)
+
+    def test_wrong_case_d8_with_bearings_fails_c09(self):
+        """The same wrong case with bearings (1.9.0, proposal S1): shifted west while facing north, the door straight
+        ahead lands right of centre, so 门 in the 画左 column is a C09 error. Shifted east it is correct."""
+        row = '| 1 | 走廊里，偏西 | 朝北 | 门（中间偏左） | 东窄墙 | 两人对着 | 能 | 一致 |\n'
+        errors, _ = run(card(shots=(1,), rows=()).replace(HEADER, HEADER + row))
+        self.assertTrue(any(e.startswith('C09') and '门' in e for e in errors), errors)
+        fixed = row.replace('偏西', '偏东')
+        errors, _ = run(card(shots=(1,), rows=()).replace(HEADER, HEADER + fixed))
+        self.assertEqual(errors, [])
+
+    def test_c09_reverse_along_the_end_wall(self):
+        """dddc014 shot 8: camera by the west narrow wall facing east; the end wall and door are on the north side,
+        which is frame left when facing east. The review wrote the door on frame right."""
+        row = '| 1 | 西窄墙前，贴尽头墙 | 朝东 | 走廊另一头 | 门 | 中间，3/4 正脸 | 能 | 相反 |\n'
+        errors, _ = run(card(shots=(1,), rows=()).replace(HEADER, HEADER + row))
+        self.assertTrue(any('C09' in e and '「门」应在画左' in e for e in errors), errors)
+        self.assertTrue(any('C09' in e and '「走廊另一头」应在画右' in e for e in errors), errors)
+
+    def test_c09_back_to_the_door(self):
+        """clip01 shot 1 with absolute names: facing south, the west wall is frame right."""
+        row = '| 1 | 走廊里，随 Theo 后退 | 朝南，背对门 | 西长墙 | 东长墙 | 中间，正面 | 能 | 一致 |\n'
+        errors, _ = run(card(shots=(1,), rows=()).replace(HEADER, HEADER + row))
+        self.assertTrue(any('C09' in e and '西长墙' in e for e in errors), errors)
+        swapped = row.replace('| 西长墙 | 东长墙 |', '| 东长墙 | 西长墙 |')
+        errors, _ = run(card(shots=(1,), rows=()).replace(HEADER, HEADER + swapped))
+        self.assertEqual(errors, [])
+
+    def test_c09_object_behind_the_camera(self):
+        row = '| 1 | 走廊中段 | 朝北 | 走廊另一头 | 东长墙 | 中间 | 能 | 一致 |\n'
+        errors, _ = run(card(shots=(1,), rows=()).replace(HEADER, HEADER + row))
+        self.assertTrue(any('C09' in e and '镜头身后' in e for e in errors), errors)
+
+    def test_landmark_used_as_reference_point_is_skipped(self):
+        row = '| 1 | 走廊里正对门 | 朝北 | 门右边那截窄墙的影子 | 东长墙 | 中间 | 能 | 一致 |\n'
+        errors, _ = run(card(shots=(1,), rows=()).replace(HEADER, HEADER + row))
+        self.assertEqual(errors, [])
+
+    def test_row_without_bearing_facing_warns(self):
+        row = '| 1 | 走廊里正对门 | 朝门 | 门 | 墙纸 | 中间 | 能 | 一致 |\n'
         errors, warns = run(card(shots=(1,), rows=()).replace(HEADER, HEADER + row))
         self.assertEqual(errors, [])
-        self.assertEqual(warns, [])
+        self.assertTrue(any(w.startswith('W-C3 镜1') for w in warns), warns)
+
+    def test_bare_yes_without_reach_line(self):
+        anchors = ANCHORS.replace('可达：站在东窄墙前，画左那只手够得到门板铰链一侧，够不到门把手。\n', '')
+        _, warns = run(card(anchors=anchors))
+        self.assertTrue(any(w.startswith('W-C4') for w in warns), warns)
+        _, warns = run(card())
+        self.assertFalse(any(w.startswith('W-C4') for w in warns), warns)
+
+    def test_corridor_relative_wall_name(self):
+        row = '| 1 | 走廊里正对门 | 朝北 | 走廊左墙 | 东长墙 | 中间 | 能 | 一致 |\n'
+        _, warns = run(card(shots=(1,), rows=()).replace(HEADER, HEADER + row))
+        self.assertTrue(any(w.startswith('W-C5 镜1') and '走廊左墙' in w for w in warns), warns)
 
     def test_cli_stage_flag(self):
         with tempfile.NamedTemporaryFile('w', suffix='.md', delete=False, encoding='utf-8') as f:

@@ -9,7 +9,15 @@
 - 空间锚点写了"上一条成片末帧"（没有写"无"）；不是"无"时要有 `### 复核` 小节，四行（上一条成片 / 末帧 / 对照 / 改动）都写了。
   复核在上一条成片回来后、编本条 Prompt 前做：S5 停靠时用 `--stage s5`，复核没做只给 WARN（W-C2）；
   编 Prompt 前（S6 入口）不带 --stage，复核没做是 ERROR（C08），不进 S6。
-另给 WARN：机位表里用人物身体的左右（左肩 / 右肩 / 左手 / 右手 / 他的左边…）而没写画左 / 画右。
+另给 WARN：机位表里用人物身体的左右（左肩 / 右肩 / 左手 / 右手 / 他的左边…）而没写画左 / 画右（W-C1）。
+
+1.9.0 加一条"写得对不对"的检查（offset EP06 复盘提案 S1；1.8.0 的表在 D8 错误样例上 0 ERROR 通过）：
+- 空间锚点给固定物件写绝对方位（`方位：门=北，西长墙=西，东窄墙=东北`，或 `| 物件 | 方位 |` 表），机位表"朝哪拍"写 朝北 / 朝东 …，
+  "机位在哪"偏离中线时写 偏东 / 偏西 …。C09（ERROR）：画左 / 画右格里出现的锚点物件，按朝向换算不在那一侧
+  （朝北：画左西、画右东；朝东：画左北、画右南；朝南：画左东、画右西；朝西：画左南、画右北）；正对镜头方向的物件
+  只在写了"偏 X"时判（机位偏右，正前方的东西落在画左），正在镜头身后的物件填进画左 / 画右也报。
+- W-C3：空间锚点没写方位，或某行"朝哪拍"没写绝对方位，C09 核不了；W-C4：机位表"动作做得出来吗"全是光秃秃的"能"、
+  空间锚点也没有"可达"；W-C5：机位表用了随机位转向会换边的名字（走廊左墙 / 右侧的墙），改用锚点里的绝对名字。
 
 退出码：0 = 做了（可有 WARN）；1 = 缺项（ERROR）；2 = 用法错误。
 """
@@ -22,6 +30,56 @@ CHECK_ITEMS = ('左右', '换边', '动作可行', '参考图视角', '上一条
 RECHECK_FIELDS = ('上一条成片', '末帧', '对照', '改动')
 PLACEHOLDER = re.compile(r'^\s*(?:_+|—|-|待定|TODO|TBD|？|\?)?\s*$', re.I)
 BODY_SIDE = re.compile(r'(?:左|右)肩|(?:左|右)手|(?:他|她)的(?:左|右)边|(?:他|她)(?:左|右)侧')
+BEARINGS = {'北': 0, '东北': 45, '东': 90, '东南': 135, '南': 180, '西南': 225, '西': 270, '西北': 315}
+BEARING_WORD = r'东北|东南|西北|西南|北|南|东|西'
+PAIR = re.compile(rf'([^\s=＝，、；：:|（）()]+?)\s*[=＝]\s*({BEARING_WORD})(?![\u4e00-\u9fff])')
+FACING = re.compile(rf'朝(?:正)?({BEARING_WORD})')
+OFFSET = re.compile(rf'偏({BEARING_WORD})')
+RELATIVE_WALL = re.compile(r'(?:走廊|房间|屋子?|过道)(?:的)?[左右](?:墙|侧|边|长墙)|[左右](?:墙|长墙)|[左右]边(?:那|的)?面?墙')
+BARE_YES = re.compile(r'^\s*(?:能|可以|做得到|可行|没问题)\s*[。.]?\s*$')
+FRAME_LEFT, FRAME_RIGHT = '画左', '画右'
+
+
+def bearing_table(anchors):
+    """{物件: 角度} from `方位：门=北，…` pairs or a `| 物件 | 方位 |` table inside the anchors."""
+    found = {}
+    for name, word in PAIR.findall(anchors):
+        found[name.strip()] = BEARINGS[word]
+    for line in anchors.splitlines():
+        cells = [c.strip() for c in line.strip().strip('|').split('|')] if line.strip().startswith('|') else []
+        if len(cells) >= 2 and cells[1] in BEARINGS and cells[0] not in ('物件', '---'):
+            found[cells[0]] = BEARINGS[cells[1]]
+    return found
+
+
+def objects_in(cell, table):
+    """Anchor names in a cell, longest first; a name followed by 左边 / 右侧 is a reference point, not the thing placed."""
+    hits, masked = [], cell
+    for name in sorted(table, key=len, reverse=True):
+        for m in re.finditer(re.escape(name), masked):
+            if re.match(r'[左右](?:边|侧)', masked[m.end():m.end() + 2]):
+                continue
+            hits.append(name)
+            masked = masked[:m.start()] + '＿' * len(name) + masked[m.end():]
+            break
+    return hits
+
+
+def side_of(obj_angle, facing, offset):
+    """'left' / 'right' / 'ahead' / 'behind' for an object seen from a camera facing `facing`, shifted toward `offset`."""
+    r = (obj_angle - facing) % 360
+    if r == 0:
+        if offset is None:
+            return 'ahead'
+        ro = (offset - facing) % 360
+        if 0 < ro < 180:
+            return 'left'
+        if 180 < ro < 360:
+            return 'right'
+        return 'ahead'
+    if r == 180:
+        return 'behind'
+    return 'right' if r < 180 else 'left'
 
 
 def blank(value):
@@ -88,6 +146,11 @@ def check(path, stage='s6'):
             absent = [n for n in shots if n not in seen]
             if absent:
                 errors.append('C05 机位表缺镜头：' + '、'.join(f'镜{n}' for n in absent))
+            table_bearings = bearing_table(anchors or '')
+            if anchors and not table_bearings:
+                warns.append('W-C3 空间锚点没给固定物件写绝对方位（方位：门=北，西长墙=西 …），机位表的画左 / 画右核不了（C09）')
+            cell = lambda r, col: r[idx[col]] if idx.get(col) is not None and idx[col] < len(r) else ''
+            bare = []
             for n, r in sorted(seen.items()):
                 empty = [c for c, i in idx.items() if i is not None and (i >= len(r) or PLACEHOLDER.match(r[i]))]
                 if empty:
@@ -95,6 +158,31 @@ def check(path, stage='s6'):
                 cells = ' '.join(r[1:])
                 if BODY_SIDE.search(cells) and not re.search(r'画左|画右', cells):
                     warns.append(f'W-C1 镜{n} 用了人物身体的左右（{BODY_SIDE.search(cells).group()}），没写画左 / 画右')
+                rel = RELATIVE_WALL.search(cell(r, '画左') + ' ' + cell(r, '画右'))
+                if rel:
+                    warns.append(f'W-C5 镜{n} 用了随机位转向会换边的名字「{rel.group()}」，改用空间锚点里的绝对名字')
+                if BARE_YES.match(cell(r, '动作做得出来')):
+                    bare.append(n)
+                if not table_bearings:
+                    continue
+                facing = FACING.search(cell(r, '朝哪拍'))
+                if not facing:
+                    warns.append(f'W-C3 镜{n} 「朝哪拍」没写绝对方位（朝北 / 朝东 …），这一行的左右核不了')
+                    continue
+                f = BEARINGS[facing.group(1)]
+                off = OFFSET.search(cell(r, '机位在哪'))
+                o = BEARINGS[off.group(1)] if off else None
+                for col, want in (('画左', 'left'), ('画右', 'right')):
+                    for obj in objects_in(cell(r, col), table_bearings):
+                        got = side_of(table_bearings[obj], f, o)
+                        if got == 'ahead':
+                            continue
+                        if got != want:
+                            where = {'left': '画左', 'right': '画右', 'behind': '镜头身后'}[got]
+                            errors.append(f'C09 镜{n} 朝{facing.group(1)}拍时「{obj}」应在{where}，表里填在{col}'
+                                          '（按朝向换算：朝北 画左西 / 画右东；朝东 画左北 / 画右南；朝南 画左东 / 画右西；朝西 画左南 / 画右北）')
+            if seen and len(bare) == len(seen) and anchors and '可达' not in anchors:
+                warns.append('W-C4 机位表「动作做得出来吗」全是"能"，空间锚点也没有「可达」：写每个站位用哪只手够得到什么、够不到什么')
     if review:
         for item in CHECK_ITEMS:
             m = re.search(rf'{re.escape(item)}[^：:\n]*[：:][ \t]*([^\n]*)', review)

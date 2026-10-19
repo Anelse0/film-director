@@ -35,6 +35,13 @@ word in the bracket of a close shot with no executable beat for that speaker in 
 body, voice or pause, an action toward the other character, or a delivery word in the bracket (口气 words stay; one line per shot);
 W45 (costume_checks.py) a sustained wearing-state deviation while the character's binding lines use the image-equals-state
 wording (唯一的服装 / 一律按 @图; E-layer 穿着状态说明 keeps a reviewed design). Shot tags may run to 80 characters.
+1.9.0 (offset EP06 clip01 / clip02 renders): W46-W49 (wording_checks.py) wording the model executes literally — a character's
+own left / right or an undefined landmark side used as a screen position, and an over-the-shoulder shoulder that disagrees
+with its frame corner (W46); speed words in the dialogue bracket or a fast voice line (W47); a held phone / cup / bottle
+with no grip, or 捂 … 话筒 (W48); flustered / wide-eyed acting words in a light-tone clip (W49). W51 (continuity_checks.py)
+the first shot of a last-frame continuation replays the previous beat. W52 (viewpoint_checks.py) an object placed behind
+the camera mentioned more than once per shot / per global sentence, and a scene image bound with 不参考视角 for one shot
+only (E-layer 视角说明 keeps a reviewed choice). W50 is reserved for the per-shot load count (not in this release).
 English speech estimate defaults to 3.5 words/s (1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
@@ -57,6 +64,9 @@ from guide_checks import guide_checks
 from focus_checks import focus_checks
 from subtext_checks import subtext_checks
 from costume_checks import costume_checks
+from wording_checks import wording_checks
+from continuity_checks import continuity_checks
+from viewpoint_checks import viewpoint_checks
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -418,6 +428,13 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         warns.extend(cw)
         for line in ci:
             info(line)
+        # 1.9.0: W46-W49 wording executed literally (wording_checks), W51 last-frame continuation replays the previous beat
+        # (continuity_checks), W52 behind-camera mentions and single-shot opposite-view scene images (viewpoint_checks).
+        for check in (wording_checks, continuity_checks, viewpoint_checks):
+            xw, xi = check(text, shots, metadata_text)
+            warns.extend(xw)
+            for line in xi:
+                info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:
         if re.search(r"\d+\s*秒?内.{0,10}\d+\s*次|\d+\s*times? (?:per|in) \d+", body):
