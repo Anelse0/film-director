@@ -1,4 +1,10 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.7.1 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.8.0 baseline.
+
+1.8.0 (2026-10-19): mandatory camera-position plan in S5 (§5.1g), shot-card template section, stage-7 review row;
+camera_plan_check.py added to the zone; per-clip recheck after the previous clip's render (--stage s5 / s6, C08, W-C2);
+hashes for stage-5, stage-7, the shot-card template and camera_plan_check.py re-set in the same commit.
+
+Previous baseline: 1.7.1.
 
 1.7.1 (2026-10-13): W44 relaxed by the user's decision - the intent word in the dialogue bracket needs one executable
 beat of any kind for the speaker (eye / face, hand / head / body, voice or pause, an action toward the other character,
@@ -80,10 +86,10 @@ PROTECTED = {
     'references/emotion-performance.md': 'f2c7aa0b1beb72781117abd310cab2431c703af909e5aa2918946a2f40ae5a5a',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': '8fbfdb57213b17e6d1ce6b2ef0fc55e49d81b517d57a880143bfe1486cbc56c5',
-    'references/stage-5-directing-storyboard.md': '79da8f6b67855979b222f26054b3d26922d4183f5a9c6ac8a5980dc8b438b7a6',
+    'references/stage-5-directing-storyboard.md': 'a63781c8d2c374745c41825425cf3cf1f49e81c601e224adaeaf6cc1025a8012',
     'references/stage-5b-reference-assets.md': '38c893fcdfe03dbf2238cecdd7d5cc8559f4b2593a87e9b2cd87be493d3bc81e',
     'references/stage-6-prompt-compiler.md': '43dd8d2c61f402b41ecfb5ad44e2c2a54a9c216166a81011ded72d865e97a1c4',
-    'references/stage-7-qa-continuity.md': '4553744472121f76403836edcdd96116209eff9f8d3b9a1b9dd88dbe6610717e',
+    'references/stage-7-qa-continuity.md': '0c3db951977cd82a9f2371a757341ecb4fa725e2fe86cad270a0bb8e47df971c',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
     'references/seedance-2.5-capabilities.md': 'b1cf9cec6593a12c0a51ccb3f6d4818a2c90eda35de9e7a90a857e27563f92eb',
@@ -94,7 +100,7 @@ PROTECTED = {
     'templates/prompt-templates.md': '0ba89b6563f909ccc4b1ba6537023183bbfe284179ace3a3a2cad75d6a1e4e2d',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '96e7fcb783028d6c258005c962c18b9f2cdbd3bc36d52596bc7a5568900b838b',
-    'templates/shot-card.md': '76261f39120de5c40b54114a0267b7aebede559c99cdceedbe1621eb33390a23',
+    'templates/shot-card.md': '3118bd5a12ebd42fd802cd1a5c5458e81a0980436a6b15a53d36dd723bf05684',
     'templates/reference-asset-brief.md': '106e08747fd39ce900ca928afef2244ce8071c0ea43fec328581352ce552b441',
     'templates/asset-registry.md': '2b478992e56c0d08bd99e66b04aa3933f9bd6dc46b0ca2eb507ae68632df0bba',
     'scripts/rhythm_checks.py': '24f4836a1d98b46acfeb1cf95c2f50a5f89f633b2412dd4ffc5d9a10628e61be',
@@ -110,6 +116,7 @@ PROTECTED = {
     'scripts/production_contract.py': 'adb40d1e05ecb6d298e2bb295a8ef325941812f00a89f9000fe03477a58b780f',
     'scripts/production_preflight.py': 'aab550991f000dac727f744f1c603a5a1519f1adf44d2e288e11c9d3cc859c0d',
     'scripts/emotion_library.py': '11b1257528d00edbf66a9637a9508966f26d23d1db97917b609127858ac0cc6d',
+    'scripts/camera_plan_check.py': '6e448d73e28bc3f65bb05ef37583b701fcfc6d5ca89d7abf2a3df4a111f752ff',
     'scripts/performance_checks.py': '5a54ee7c0cb77b67466ee6f7102ded648220cf8b922fea7da186f68ccd869ae0',
 }
 

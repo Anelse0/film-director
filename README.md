@@ -12,9 +12,11 @@
 
 1.7.0 把 offset EP05 s03 clip03 审阅里确认的三个做法写进规则与校验（第四项「借秒：镜内秒数账」按用户要求暂停，未进本版）：**焦点与虚实**（有画内人物的镜标注末尾写「焦点在 X」，过肩 / 虚化层写在画面哪里、占多少，默认景深在【画面基调】；W43）；**台词括号里的意图**（口气词留在括号里即可；意图词不是去处：近景以内同镜要有这个人的一个可执行拍子，动作不进括号；S4 §4.4c 第 7 条，W44）；**服装图与穿着状态**（服装图是衣物的样子不是穿着状态：脱下 / 敞开 / 卷袖时人物行 / 服装行改用写状态的写法，【起始状态】写开场状态、【贯穿要求】写分段状态；S5b §5b.3，W45）。
 
+1.8.0 在 S5 加必做的**机位设计**（空间锚点 + 每镜机位表 + 五项核对），停靠前跑 `scripts/camera_plan_check.py` 查有没有做。
+
 1.7.1 按用户决定放宽 W44：意图词的载体由导演设计定——眼神 / 脸、手与身体、声音与停顿、与对方的互动，任一种（括号里的可执行声音词 轻声 / 放慢 / 顿一拍 也算），不再只认眼神拍子；画外 / 背对 / 后景的句子落在听者；W45 维持原样。
 
-创意前端（概念、故事、剧本、台词创作与改写）由独立的 [film-creative](https://github.com/Anelse0/film-creative) Skill 承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
+创意前端（概念、故事、剧本、台词创作与改写）由独立的 film-story Skill（本地 ~/.claude/skills/film-story，2026-10-18 起取代 film-creative）承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
 
 ## 一句话
 
@@ -95,7 +97,7 @@ python3 scripts/validate_prompt.py <prompt.md> --production-record <production.j
 <workspace>/<ip-slug>/ip.md · assets/ · <story-slug>/{00_brief, 01_concept, 02_story, 03_script/, 04_shots/, 05_assets/, 06_prompts/, 07_qa/}
 ```
 
-00–03 层是创意侧输入（film-creative 或用户提供），本 Skill 只读不写。
+00–03 层是创意侧输入（film-story 或用户提供），本 Skill 只读不写。
 
 ## 事实来源
 

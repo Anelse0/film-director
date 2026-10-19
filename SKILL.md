@@ -1,6 +1,6 @@
 ---
 name: film-director
-description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。支持调用情绪表演原文、调节强度与克制、微调和重组情绪弧线及独立定时表演测试。用于剧本/分镜转视频 Prompt、视频编辑/延长规划和成片修正。不做概念、故事与剧本创作（那些由 film-creative skill 承担），不用于单张图片生成或非视频文案。
+description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词、导演与分镜、参考资产计划、Prompt 编译、连续性与质量检查。支持调用情绪表演原文、调节强度与克制、微调和重组情绪弧线及独立定时表演测试。用于剧本/分镜转视频 Prompt、视频编辑/延长规划和成片修正。不做概念、故事与剧本创作（那些由 film-story skill 承担），不用于单张图片生成或非视频文案。
 ---
 
 # Film Director — 表演 · 分镜 · Seedance 2.5 Prompt
@@ -18,7 +18,7 @@ description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词�
 ## 工作边界
 
 - **做**：表演外化（含情绪提示词）、导演与分镜、参考资产计划、Seedance 2.5 Prompt 编译（参考生为主；文生 / 关键帧 / 宫格 / 首尾帧 / 编辑 / 延长）、连续性与质量检查、成片问题定位。
-- **不做**：不创作概念、故事与剧本，不代写或润色台词，不开发人物语言（创意工作由 film-creative skill 承担；剧本缺口只登记，不代补；S4 只取执行需要的语音信息）；不调用模型 API，不生成图片（只产出图像简报）；不虚构模型参数；不替用户决定与任务无关的美术风格。
+- **不做**：不创作概念、故事与剧本，不代写或润色台词，不开发人物语言（创意工作由 film-story skill 承担；剧本缺口只登记，不代补；S4 只取执行需要的语音信息）；不调用模型 API，不生成图片（只产出图像简报）；不虚构模型参数；不替用户决定与任务无关的美术风格。
 - **事实分级**（写任何模型能力时必须带标签）：`[官方]` 火山方舟指南原文 · `[第三方]` 有出处的外部经验 · `[推论]` 本 Skill 的设计推论 · `[未验证]` 未核实假设。能力表见 `references/seedance-2.5-capabilities.md`。
 
 完整生产到 S5b–S7 时读取 `references/production-workflow.md`。该接口把既有素材、任务参数、上游版本和审阅记录绑定到每条 clip；文本草稿不冒充可提交生产包。
@@ -26,7 +26,7 @@ description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词�
 ## 输入与交接
 
 - **接受的输入**：剧本场景文本（`03_script/scene-XX.md` 格式或任何来源的等价场景稿）、场景参数卡、`ip.md` / 人物外观与地点描述、已有分镜卡或镜头表、既有 Prompt 与成片反馈、表演测试请求。输入不要求来自 film-creative；用户直接给一段场景文本同样有效。
-- **剧本层缺口只登记不代写**：缺场景、缺台词、故事不成立时列缺口交回用户或 film-creative；用户说"台词就这样"时锁定台词，只补表演。
+- **剧本层缺口只登记不代写**：缺场景、缺台词、故事不成立时列缺口交回用户或 film-story；用户说"台词就这样"时锁定台词，只补表演。
 - **锁定**：输入剧本中已确认的台词与场景是锁定内容，编译与外化不得擅改（硬规则 7）；表演目的需要的嘴部状态、动作标注是新增外化信息，不是改台词。
 
 ## 流水线
@@ -42,7 +42,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | S1 资源读取 | `references/stage-1-intake.md` | 资产登记 + 缺口清单 | |
 | S2 任务识别 | 同上 §任务识别 ＋ `references/scene-parameters.md` §一 | 任务类型 · 运行模式 · 入口阶段 · clip 数 · 锁定判定 · **场景参数卡** | |
 | S4 表演外化 | `references/stage-4-performance.md` ＋ `references/emotion-performance.md` | 有序表演块（C 层）及内部核对记录 | |
-| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-grammar.md`（景别 / 运镜 / 动线 / 剪辑 / 载体的决策规则）＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` ＋ `references/duration-rhythm.md`（clip 时长从内容推导、台词窗口、镜长分布、无声段） | `04_shots/scene-XX-clipYY.md` 分镜卡（五层）+ 走位表 + 决策载体 + **变化轨**（峰值镜 + 每镜四维变化：景别 / 机位或运镜 / 光 / 动作幅度，`duration-rhythm.md` §二） | ▮（与 S5b 一起） |
+| S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-grammar.md`（景别 / 运镜 / 动线 / 剪辑 / 载体的决策规则）＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` ＋ `references/duration-rhythm.md`（clip 时长从内容推导、台词窗口、镜长分布、无声段） | `04_shots/scene-XX-clipYY.md` 分镜卡（五层）+ 走位表 + **机位设计**（必做，§5.1g；`scripts/camera_plan_check.py`）+ 决策载体 + **变化轨**（峰值镜 + 每镜四维变化：景别 / 机位或运镜 / 光 / 动作幅度，`duration-rhythm.md` §二） | ▮（与 S5b 一起） |
 | S5b 参考资产 | `references/stage-5b-reference-assets.md` | `05_assets/asset-plan.md`：资产清单 + 图像简报 + 上传顺序 | 等用户回填 |
 | S6 Prompt 编译 | `references/stage-6-prompt-compiler.md` ＋ `templates/prompt-templates.md` | `06_prompts/scene-XX-clipYY.prompt.md` | |
 | S7 检查 | `references/stage-7-qa-continuity.md` ＋ `scripts/validate_prompt.py`；有成片时 `scripts/measure_clip.py`（实测切点 / 有声占比 / 视觉变化谱对照 Prompt 的时间轨与变化轨） | `07_qa/…`；有成片时追加 `references/validation-log.md` | |
@@ -69,7 +69,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 
 停靠规则（只适用于默认停靠式；全流程、看一眼、单阶段及表演优先路由按上表执行）：
 
-- **S5 后必停**：分镜卡是最后一个人类可读的决策层；资产清单随分镜一起确认。
+- **S5 后必停**：分镜卡是最后一个人类可读的决策层；资产清单随分镜一起确认。停之前跑 `python3 scripts/camera_plan_check.py --stage s5 <分镜卡>`，机位设计缺项（ERROR）不停靠。编每条 clip 的 Prompt 前（S6 入口）不带 `--stage` 再跑一次：上一条成片回来后的**复核**没做是 ERROR，不进 S6。
 - 其余停靠只问"按此继续？或改哪里"。
 - **每个停靠点第一行回显场景参数卡**（`references/scene-parameters.md`：强度 · 方向 · 信息 · 权力 · 进场温度 · 密度），让用户在早期纠正。
 
@@ -92,7 +92,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
   ip.md                    世界观 · 人物总表 · 地点总表 · 视觉声音总则（跨故事共享）
   assets/assets.md         参考资产登记表（编号 = 上传顺序）+ 文件
   <story-slug>/            一个故事 / 一条先导 / 一集
-    00_brief.md · 01_concept.md · 02_story.md · 03_script/scene-XX.md   ← 创意侧输入（film-creative 或用户提供），只读不写
+    00_brief.md · 01_concept.md · 02_story.md · 03_script/scene-XX.md   ← 创意侧输入（film-story 或用户提供），只读不写
     04_shots/scene-XX-clipYY.md
     05_assets/asset-plan.md
     06_prompts/scene-XX-clipYY.prompt.md
@@ -126,6 +126,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 17. **台词长度按预算。** 英文默认 3.5 词/s（常速交锋；短促可到 4；慢戏 2.5–3 须写明说法）、中文 4 字/s、占比 ≤2/3（`references/seedance-2.5-capabilities.md` §7）；2.5 词/s 是美式英语均值 `[一手]`，是下限不是默认；超预算先放宽窗口或拆镜，不改锁定台词、不自动提速。`[一手]` 语音学标准 + `[实测]` + `[推论]`
 18. **对话场一句不等于一镜，时长从内容推导。** 切点落在信息变化处（被点名的人、被提到的物、听者接住的一下、动作终点），一句可跨两镜、尾段画外；语速按成片校准（`scripts/measure_clip.py` 加 `--prompt`），对话场用 `台词轨 | 连续`（一句可溢出到下一镜 ≤1 s，W29 链式检查取代逐窗口 W05）；固定机位整句一镜 ≥4 s、窗口比估时宽 >1 s、无台词段无功能、30 s 未按内容推导都是校验 W22–W29 的审阅项，写明理由才保留（`references/duration-rhythm.md`）。`[官方范例]` + `[实测]` + `[推论]`
 19. **镜与镜之间必须有变化（变化轨，与两条时间轨平权）。** 每条 clip 先声明峰值事件（最大物理动作或最大信息变化）并写 E 层 `峰值镜 | N`，峰值镜拿最可见景别与本 clip 首要的有动机运镜；每镜在 C 层声明相对上一镜的四维变化 `【变化：景别 全→近｜机位 固定→推｜光 正→侧｜幅度 1→3】`（写在分镜卡与 E 层 `变化轨` 行，不进 Prompt 正文，1.6.0）；下限：镜长有对比（最长 ≥2× 最短）、至少两个维度在 clip 内各变一次、峰值不落在全景或越肩、无台词段同样受此约束（校验 W30–W33，`references/duration-rhythm.md` §二、S5 §5.1f）。成片 = 设计的实测（`validation-log.md` 2026-09-20）说明"画面没有变化"的问题在设计，不在渲染。`[实测]` + `[一手]` Lumet + `[推论]`
+20. **机位设计必做（1.8.0）。** S5 在走位表之后、逐镜设计之前写 `## 机位设计`：空间锚点（场景图视角、固定物件的画左 / 画右、门开向与把手、人物固定站位、上一条成片末帧）、每镜一行的机位表（机位在哪、朝哪拍、画左 / 画右各有什么、人物在哪脸朝哪、动作做不做得出来、和参考图视角是否一致）、五项核对（左右 / 换边 / 动作可行 / 参考图视角 / 上一条成片）。左右一律写画左 / 画右；机位和参考图视角相反时正文只写画面里有什么、用这一侧的物件做前景，不描写镜头身后东西的样子（E23 的方向句照写）。颗粒度按 clip（一张分镜卡一段，机位表每镜一行）。有上一条 clip 时，上一条成片回来后、编本条 Prompt 前做**复核**：抽成片末帧，和本卡空间锚点、机位表逐项对，写 `### 复核` 四行（上一条成片 / 末帧 / 对照 / 改动），以成片为准改。`scripts/camera_plan_check.py` 只查做没做（S5 停靠用 `--stage s5`，复核待做只 WARN；S6 入口不带，复核没做 ERROR），对不对靠核对、复核与 S7（`references/stage-5-directing-storyboard.md` §5.1g）。`[实测]` offset EP06 clip01 / clip02
 
 ## 默认输出契约
 
@@ -151,6 +152,6 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | "把 @视频1 延长 / 改台词 / 换人" | S2 编辑-延长分支 → S6 |
 | "先出一个 prompt 看看效果" | 看一眼：跑到 S6，不落盘；纯表演走优先路由 |
 | "一次跑完 / 全部落盘" | 全流程 |
-| "构思 / 想故事 / 写剧本 / 改台词" | 越界项：交由 film-creative，产出剧本后回本 skill |
+| "构思 / 想故事 / 写剧本 / 改台词" | 越界项：交由 film-story，产出剧本后回本 skill |
 
 不确定入口且结果会实质不同时，只问一个简短问题；否则按最保守解读推进并写明假设。
