@@ -1,7 +1,8 @@
 """1.8.0 camera-position plan (S5 §5.1g): camera_plan_check.py checks that the plan was done —
 section present, anchors give the reference view and frame sides, one filled row per shot, five review items answered.
 1.9.0: with absolute bearings in the anchors and the row's facing, C09 checks that the frame sides are right
-(W-C3 when bearings are missing, W-C4 bare "能" with no reach line, W-C5 corridor-relative wall names)."""
+(W-C3 when bearings are missing, W-C4 bare "能" with no reach line, W-C5 corridor-relative wall names).
+1.10.0: --prompt cross-checks each row against the same prompt shot (C10, explicit contradictions only)."""
 import sys
 import tempfile
 import unittest
@@ -174,6 +175,51 @@ class CameraPlanTests(unittest.TestCase):
         with tempfile.NamedTemporaryFile('w', suffix='.md', delete=False, encoding='utf-8') as f:
             f.write(card(plan=False))
         self.assertEqual(cpc.main(['x', f.name]), 1)
+
+
+def prompt_file(lines):
+    with tempfile.NamedTemporaryFile('w', suffix='.prompt.md', delete=False, encoding='utf-8') as f:
+        f.write('【分镜时间线】\n' + ''.join(lines))
+    return f.name
+
+
+class CrossCheckTests(unittest.TestCase):
+    ROW = '| 1 | 走廊里，偏东 | 朝北 | 门（中间偏左） | 东窄墙 | Theo 中间偏右 | 能 | 一致 |\n'
+
+    def card_path(self):
+        with tempfile.NamedTemporaryFile('w', suffix='.md', delete=False, encoding='utf-8') as f:
+            f.write(card(shots=(1,), rows=()).replace(HEADER, HEADER + self.ROW))
+        return f.name
+
+    def test_contradiction_is_c10(self):
+        """offset EP06: the clip02 card was mirrored (door frame left) while an older prompt still said frame right."""
+        prompt = prompt_file(['镜头1（0-3s）：【中景，正对门，焦点在 Theo】门在画面中间偏右；Theo 在画面中间偏左。\n'])
+        errors, _ = cpc.check(self.card_path(), 's6', prompt)
+        self.assertTrue(any(e.startswith('C10 镜1') and '「门」' in e for e in errors), errors)
+
+    def test_agreement_passes(self):
+        prompt = prompt_file(['镜头1（0-3s）：【中景，正对门，焦点在 Theo】门在画面中间偏左；Theo 在画面中间偏右。\n'])
+        errors, _ = cpc.check(self.card_path(), 's6', prompt)
+        self.assertEqual(errors, [])
+
+    def test_clause_with_both_sides_or_reference_point_is_skipped(self):
+        prompt = prompt_file(['镜头1（0-3s）：【中景，正对门，焦点在 Theo】门从画左看过去在画右的反光里，门右边那截窄墙在画右。\n'])
+        errors, _ = cpc.check(self.card_path(), 's6', prompt)
+        self.assertEqual(errors, [])
+
+    def test_common_objects_without_bearings(self):
+        row = '| 1 | 走廊里正对门 | 朝门 | 门框和铜名牌 | 墙纸 | Theo 中间 | 能 | 一致 |\n'
+        with tempfile.NamedTemporaryFile('w', suffix='.md', delete=False, encoding='utf-8') as f:
+            f.write(card(shots=(1,), rows=(), anchors=PRESENCE_ONLY).replace(HEADER, HEADER + row))
+        prompt = prompt_file(['镜头1（0-2s）：【近景，正对门，焦点在 Theo】门框和铜名牌在他头部的画右一侧，画左是墙纸。\n'])
+        errors, _ = cpc.check(f.name, 's6', prompt)
+        self.assertTrue(any('C10' in e and '「门框」' in e for e in errors), errors)
+
+    def test_cli_prompt_flag(self):
+        prompt = prompt_file(['镜头1（0-3s）：【中景】门在画面中间偏右。\n'])
+        self.assertEqual(cpc.main(['x', '--prompt', prompt, self.card_path()]), 1)
+        self.assertEqual(cpc.main(['x', '--prompt']), 2)
+        self.assertEqual(cpc.main(['x', '--prompt', prompt, self.card_path(), self.card_path()]), 2)
 
 
 if __name__ == '__main__':

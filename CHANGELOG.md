@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.10.0 — 2026-10-19
+
+复盘提案（`offset/_proposals/2026-10-19-clip-workflow-fixes.md`）剩下的几项（用户 2026-10-19："the per-shot action-load check (W50), the card-vs-prompt cross-check, review passes, QA current-state sections and platform notes"）。效果为流程与写法规则，本项目成片未验证。
+
+### 决定（用户 2026-10-19）
+- **W50 镜内负载暂停**（"pause:W50"）。和 1.7.0 的借秒（W42）一样：不接进 `validate_prompt.py`，模块与测试不在仓库里（草稿留在会话暂存目录 `parked-1.10.0-W50/`：`action_load_checks.py`、测试类、`duration-rhythm.md` 的行与恢复说明），码表保留 W50；镜内负载照硬规则 15 人工审（S7 §7.1 第 4 道）。暂停前的回归：EP01–EP05 为 0，EP06 两处（clip01 镜 3、clip02 镜 8，各 3 s 六件事）。模块名当时用 `action_load_checks.py`，因为 `load_checks.py` 被 1.7.0 的借秒草稿占着（`test_release_170` 守着它不进仓库）。
+
+### Added
+- **`camera_plan_check.py --prompt <prompt.md>`：C10**（ERROR）——机位表第 N 行画左格里的物件，在 Prompt 镜头 N 里出现在只写了画右的分句里（或反过来）；物件取空间锚点方位行里的名字，没写方位时取常见固定物件（门 / 门框 / 名牌 / 窗 / 镜台 / 灯泡镜 / 扶手椅 …）；同一分句两侧都写、物件后接"左边 / 右侧"当参照点的都跳过；只配一张分镜卡。拿镜像后的 clip02 分镜卡对镜像前的 clip02 Prompt（f7da3e3）报 8 条，对现行 Prompt 0 条。
+- **`scripts/qa_check.py`（入保护区）+ `templates/qa.md`（入保护区）**：QA 第一节 `## 现行状态`（Prompt / 分镜卡版本、成片由哪一版生成、上游末帧、两个脚本的最新结果、未决），每次改稿重写；Q01 没有这一节 / 不在最前 / 缺 Prompt、成片、校验行，Q02 记的 Prompt 版本和 E 表"版本"行不一致，Q03 记的 WARN 代码或 ERROR 数和重跑 `validate_prompt.py` 不一致（都是 ERROR）；W-Q1 Prompt 路径找不到。
+- **WARN 分级**：`validate_prompt.py` 最后一行 INFO"成片教训类提醒 …"列出本条命中的 W35、W46–W49、W51、W52（`RENDER_LESSON_CODES`）；这一类默认改，保留要用户点头。
+- 测试：`test_render_lessons.py` 加 2 项（WARN 分级）、`test_camera_plan.py` 加 5 项（C10）、`tests/test_qa_check.py` 10 项、`tests/test_release_1100.py`。
+
+### Changed
+- **S7 §7.1**：第 1 步写 WARN 两类与 `camera_plan_check.py --prompt`；新增第 3 步**七道审阅**（台词 / 括号与声音行 / 机位与空间 / 动作可行与负载 / 衔接 / 基调与表演 / 校验处置），每道在 QA 留表，空间那道不等用户追问。**§7.4** 改为指向 `templates/qa.md`，写现行状态、版本号、旧节标"已被 … 替代"和 `qa_check.py`。
+- **S6 §6.6**：编译后加跑 C10；成片教训类 WARN 在编译时就改。
+- **能力表 §2**：加"平台差异"说明——项目的 `platform.md` 记了平台实测（offset：first_frame 与 reference_image 可混用）时以它为准，冲突先告诉用户。**S5 §5.1** 衔接表"尾帧接首帧"一行写"上一 clip **成片**末帧"，并指向平台记录。
+- SKILL：S7 一行写 C10、`qa_check.py` 与 `templates/qa.md`；硬规则 12 写 WARN 两类；W50 说明改为暂停；模板清单加 `qa.md`。`duration-rhythm.md` §七 W50 行写暂停；S7 §7.1 第 4 道写"W50 暂停，人工审"；README。
+
+### 回归（offset EP01–EP06 全部 35 条 Prompt）
+- exit 码与 1.9.0 一致；示例 01 / 03 / 05 / 06 仍 0 warning。
+- W50 暂停，不运行（暂停前的结果见上面"决定"）。
+- C10：EP06 三张分镜卡对各自现行 Prompt 都是 0。
+- `qa_check.py`：EP06 三份 QA 补了现行状态后都通过；EP01–EP05 的 23 份旧 QA 都报 Q01（没有现行状态，不迁移）。
+
 ## 1.9.0 — 2026-10-19
 
 把 offset EP06 场 01 clip01 / clip02 复盘提案（`offset/_proposals/2026-10-19-clip-workflow-fixes.md`）里用户排定的前四项做成规则与校验（用户 2026-10-19："pls begin"，顺序：参考图视角 → 方位与 C09 → 交接 → 措辞校验）。效果为写法规则，本项目成片未验证。

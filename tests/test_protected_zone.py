@@ -1,6 +1,12 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.9.0 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.10.0 baseline.
 
-1.9.0 (2026-10-19): render lessons from offset EP06 s01 clip01 / clip02 — C09 bearing check plus W-C3 / W-C4 / W-C5 in
+1.10.0 (2026-10-19): the rest of the EP06 review proposal (W50 per-shot action load paused by the user, not in the release) —
+C10 card-vs-prompt cross-check (camera_plan_check.py --prompt), the closing render-lesson INFO in validate_prompt.py,
+qa_check.py and templates/qa.md (QA current state, new to the zone), seven review passes (stage-7 §7.1 / §7.4), C10 in
+stage-6 §6.6, the platform-difference note (capabilities §2, stage-5 §5.1 hand-off row); hashes re-set in the same
+change with a CHANGELOG entry.
+
+1.9.0 previous baseline. 1.9.0 (2026-10-19): render lessons from offset EP06 s01 clip01 / clip02 — C09 bearing check plus W-C3 / W-C4 / W-C5 in
 camera_plan_check.py; wording_checks.py (W46-W49), continuity_checks.py (W51) and viewpoint_checks.py (W52) added to the
 zone and wired into validate_prompt.py; stage-5 (§5.1 hand-off, §5.1c, §5.1g bearings / reach / existing reference
 images only), stage-5b (scene-image viewpoint), stage-6 (bracket without speed, five wording rules, self-check),
@@ -96,13 +102,13 @@ PROTECTED = {
     'references/emotion-performance.md': 'f2c7aa0b1beb72781117abd310cab2431c703af909e5aa2918946a2f40ae5a5a',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': '8fbfdb57213b17e6d1ce6b2ef0fc55e49d81b517d57a880143bfe1486cbc56c5',
-    'references/stage-5-directing-storyboard.md': 'dd8d38dc77c5f05566eeb437a0a77c132bb2e887bd66f751341668a97bfddcee',
+    'references/stage-5-directing-storyboard.md': '7356bbbd5ba12262d11a4794c3cb5f4050974c6398500ebaad6aac7945cfb46f',
     'references/stage-5b-reference-assets.md': '0ca1e45deee8a4dd5aa97022eed99c47284ca83018d5805aebfe254e9a1af18c',
-    'references/stage-6-prompt-compiler.md': '0512d89c2c8e0748541a638e293500d626c6187c64106e05253a746dffbd3f13',
-    'references/stage-7-qa-continuity.md': 'a16be9e46040c734b926a382d6f00d7a3581e008332c4fc15b5aaa8a7b7d3a72',
+    'references/stage-6-prompt-compiler.md': '5c992be1631a2b7ed8e4c13c4ecd1663b9dbfea2eb595810df81ba9720720f18',
+    'references/stage-7-qa-continuity.md': 'c7faae3c63a9363f8fbc035df0654344e789c93ba02b4b0a5d2f63aa507b5b2f',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
-    'references/seedance-2.5-capabilities.md': 'b1cf9cec6593a12c0a51ccb3f6d4818a2c90eda35de9e7a90a857e27563f92eb',
+    'references/seedance-2.5-capabilities.md': 'fc3d1a1b4edf12b08cc333a655067433b8dd2bb12c85d1834cbf1c9a565c113d',
     'references/camera-vocabulary.md': '2910da6bcebe1d4603e712a30db195504edfbf0ddfc22aa823adbf996be4582c',
     'references/externalization-lexicon.md': 'd89d0cc4ea98e63c9673984c84abd4081729ddaff2057616af582f141891f9da',
     'references/genre-packs.md': 'e8bf4dd45abb22776ac4dec2490551e1a9aedddfd26cca459bc6557df3c95513',
@@ -121,15 +127,17 @@ PROTECTED = {
     'scripts/focus_checks.py': '5b5d3110f22c58c272f3c24aa7533e75b9b91f46f951589a829c0eef25a6106c',
     'scripts/subtext_checks.py': 'c060f2bc9c7faf731e4ef8da3230319cdbf5c9916107de6ac1f37f019323a7ed',
     'scripts/costume_checks.py': 'dd11f7a23d3a252378d6f415a7310e16d0bf0811b3f5df29629b6957c74955fc',
-    'scripts/validate_prompt.py': '3524386e342b014f3e17630e57e5eb2230c804e5b6b1cb27a2bba857f3055496',
+    'scripts/validate_prompt.py': 'e515dfd023eb214fb083504fafbf6e2d752b46c8693b6362a232a56147c6d55b',
     'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
     'scripts/production_contract.py': 'adb40d1e05ecb6d298e2bb295a8ef325941812f00a89f9000fe03477a58b780f',
     'scripts/production_preflight.py': 'aab550991f000dac727f744f1c603a5a1519f1adf44d2e288e11c9d3cc859c0d',
     'scripts/emotion_library.py': '11b1257528d00edbf66a9637a9508966f26d23d1db97917b609127858ac0cc6d',
-    'scripts/camera_plan_check.py': '58cf794476b18abf473af23f79741f4a010173ef07f6ebb8610f3497fb4b7b34',
+    'scripts/camera_plan_check.py': '97e1e20dda466748e7d0f9aa5c46859674fd635234506f54f05a9cc9453c9655',
     'scripts/wording_checks.py': 'b4e01868ffe7778b7ce45d90abe36b90fb1a25889a4f9c667ee3afe280a69417',
     'scripts/continuity_checks.py': 'b93b1349b682829892f7e7df7b8459aa0ae953266da017683cd80c1ccebc2c96',
     'scripts/viewpoint_checks.py': 'ef4fec0091e3b99587dfe399e7e4b91e20ca0467030ea6f593cf5eb75b18bda2',
+    'scripts/qa_check.py': '25b2b1e2577aa76b80b5bcab5ff4d90fd0b79308b612c1f001c459e61bc8e8ff',
+    'templates/qa.md': '2dbc43d0153d65fc94349c96d4067494c826ba4fd866db3051bb885393b1e102',
     'scripts/performance_checks.py': '5a54ee7c0cb77b67466ee6f7102ded648220cf8b922fea7da186f68ccd869ae0',
 }
 

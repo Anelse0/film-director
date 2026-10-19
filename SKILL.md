@@ -45,7 +45,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-grammar.md`（景别 / 运镜 / 动线 / 剪辑 / 载体的决策规则）＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` ＋ `references/duration-rhythm.md`（clip 时长从内容推导、台词窗口、镜长分布、无声段） | `04_shots/scene-XX-clipYY.md` 分镜卡（五层）+ 走位表 + **机位设计**（必做，§5.1g；`scripts/camera_plan_check.py`）+ 决策载体 + **变化轨**（峰值镜 + 每镜四维变化：景别 / 机位或运镜 / 光 / 动作幅度，`duration-rhythm.md` §二） | ▮（与 S5b 一起） |
 | S5b 参考资产 | `references/stage-5b-reference-assets.md` | `05_assets/asset-plan.md`：资产清单 + 图像简报 + 上传顺序 | 等用户回填 |
 | S6 Prompt 编译 | `references/stage-6-prompt-compiler.md` ＋ `templates/prompt-templates.md` | `06_prompts/scene-XX-clipYY.prompt.md` | |
-| S7 检查 | `references/stage-7-qa-continuity.md` ＋ `scripts/validate_prompt.py`；有成片时 `scripts/measure_clip.py`（实测切点 / 有声占比 / 视觉变化谱对照 Prompt 的时间轨与变化轨） | `07_qa/…`；有成片时追加 `references/validation-log.md` | |
+| S7 检查 | `references/stage-7-qa-continuity.md` ＋ `scripts/validate_prompt.py`；有分镜卡时 `scripts/camera_plan_check.py` 加 `--prompt`（C10，机位表与 Prompt 的左右）；QA 改完 `scripts/qa_check.py`（现行状态与 Prompt 版本、校验结果一致）；有成片时 `scripts/measure_clip.py`（实测切点 / 有声占比 / 视觉变化谱对照 Prompt 的时间轨与变化轨） | `07_qa/…`（模板 `templates/qa.md`，第一节是现行状态，七道审阅）；有成片时追加 `references/validation-log.md` | |
 
 **只读当前阶段需要的文件。**
 **按类型叠加**：基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇 / 视觉喜剧 / 暧昧爱情时，S4–S5 加读 `references/genre-packs.md` 对应一包。
@@ -99,7 +99,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
     07_qa/scene-XX-clipYY.qa.md
 ```
 
-用户已有目录时沿用。模板在 `templates/`：`ip.md` · `script-scene.md`（输入格式参照）· `shot-card.md` · `reference-asset-brief.md` · `asset-registry.md` · `prompt-templates.md`。
+用户已有目录时沿用。模板在 `templates/`：`ip.md` · `script-scene.md`（输入格式参照）· `shot-card.md` · `reference-asset-brief.md` · `asset-registry.md` · `prompt-templates.md` · `qa.md`（1.10.0）。
 
 一个 **clip = 一次 Seedance 2.5 生成 ≤ 30 秒**。clip 衔接策略在 S5 决定（延长 / 尾帧接首帧 / 独立）。
 
@@ -118,7 +118,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 9. **每个 clip 的 Prompt 自足。** 外观锁、空间、光源、声音在每个 clip 重写。`[推论]`
 10. **手法服务需求。** 复用、重复、持续或创新按本次目标判断，不以配额或词频裁决。导演名字不作为风格捷径进入 Prompt（导演逻辑的研究与引用只在 `director-grammar.md` / `director-lenses.md` 与 A 层）；通用技术名如希区柯克变焦可配可见描述使用，透镜不覆盖锁定表演。
 11. **生产审阅看具体表现**：表演检查高光、衔接、可见性与保真，不要求每片都有反转或固定手法。
-12. **S6 后分层校验**：production 默认 `python3 scripts/validate_prompt.py <prompt.md>`；片段加 `--artifact performance --duration N`，原文加 `--artifact raw --entry-id N`。可选记录接口见 `references/performance-record.md`。完整生产包另按 `references/production-workflow.md` 执行 `--production-record … --require-ready`，不得把基础 CLI 的零错误称为生产就绪。未落盘可用临时文件检查，不强制保存产物。ERROR 修复；WARN 审阅；脚本通过不等于表演/成片通过。W22–W29 是时间利用的下限审阅（窗口过宽 / 长镜 / 无声段 / 平均镜长 / 时长冗余 / 减速词 / 整句一镜 / 连续台词轨），W30–W33 是变化轨的下限审阅（连续零变化 / 无镜长对比 / 未声明峰值镜 / 峰值落在全景或越肩），E23 是方向检查，也是唯一不属格式 / 契约的 ERROR：朝镜头走的镜里地标没标相对镜头的位置就停下改写，不能附理由保留——改写只会让 Prompt 更好，一次成片比一次误停贵。W35 是基调线索审阅（轻松场里的悬疑语法；声明悬疑 / 喜剧只给 INFO）。W36–W41 是官方 FAQ 对齐审阅（台词后语气括号 / 声音策略首尾与同义词 / 篇幅 / 素材顺序 / 强情绪词 / 声明未引用）。W43–W45 是 1.7.0 的审阅项：焦点与虚实（W43）/ 台词括号里的动作与没有可见拍子的态度词（W44）/ 服装图与穿着状态（W45）。W46–W52 是 1.9.0 的审阅项，都来自 offset EP06 成片：人物自己的左右或没定义的地标左右当画面方位、过肩的肩和下角不同侧（W46）/ 台词括号或声音行里的快慢词（W47）/ 手机杯瓶没写握法、捂话筒（W48）/ 轻松场的慌张瞪眼类词（W49）/ 接上一条末帧的第一镜重演上一拍（W51）/ 镜头身后的东西提了不止一次、场景图只服务一个反向镜（W52）；W50 预留给镜内负载计数，未实现。`节奏档` 选的是检查集不是开关：对话档 = W22–W33，表演档 = W24（无声段功能）+ W30–W33；没有任何档位把全部检查降为 INFO。阈值与理由见 `references/duration-rhythm.md`。
+12. **S6 后分层校验**：production 默认 `python3 scripts/validate_prompt.py <prompt.md>`；片段加 `--artifact performance --duration N`，原文加 `--artifact raw --entry-id N`。可选记录接口见 `references/performance-record.md`。完整生产包另按 `references/production-workflow.md` 执行 `--production-record … --require-ready`，不得把基础 CLI 的零错误称为生产就绪。未落盘可用临时文件检查，不强制保存产物。ERROR 修复；WARN 审阅——成片教训类（W35、W46–W49、W51、W52）默认改，保留要用户点头，其余写理由可保留（1.10.0，S7 §7.1 七道审阅）；脚本通过不等于表演/成片通过。W22–W29 是时间利用的下限审阅（窗口过宽 / 长镜 / 无声段 / 平均镜长 / 时长冗余 / 减速词 / 整句一镜 / 连续台词轨），W30–W33 是变化轨的下限审阅（连续零变化 / 无镜长对比 / 未声明峰值镜 / 峰值落在全景或越肩），E23 是方向检查，也是唯一不属格式 / 契约的 ERROR：朝镜头走的镜里地标没标相对镜头的位置就停下改写，不能附理由保留——改写只会让 Prompt 更好，一次成片比一次误停贵。W35 是基调线索审阅（轻松场里的悬疑语法；声明悬疑 / 喜剧只给 INFO）。W36–W41 是官方 FAQ 对齐审阅（台词后语气括号 / 声音策略首尾与同义词 / 篇幅 / 素材顺序 / 强情绪词 / 声明未引用）。W43–W45 是 1.7.0 的审阅项：焦点与虚实（W43）/ 台词括号里的动作与没有可见拍子的态度词（W44）/ 服装图与穿着状态（W45）。W46–W52 是 1.9.0 的审阅项，都来自 offset EP06 成片：人物自己的左右或没定义的地标左右当画面方位、过肩的肩和下角不同侧（W46）/ 台词括号或声音行里的快慢词（W47）/ 手机杯瓶没写握法、捂话筒（W48）/ 轻松场的慌张瞪眼类词（W49）/ 接上一条末帧的第一镜重演上一拍（W51）/ 镜头身后的东西提了不止一次、场景图只服务一个反向镜（W52）；W50（镜内负载计数）按用户要求暂停（1.10.0），码保留，镜内负载按硬规则 15 人工审。`节奏档` 选的是检查集不是开关：对话档 = W22–W33，表演档 = W24（无声段功能）+ W30–W33；没有任何档位把全部检查降为 INFO。阈值与理由见 `references/duration-rhythm.md`。
 13. **需求参数优先于默认美学。** 场景强度、角色情绪强度、克制、方向与台词密度分别判断；高强度可以内收且无台词，不自动套预设。基调由线索决定，不由基调词决定：手停住、固定正面近景里慢转头看画外来人、盯住加压低声音、来人无状态地逼近、低头抬眼是悬疑语法，轻松场里每个反应镜带日常证据（嚼、手上的活不停、压着笑），来人写状态（`references/stage-4-performance.md` §4.4b，校验 W35）。`[实测]`
 14. **状态与因果连贯。** 表演检查状态推进/持续；删除测试不能删识别性细节；同步多部位不等于多个无关任务（`references/causal-chain.md`）。
 15. **每镜负载有上限。** 一镜一个主要事件 + 至多一个记忆点细节，其余概括；概括的是无关动作与背景活动，不是表演（表演按硬规则 7 写全）；部位级表情只写在可见景别。`[官方]` 概括优先、时段内容过多会被过度剪切或遗漏。负载上限管一镜之内；镜与镜之间仍须有变化——一串"一镜一个同等幅度的微动作"是变化轨（硬规则 19）要拦的东西。

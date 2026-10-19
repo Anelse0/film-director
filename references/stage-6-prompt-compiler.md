@@ -166,4 +166,4 @@ performance/raw 按 `emotion-performance.md`，不强制下面的生产骨架。
 - 括号里的意图词在同镜有这个人的可执行拍子（眼神 / 身体 / 声音与停顿 / 互动任一，窗口内，不另占秒数）？动作没留在括号里？括号里的词没删？（W44）
 - 穿着状态与服装图不同时，人物行 / 服装行写了状态、【起始状态】写了开场状态、【贯穿要求】写了分段状态？（W45）
 
-然后：`python3 scripts/validate_prompt.py 06_prompts/scene-XX-clipYY.prompt.md`
+然后：`python3 scripts/validate_prompt.py 06_prompts/scene-XX-clipYY.prompt.md`；有分镜卡时再跑 `python3 scripts/camera_plan_check.py --prompt 06_prompts/scene-XX-clipYY.prompt.md 04_shots/scene-XX-clipYY.md`（C10）。成片教训类 WARN（W35、W46–W49、W51、W52）在这一步就改，不等审阅（S7 §7.1）。

@@ -1,5 +1,6 @@
 """1.9.0 W46-W49 (wording_checks.py), W51 (continuity_checks.py), W52 (viewpoint_checks.py): wording the model executed
-literally in the offset EP06 s01 clip01 / clip02 renders. Fixtures are placeholder corridor prompts (A / B) in the EP06
+literally in the offset EP06 s01 clip01 / clip02 renders. 1.10.0: the closing INFO for the render-lesson warning class
+(W50 per-shot action load was paused by the user; draft and tests parked outside the repo). Fixtures are placeholder corridor prompts (A / B) in the EP06
 shape: A stands by the end-wall door, B walks in holding a phone. Wiring lives in test_release_190.py."""
 import sys
 import tempfile
@@ -210,6 +211,20 @@ class ViewpointTests(unittest.TestCase):
         result = run(build(refs=REFS + self.ROOM, shots=(SHOT1, SHOT2, shot), e=e))
         self.assertFalse(any('@01_room' in h for h in codes(result, 'W52')))
         self.assertTrue(any(i.startswith('反视角参考图') for i in result['info']), result['info'])
+
+
+class WarnClassTests(unittest.TestCase):
+    def test_render_lesson_codes_are_named(self):
+        shot = SHOT2.replace('英语，随口）', '英语，随口，语速快）')
+        result = run(build(shots=(SHOT1, shot, SHOT3)))
+        line = [i for i in result['info'] if i.startswith('成片教训类提醒')]
+        self.assertEqual(len(line), 1, result['info'])
+        self.assertIn('W47', line[0])
+        self.assertIn('默认改', line[0])
+
+    def test_clean_prompt_has_no_class_line(self):
+        result = run(build())
+        self.assertFalse(any(i.startswith('成片教训类提醒') for i in result['info']), result['info'])
 
 
 if __name__ == '__main__':

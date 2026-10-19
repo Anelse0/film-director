@@ -19,6 +19,10 @@
 - W-C3：空间锚点没写方位，或某行"朝哪拍"没写绝对方位，C09 核不了；W-C4：机位表"动作做得出来吗"全是光秃秃的"能"、
   空间锚点也没有"可达"；W-C5：机位表用了随机位转向会换边的名字（走廊左墙 / 右侧的墙），改用锚点里的绝对名字。
 
+1.10.0 加 `--prompt <prompt.md>`（只带一张分镜卡时）：C10（ERROR）——机位表第 N 行画左格里的物件，在 Prompt 镜头 N 里
+出现在只写了画右的分句里（或反过来）。物件取空间锚点方位行里的名字，没写方位时取常见固定物件（门 / 名牌 / 窗 / 镜台 …）。
+只报明确矛盾（同一分句只有一侧），不判遗漏。分镜卡和 Prompt 改了一边没改另一边（offset EP06 复盘 G3）就在这里拦。
+
 退出码：0 = 做了（可有 WARN）；1 = 缺项（ERROR）；2 = 用法错误。
 """
 import re
@@ -38,6 +42,40 @@ OFFSET = re.compile(rf'偏({BEARING_WORD})')
 RELATIVE_WALL = re.compile(r'(?:走廊|房间|屋子?|过道)(?:的)?[左右](?:墙|侧|边|长墙)|[左右](?:墙|长墙)|[左右]边(?:那|的)?面?墙')
 BARE_YES = re.compile(r'^\s*(?:能|可以|做得到|可行|没问题)\s*[。.]?\s*$')
 FRAME_LEFT, FRAME_RIGHT = '画左', '画右'
+# C10
+COMMON_OBJECTS = ('门框', '门', '名牌', '墙纸', '窗户', '窗', '镜台', '灯泡镜', '镜子', '吧台', '沙发', '扶手椅', '床', '桌子', '柜子', '壁灯')
+PROMPT_SHOT = re.compile(r'^镜头\s*(\d+)（[^）]*）[：:](.*)$', re.M)
+SAYS_LEFT = re.compile(r'画左|画面(?:中间)?偏左|画面(?:的)?左(?:侧|边|半)')
+SAYS_RIGHT = re.compile(r'画右|画面(?:中间)?偏右|画面(?:的)?右(?:侧|边|半)')
+CLAUSE = re.compile(r'[，。；;,\n]')
+
+
+def prompt_shots(prompt_path):
+    text = Path(prompt_path).read_text(encoding='utf-8')
+    return {int(n): body for n, body in PROMPT_SHOT.findall(text)}
+
+
+def cross_check(seen, idx, names, shots_text):
+    """C10: an object the camera table puts on one side, named in a prompt clause that gives only the other side."""
+    errors = []
+    for n, r in sorted(seen.items()):
+        body = shots_text.get(n)
+        if body is None:
+            continue
+        clauses = [c for c in CLAUSE.split(re.sub(r'【[^】]*】', '', body)) if c.strip()]
+        for col, want, other in (('画左', SAYS_LEFT, SAYS_RIGHT), ('画右', SAYS_RIGHT, SAYS_LEFT)):
+            i = idx.get(col)
+            cell = r[i] if i is not None and i < len(r) else ''
+            for obj in objects_in(cell, names):
+                for c in clauses:
+                    hit = re.search(re.escape(obj), c)
+                    if not hit or re.match(r'[左右](?:边|侧)', c[hit.end():hit.end() + 2]):
+                        continue
+                    if other.search(c) and not want.search(c):
+                        errors.append(f'C10 镜{n} 机位表把「{obj}」填在{col}，Prompt 镜头{n}却写「{c.strip()[:30]}」：'
+                                      '分镜卡和 Prompt 只改了一边，以机位设计为准对齐')
+                        break
+    return errors
 
 
 def bearing_table(anchors):
@@ -111,7 +149,7 @@ def table_rows(block):
     return header, rows
 
 
-def check(path, stage='s6'):
+def check(path, stage='s6', prompt=None):
     text = Path(path).read_text(encoding='utf-8')
     errors, warns = [], []
     plan = section(text, '机位设计', 2)
@@ -181,6 +219,9 @@ def check(path, stage='s6'):
                             where = {'left': '画左', 'right': '画右', 'behind': '镜头身后'}[got]
                             errors.append(f'C09 镜{n} 朝{facing.group(1)}拍时「{obj}」应在{where}，表里填在{col}'
                                           '（按朝向换算：朝北 画左西 / 画右东；朝东 画左北 / 画右南；朝南 画左东 / 画右西；朝西 画左南 / 画右北）')
+            if prompt is not None:
+                names = table_bearings or {o: 0 for o in COMMON_OBJECTS}
+                errors.extend(cross_check(seen, idx, names, prompt_shots(prompt)))
             if seen and len(bare) == len(seen) and anchors and '可达' not in anchors:
                 warns.append('W-C4 机位表「动作做得出来吗」全是"能"，空间锚点也没有「可达」：写每个站位用哪只手够得到什么、够不到什么')
     if review:
@@ -216,12 +257,23 @@ def main(argv):
             return 2
         stage = args[i + 1]
         del args[i:i + 2]
+    prompt = None
+    if '--prompt' in args:
+        i = args.index('--prompt')
+        if i + 1 >= len(args):
+            print('--prompt 后面要跟 Prompt 文件', file=sys.stderr)
+            return 2
+        prompt = args[i + 1]
+        del args[i:i + 2]
     if not args:
-        print('用法：camera_plan_check.py [--stage s5|s6] <分镜卡.md> [更多分镜卡…]', file=sys.stderr)
+        print('用法：camera_plan_check.py [--stage s5|s6] [--prompt <prompt.md>] <分镜卡.md> [更多分镜卡…]', file=sys.stderr)
+        return 2
+    if prompt is not None and len(args) != 1:
+        print('--prompt 只能配一张分镜卡', file=sys.stderr)
         return 2
     worst = 0
     for path in args:
-        errors, warns = check(path, stage)
+        errors, warns = check(path, stage, prompt)
         print(f'== camera_plan_check: {path}')
         for e in errors:
             print('ERROR', e)

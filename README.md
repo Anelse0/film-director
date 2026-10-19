@@ -16,6 +16,8 @@
 
 1.9.0 把 offset EP06 场 01 两条成片的教训写成校验：机位表写绝对方位与朝向后 C09 核画左 / 画右写得对不对（W-C3 / W-C4 / W-C5 提示方位、可达、相对墙名）；Prompt 里人物自己的左右与过肩下角（W46）、台词括号快慢词（W47）、手持道具握法与捂话筒（W48）、轻松场慌张类表演词（W49）、接上一条末帧的首镜停顿（W51）、镜头身后物件反复提及与只服务一个反向镜的场景图（W52）。机位从用户现有的参考图出发，不要求补图或重出参考图（用户 2026-10-19）。
 
+1.10.0 补齐复盘提案的其余几项（镜内负载 W50 按用户要求暂停）：`camera_plan_check.py --prompt` 的 C10（机位表与 Prompt 的画左 / 画右明确矛盾）；S7 §7.1 七道审阅与 WARN 分级（成片教训类 W35、W46–W49、W51、W52 默认改，保留要用户点头，脚本最后一行 INFO 列出来）；QA 模板 `templates/qa.md` 第一节是现行状态，`scripts/qa_check.py` 查它和 Prompt 版本、重跑的校验结果是否一致（Q01–Q03）；能力表 §2 加平台差异说明（项目的 `platform.md` 优先）。
+
 1.7.1 按用户决定放宽 W44：意图词的载体由导演设计定——眼神 / 脸、手与身体、声音与停顿、与对方的互动，任一种（括号里的可执行声音词 轻声 / 放慢 / 顿一拍 也算），不再只认眼神拍子；画外 / 背对 / 后景的句子落在听者；W45 维持原样。
 
 创意前端（概念、故事、剧本、台词创作与改写）由独立的 film-story Skill（本地 ~/.claude/skills/film-story，2026-10-18 起取代 film-creative）承担。本 Skill 内容取自 [Film-Seedance-Director](https://github.com/Anelse0/Film-Seedance-Director) **v2.3.1** 的生产后端（用户指定以 2.3.1 为生产基线）。
@@ -81,6 +83,8 @@ python3 scripts/validate_prompt.py <fragment.md> --artifact performance --durati
 python3 scripts/validate_prompt.py <fragment.md> --artifact performance --record <record.json>
 python3 scripts/validate_prompt.py <original.txt> --artifact raw --entry-id 6
 python3 scripts/measure_clip.py <成片.mp4> --prompt <prompt.md> [--frames DIR]
+python3 scripts/camera_plan_check.py [--stage s5] [--prompt <prompt.md>] <分镜卡.md>
+python3 scripts/qa_check.py [--prompt <prompt.md>] <qa.md>
 ```
 
 退出码 0 只代表无确定性错误，不代表表演或视频质量通过。多文件默认按连续片段做提示，独立 A/B 对照加 `--batch independent`。Python 3.9+，基础脚本仅用标准库；真实媒体预检另需 PATH 中的 ffprobe（测试另用 ffmpeg）。

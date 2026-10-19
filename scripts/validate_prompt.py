@@ -41,7 +41,8 @@ with its frame corner (W46); speed words in the dialogue bracket or a fast voice
 with no grip, or 捂 … 话筒 (W48); flustered / wide-eyed acting words in a light-tone clip (W49). W51 (continuity_checks.py)
 the first shot of a last-frame continuation replays the previous beat. W52 (viewpoint_checks.py) an object placed behind
 the camera mentioned more than once per shot / per global sentence, and a scene image bound with 不参考视角 for one shot
-only (E-layer 视角说明 keeps a reviewed choice). W50 is reserved for the per-shot load count (not in this release).
+only (E-layer 视角说明 keeps a reviewed choice).
+1.10.0: W50 (per-shot action load) is paused by the user and not run; the code stays reserved. The closing INFO names the warnings that came from renders (W35, W46-W49, W51, W52), which are fixed by default.
 English speech estimate defaults to 3.5 words/s (1.4.0; 2.5 = American-English mean, a floor).
 Semantic acting quality is always needs_review; render is always not_tested.
 Exit 0 means no deterministic errors, 1 check failure, 2 invalid invocation/input.
@@ -67,6 +68,9 @@ from costume_checks import costume_checks
 from wording_checks import wording_checks
 from continuity_checks import continuity_checks
 from viewpoint_checks import viewpoint_checks
+
+# Review classes (1.10.0, S7 §7.1): warnings that each came from a render that went wrong.
+RENDER_LESSON_CODES = {"W35", "W46", "W47", "W48", "W49", "W51", "W52"}  # W50 (paused) would be a review item, not a render lesson
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -514,6 +518,10 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     if record is not None:
         fidelity_errors, fidelity = check_record(record, beats, dur)
         errors.extend(fidelity_errors)
+    # 1.10.0 WARN classes (S7 §7.1): codes that came from renders are fixed by default; keeping one needs the user's OK.
+    lesson = sorted({w.split()[0] for w in warns if w.split() and w.split()[0] in RENDER_LESSON_CODES})
+    if lesson:
+        info(f"成片教训类提醒 {'、'.join(lesson)}：默认改，保留要用户点头（S7 §7.1）；其余 WARN 写理由可保留")
     return {"file": str(path), "errors": errors, "warnings": warns, "info": infos, "lens": lens,
             "task": task, "parameters": parameter_state, "dialogue": dialogue, "variation": variation,
             "assets": {"declared": sorted(d["id"] for d in declared_rows),
