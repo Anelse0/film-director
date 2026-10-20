@@ -125,7 +125,7 @@ PROTECTED = {
     'references/emotion-performance.md': 'b928678bee8bfc1a6d68953b83f5bc9a86dff022e0a41667b38f8f5e4e8a084e',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': '12eb294f022c8d39350bbb6f5af44af06d972e037cd7483f5f07f3b486155ad7',
-    'references/stage-5-directing-storyboard.md': 'db31cbe206d5c38ce8b9899d016d1f2bf697a13dccf411525f6d7b21596321e0',
+    'references/stage-5-directing-storyboard.md': '7b47bc606585c5e7eb61d5d737e202305c0e414b0326c4e195c7ffbf03646cf5',
     'references/stage-5b-reference-assets.md': 'a002a1b033dee2f4e0471c118b7d592e2cb8db4171ff4a95b3c3d6d06306aa09',
     'references/stage-6-prompt-compiler.md': 'a74fe556a9b4c2dd0fb2854d46ba1ddbfaab5f2d9cd58544c92d7ed1863a8773',
     'references/stage-7-qa-continuity.md': '4751e2bdb612257af9805e82f005e83b129f8966d943d072e5e79d5bcc8da3bd',
