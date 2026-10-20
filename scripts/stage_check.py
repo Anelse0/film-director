@@ -17,6 +17,7 @@
                写 `表演翻译：无（原因）` 的插入镜跳过。
   S05 (ERROR)  1.12.0 表演翻译第二段没有引用外化词典的行（`references/externalization-lexicon.md` 第一列，含「（轻松）」变体）
                或情绪库条目（`情绪库 N` / 条目名）。
+  W-C10 (WARN) 1.12.1 表演翻译第三段没写「声音：…」——情绪的声音翻译（口气 / 音量 / 停顿）就是括号里要放的内容。
   W-C9 (WARN)  1.12.0 C 层行（有序表演块 / 台词 / 结束状态 …）里出现 A 层词（词典「A 层词」一节 + 第一列）；只允许在 A 创作决策与表演翻译第一段。
 
 退出码：0 = 做了（可有 WARN）；1 = 缺项（ERROR）；2 = 用法错误。
@@ -122,6 +123,9 @@ def translation_checks(text):
                         or any(n and n.lower() in middle.lower() for n in names.values())
                     if not ok:
                         errors.append(f'S05 镜头{no} 表演翻译第二段「{middle[:40]}」不是外化词典的行或情绪库条目：从 externalization-lexicon.md 第一列挑一行（轻松场用「（轻松）」变体）')
+                    third = '→'.join(segs[2:])
+                    if not re.search(r'声音|口气|音量|语气|无声|不出声|不说话|无台词', third):
+                        warns.append(f'W-C10 镜头{no} 表演翻译第三段没写声音那一半（情绪在声音里变成什么：口气 / 音量 / 停顿；没台词写「声音：无」）——括号里放的就是这一半，不写就会被删掉（S4 §4.4c 第 7 条）')
         c_lines = [l for l in body.splitlines() if re.match(r'\s*-\s*(?:有序表演块|表演(?!翻译)|台词|结束状态|起始状态|视线|主要事件|额外动作)', l)]
         found = scan_text('\n'.join(c_lines), vocab) if c_lines else []
         if found:

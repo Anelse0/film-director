@@ -21,7 +21,7 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_changelog(self):
-        self.assertEqual(read('VERSION').strip(), '1.12.0')
+        self.assertEqual(read('VERSION').strip(), '1.12.1')
         log = read('CHANGELOG.md')
         self.assertIn('## 1.7.1', log)
         self.assertLess(log.index('## 1.7.1'), log.index('## 1.7.0'))
@@ -35,7 +35,7 @@ class WiringTests(unittest.TestCase):
             self.assertIn(carrier, stage4, carrier)
         self.assertIn('轻声 / 放慢 / 顿一拍 这类可执行的声音词也算', stage4)
         self.assertNotIn('眼神为主、幅度小、不设计表情转折', stage4)
-        self.assertIn('1.7.1 放宽', read('references/duration-rhythm.md'))
+        self.assertIn('| W44 |', read('references/checks.md'))
         for doc in RULE_DOCS:
             text = read(doc)
             for phrase in ('同镜没有这个人的眼神拍子', '必须在镜头行有这个人的眼神拍子', '同镜要有这个人的眼神拍子', '同镜这个人的眼神拍子',
@@ -45,7 +45,7 @@ class WiringTests(unittest.TestCase):
         self.assertIn('载体由设计定', read('references/emotion-performance.md'))
         self.assertIn('载体写明', read('templates/shot-card.md'))
         self.assertIn('载体由导演设计定', read('SKILL.md'))
-        self.assertIn('1.7.1 按用户决定放宽 W44', read('README.md'))
+        self.assertIn('**W44 放宽**', read('CHANGELOG.md'))
 
     def test_messages_follow_the_relaxed_rule(self):
         guide = read('scripts/guide_checks.py')
@@ -61,7 +61,7 @@ class WiringTests(unittest.TestCase):
         self.assertNotIn('1.7.1', read('scripts/costume_checks.py'))
 
     def test_code_table_row_lists_the_carriers(self):
-        table = read('references/duration-rhythm.md')
+        table = read('references/checks.md')
         row = next(line for line in table.splitlines() if line.startswith('| W44 |'))
         for carrier in ('视线：', '手 / 头 / 身体', '声音与停顿', '对对方的动作', '轻声 / 放慢 / 顿一拍'):
             self.assertIn(carrier, row, carrier)

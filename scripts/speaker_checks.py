@@ -119,7 +119,7 @@ def speaker_checks(text, shots, dialogue, metadata_text=""):
         how = f"「{ta}」/「{tb}」后半句画外" if tb else f"「{ta}」句尾溢出到镜头{shot_b}"
         warns.append(f"W54 镜头{shot_a}→镜头{shot_b} {spk} 的一句拆成两段跨镜（{how}）："
                      f"一句不跨镜，合回说话人出镜的那一镜；要让听者的脸承担反应，用无台词的反应镜或双人镜"
-                     f"（S5 §5.2 第 6 步；duration-rhythm §九；[实测] offset EP06 s02 clip01 v1.6 听者替说话人开了口）")
+                     f"（S5 §5.2 第 6 步；duration-rhythm §九；证据 validation-log #10：听者替说话人开了口）")
 
     # W55: off-screen line on another character's face
     for no, s, e, body in shots:
@@ -144,7 +144,7 @@ def speaker_checks(text, shots, dialogue, metadata_text=""):
             where = f"镜头{no}（{s:g}-{e:g}s）"
             if conditions:
                 warns.append(f"W55 {where} {speaker} 的台词「{line[:20]}」画外，画里是 {face} 的脸：模型会把这句给画里那张脸"
-                             f"（[实测] offset EP06 s02 clip01 v1.6）。改成 {speaker} 出镜说，或改成无台词的反应镜；"
+                             f"（证据 validation-log #10）。改成 {speaker} 出镜说，或改成无台词的反应镜；"
                              f"按项目的画外整句镜写时还缺：{'；'.join(conditions)}（阈值 E 层「{MIN_SHOT_KEY}」可覆盖）")
             else:
                 infos.append(f"画外整句镜 {where}：{speaker} 整句画外、{face} 闭着嘴、有排除句、镜长 ≥{floor:g}s——仍登记风险"

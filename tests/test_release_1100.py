@@ -14,7 +14,7 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_changelog(self):
-        self.assertEqual(read('VERSION').strip(), '1.12.0')
+        self.assertEqual(read('VERSION').strip(), '1.12.1')
         log = read('CHANGELOG.md')
         self.assertIn('## 1.10.0', log)
         self.assertLess(log.index('## 1.10.0'), log.index('## 1.9.0'))
@@ -25,7 +25,7 @@ class WiringTests(unittest.TestCase):
         source = read('scripts/validate_prompt.py')
         self.assertNotIn('action_load_checks', source)
         self.assertFalse((ROOT / 'scripts/action_load_checks.py').exists())
-        self.assertIn('| W50 | **暂停**', read('references/duration-rhythm.md'))
+        self.assertIn('| W50 | **暂停**', read('references/checks.md'))
         self.assertIn('RENDER_LESSON_CODES', source)
         self.assertNotIn('"W50"', source.split('RENDER_LESSON_CODES =')[1].split('\n')[0])
 
@@ -48,7 +48,7 @@ class WiringTests(unittest.TestCase):
         skill = read('SKILL.md')
         self.assertIn('qa_check.py', skill)
         self.assertIn('成片教训类', skill)
-        self.assertIn('W50（镜内负载计数）按用户要求暂停', skill)
+        self.assertIn('W50 暂停', skill)
 
     def test_checkers_import(self):
         import camera_plan_check  # noqa: F401

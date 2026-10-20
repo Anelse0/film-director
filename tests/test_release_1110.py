@@ -15,7 +15,7 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_changelog(self):
-        self.assertEqual(read('VERSION').strip(), '1.12.0')
+        self.assertEqual(read('VERSION').strip(), '1.12.1')
         log = read('CHANGELOG.md')
         self.assertIn('## 1.11.0', log)
         self.assertLess(log.index('## 1.11.0'), log.index('## 1.10.0'))
@@ -37,13 +37,13 @@ class WiringTests(unittest.TestCase):
     def test_rule_text(self):
         skill = read('SKILL.md')
         self.assertIn('但一句不跨镜', skill)
-        self.assertIn('21. **执行卡必做（1.11.0）。**', skill)
+        self.assertIn('21. **镜头纵览与执行卡必做。**', skill)
         self.assertIn('stage_check.py', skill)
         self.assertIn('Q04', skill)
         rhythm = read('references/duration-rhythm.md')
         self.assertIn('3. **一句不跨镜**', rhythm)
-        self.assertIn('| W54 |', rhythm)
-        self.assertIn('| W55 |', rhythm)
+        self.assertIn('| W54 |', read('references/checks.md'))
+        self.assertIn('| W55 |', read('references/checks.md'))
         self.assertIn('最长连续无台词 ≤3 s', rhythm)
         self.assertNotIn('一句可以跨两镜', rhythm)
         stage5 = read('references/stage-5-directing-storyboard.md')

@@ -167,11 +167,11 @@ class WiringTests(unittest.TestCase):
         self.assertIn('### 3.7', self.read('references/director-grammar.md'))
         self.assertIn('E23', self.read('references/stage-6-prompt-compiler.md'))
         self.assertIn('E23', self.read('references/stage-5-directing-storyboard.md'))
-        self.assertIn('| E23 |', self.read('references/duration-rhythm.md'))
+        self.assertIn('| E23 |', self.read('references/checks.md'))
         self.assertIn('E23', self.read('SKILL.md'))
         self.assertIn('2026-10-13', self.read('references/validation-log.md'))
         self.assertIn('E23', self.read('scripts/validate_prompt.py').split('import argparse')[0])
-        for name in ('SKILL.md', 'README.md', 'references/stage-6-prompt-compiler.md', 'references/duration-rhythm.md'):
+        for name in ('SKILL.md', 'references/stage-6-prompt-compiler.md', 'references/duration-rhythm.md'):
             self.assertNotIn('W34', self.read(name), name)
 
 

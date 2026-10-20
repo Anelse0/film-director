@@ -251,7 +251,7 @@ def rhythm_checks(shots, rows, duration, metadata_text):
             warns.append(
                 f"W24 最长连续无台词 {longest[1] - longest[0]:g}s（{longest[0]:g}-{longest[1]:g}s，镜头{'、'.join(inside)}）> {cfg['最长无台词上限']:g}s："
                 f"能叠进相邻台词的动作叠进去、同一状态不拍两遍、反应镜 1 s、收尾动作交给下一条；"
-                f"保留要用户点头（成片教训类；E 层「最长无台词上限」可覆盖）")
+                f"保留要用户点头（成片教训类，证据 CHANGELOG 1.11.0；E 层「最长无台词上限」可覆盖）")
         if share > cfg["无声段占比上限"] + 1e-9:
             warns.append(
                 f"W24 台词窗口外 {silent:g}s（{share:.0%} > {cfg['无声段占比上限']:.0%}）：开头 {lead:g}s，结尾 {trail:g}s"

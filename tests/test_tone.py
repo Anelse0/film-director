@@ -131,7 +131,7 @@ class WiringTests(unittest.TestCase):
     def test_documents_carry_the_rule_and_the_code(self):
         self.assertIn('## 4.4b', self.read('references/stage-4-performance.md'))
         self.assertIn('发现 / 被提醒看（轻松）', self.read('references/externalization-lexicon.md'))
-        self.assertIn('| W35 |', self.read('references/duration-rhythm.md'))
+        self.assertIn('| W35 |', self.read('references/checks.md'))
         self.assertIn('W35', self.read('SKILL.md'))
         self.assertIn('W35', self.read('references/stage-5-directing-storyboard.md'))
         self.assertIn('W35', self.read('references/genre-packs.md'))

@@ -15,7 +15,7 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_changelog(self):
-        self.assertEqual(read('VERSION').strip(), '1.12.0')
+        self.assertEqual(read('VERSION').strip(), '1.12.1')
         log = read('CHANGELOG.md')
         self.assertIn('## 1.12.0', log)
         self.assertLess(log.index('## 1.12.0'), log.index('## 1.11.0'))
@@ -28,7 +28,7 @@ class WiringTests(unittest.TestCase):
         self.assertNotIn('W49', RENDER_LESSON_CODES)
         self.assertNotIn('warns.append(f"W40', read('scripts/guide_checks.py'))
         self.assertNotIn('warns.append(f"W49', read('scripts/wording_checks.py'))
-        table = read('references/duration-rhythm.md')
+        table = read('references/checks.md')
         self.assertIn('| W57 |', table)
         self.assertIn('| W40 | **并入 W57', table)
         self.assertIn('| W49 | **并入 W57', table)
@@ -42,9 +42,9 @@ class WiringTests(unittest.TestCase):
 
     def test_rule_text(self):
         skill = read('SKILL.md')
-        self.assertIn('**括号只放声音参数**', skill)
+        self.assertIn('情绪的**声音翻译**', skill)
         self.assertIn('A 层词不进 C / D', skill)
-        self.assertIn('## 规则维护（1.12.0）', skill)
+        self.assertIn('## 规则维护', skill)
         self.assertIn('新 W 码冻结', skill)
         stage4 = read('references/stage-4-performance.md')
         self.assertIn('**基调是参数，不是形容词**', stage4)

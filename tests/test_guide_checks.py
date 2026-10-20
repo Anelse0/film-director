@@ -185,15 +185,15 @@ class WiringTests(unittest.TestCase):
         return (ROOT / name).read_text(encoding='utf-8')
 
     def test_documents_carry_the_release(self):
-        self.assertEqual(self.read('VERSION').strip(), '1.12.0')
+        self.assertEqual(self.read('VERSION').strip(), '1.12.1')
         for code in NEW_CODES:
-            self.assertIn(f'| {code} |', self.read('references/duration-rhythm.md'), code)
+            self.assertIn(f'| {code} |', self.read('references/checks.md'), code)
         self.assertIn('## 8.', self.read('references/seedance-2.5-capabilities.md'))
         self.assertIn('## 4.4a', self.read('references/stage-4-performance.md'))
         self.assertIn('## 4.4c', self.read('references/stage-4-performance.md'))
         self.assertIn('变化轨', self.read('templates/prompt-templates.md'))
         self.assertNotIn('【变化：', self.read('templates/prompt-templates.md').split('## P 表演片段')[1])
-        self.assertIn('W36–W41', self.read('SKILL.md'))
+        self.assertIn('| W36 |', self.read('references/checks.md'))
 
 
 if __name__ == '__main__':

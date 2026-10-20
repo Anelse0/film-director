@@ -15,7 +15,7 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_changelog(self):
-        self.assertEqual(read('VERSION').strip(), '1.12.0')
+        self.assertEqual(read('VERSION').strip(), '1.12.1')
         log = read('CHANGELOG.md')
         self.assertIn('## 1.9.0', log)
         self.assertLess(log.index('## 1.9.0'), log.index('## 1.8.0'))
@@ -52,15 +52,15 @@ class WiringTests(unittest.TestCase):
         self.assertIn('反打镜被生成成参考图的视角', stage7)
         self.assertIn('方位：', read('templates/shot-card.md'))
         self.assertNotIn('音量 / 语速 / 音色', read('templates/prompt-templates.md'))
-        table = read('references/duration-rhythm.md')
+        table = read('references/checks.md')  # 1.12.1: the code table moved out of duration-rhythm §七
         for code in ('W46', 'W47', 'W48', 'W49', 'W50', 'W51', 'W52'):
             self.assertIn(f'| {code} |', table, code)
 
     def test_skill_rules(self):
         skill = read('SKILL.md')
-        self.assertIn('W46–W52 是 1.9.0 的审阅项', skill)
-        self.assertIn('不为机位设计要求用户补图或重出参考图', skill)
-        self.assertIn('C09', skill)
+        self.assertIn('不要求补图', skill)
+        self.assertIn('C01–C10', skill)
+        self.assertIn('| W46 |', read('references/checks.md'))
 
     def test_no_new_image_request_in_checker_messages(self):
         for module in ('viewpoint_checks', 'camera_plan_check'):

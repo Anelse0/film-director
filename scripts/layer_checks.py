@@ -106,7 +106,8 @@ def layer_checks(text, shots, metadata_text="", vocabulary=None):
         in_bracket = [w for w in found if re.search(r"台词\s*[（(][^)）\n]*" + re.escape(w), body)]
         where = f"（台词括号里：{'、'.join(in_bracket)}）" if in_bracket else ""
         warns.append(f"W57 镜头{no} C / D 层出现 A 层词 {found}{where}：情绪 / 判断 / 意图词只在分镜卡 A 层和「表演翻译」第一段；"
-                     f"按外化词典的行（轻松场用「X（轻松）」变体）翻成部位 · 先后 · 声音，括号只留语言 / 音量 / 音色 / 距离 / 可执行声音词"
-                     f"（S4 §4.4c，S5 §5.2 第 1 步；[实测] offset EP06 s02 clip02 v3「觉得不可思议」成片读成悬疑）")
+                     f"按外化词典的行（轻松场用「X（轻松）」变体）翻成两半：脸和手的一半进镜头行（部位 · 先后），声音的一半进括号（口气 / 音量 / 停顿，"
+                     f"例：不可思议 → 眉毛一抬、鼻子里笑出一口气 + 括号「声音不高，'啊？'的口气」）——是翻译，不是删词"
+                     f"（S4 §4.4c 第 7 条，S5 §5.2 第 1 步；证据 validation-log #12）")
     infos.append(f"A 层词边界：词典 {len(vocab)} 词，分镜正文命中 {total} 处")
     return warns, infos

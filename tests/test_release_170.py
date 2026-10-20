@@ -20,13 +20,13 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_code_table(self):
-        self.assertEqual(read('VERSION').strip(), '1.12.0')
-        table = read('references/duration-rhythm.md')
+        self.assertEqual(read('VERSION').strip(), '1.12.1')
+        table = read('references/checks.md')
         for code in NEW_CODES:
             self.assertIn(f'| {code} |', table, code)
         self.assertNotIn('| W42 |', table)
         self.assertNotIn('借秒', table)
-        self.assertIn('W43–W45', read('SKILL.md'))
+        self.assertIn('| W43 |', read('references/checks.md'))
         self.assertIn('W43 (focus_checks.py)', read('scripts/validate_prompt.py'))
         self.assertFalse((ROOT / 'scripts/load_checks.py').exists())
 

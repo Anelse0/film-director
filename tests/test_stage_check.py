@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 import stage_check as sc  # noqa: E402
 
-TRANSLATION = '- 表演翻译：被逗到 → 外化词典「被逗到 / 认了（轻松）」→ 合着嘴笑，嘴角一边先挑起来，摇一下头\n'
+TRANSLATION = '- 表演翻译：被逗到 → 外化词典「被逗到 / 认了（轻松）」→ 可见：合着嘴笑，嘴角一边先挑起来，摇一下头；声音：鼻子里轻轻出一口气，不出声\n'
 SHOTS = ''.join(f'## 镜头 {n}（0-2s）\n\n**C**：\n{TRANSLATION}- 有序表演块：0–1 s 嘴角一边先挑起来。\n\n' for n in (1, 2, 3))
 OVERVIEW = ('## 镜头纵览\n| 镜 | 时间 | 景别 | 机位 / 运镜 | 焦点与虚实 | 台词（句 · 画内 / 画外整句） | 无台词秒 | 脸对镜头角度 | 手法 |\n'
             '|---|---|---|---|---|---|---|---|---|\n'
@@ -112,12 +112,19 @@ class StageCheckTests(unittest.TestCase):
         bad = SHOTS.replace(TRANSLATION, '- 表演翻译：不可思议 → 皱眉 → 眉头一皱\n')
         errors, _ = run(card(shots=bad))
         self.assertTrue(any(e.startswith('S05') for e in errors), errors)
-        lib = SHOTS.replace(TRANSLATION, '- 表演翻译：被拆穿 → 情绪库 13 → 眉毛一抬，鼻子里笑出一口气\n')
+        lib = SHOTS.replace(TRANSLATION, '- 表演翻译：被拆穿 → 情绪库 13 → 可见：眉毛一抬，鼻子里笑出一口气；声音："啊？"的口气\n')
         errors, _ = run(card(shots=lib))
         self.assertFalse(any(e.startswith('S05') for e in errors), errors)
         none = SHOTS.replace(TRANSLATION, '- 表演翻译：无（物件插入）\n')
         errors, _ = run(card(shots=none))
         self.assertFalse(any(e.startswith(('S04', 'S05')) for e in errors), errors)
+
+    def test_third_segment_without_voice_half_is_w_c10(self):
+        shots = SHOTS.replace(TRANSLATION, '- 表演翻译：被逗到 → 外化词典「被逗到 / 认了（轻松）」→ 合着嘴笑，摇一下头\n')
+        _, warns = run(card(shots=shots))
+        self.assertTrue(any(w.startswith('W-C10') for w in warns), warns)
+        _, warns = run(card())
+        self.assertFalse(any(w.startswith('W-C10') for w in warns), warns)
 
     def test_a_layer_word_in_c_layer_line_is_w_c9(self):
         shots = SHOTS.replace('- 有序表演块：0–1 s 嘴角一边先挑起来。', '- 有序表演块：0–1 s 一脸不信，觉得不可思议。')

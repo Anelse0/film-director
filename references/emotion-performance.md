@@ -64,7 +64,7 @@ S4 写入剧本页“有序表演块”——这是设计稿，要写满：状�
 
 需要落盘或自动核对时，用 `templates/performance-record.json` 的可选 sidecar（见 `references/performance-record.md`）；它保存获准的 C 层正文，脚本核对 D 层逐节拍一致性。不要从最终 Prompt 倒填记录再宣称“上游保真已通过”。有意修订必须先更新上游表演块及修改记录。
 
-## 强度 → 生产写法（1.6.0）
+## 强度 → 生产写法
 
 | 条目强度 | 表演测试（performance / raw） | 生产对话场（production） |
 |---|---|---|
