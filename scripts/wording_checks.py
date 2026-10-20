@@ -147,17 +147,9 @@ def wording_checks(text, shots, metadata_text=""):
                     held_seen.add(prop)
                     warns.append(f"W48 {name} 手里的「{prop}」没写哪只手、怎么握，【贯穿要求】也没有「手：」一行：会被生成成两手捧着、"
                                  "平放在掌心；写明哪只手、正常握法（四指托背面、拇指在屏幕一侧）、另一只手在干什么（每条每件道具报一次）")
-        exag = EXAG.findall(body)
-        if exag:
-            if light and not genre:
-                warns.append(f"W49 {name} 表演幅度词 {sorted(set(exag))}：轻松场里会被演成瞪眼、张嘴、整张脸皱起来；"
-                             "写成平常的样子加一个小动作（一愣、闭一下眼、嘴角撇一下）")
-            else:
-                exag_info.append(f"{name}：{'、'.join(sorted(set(exag)))}")
+        # W49 (表演幅度词) retired in 1.12.0: folded into W57 (layer_checks.py), dictionary = externalization lexicon.
     for m in VOICE_FAST.finditer(glob):
         warns.append(f"W47 【贯穿要求】声音行「{m.group(0)}」：音色里写快，模型会把这个人的每句都挤着说；只写年龄、音色和口气")
     if soft:
         infos.append("台词括号里的语速 / 音量词（待审）：" + "；".join(soft))
-    if exag_info:
-        infos.append("表演幅度词（未声明轻松基调，只提示）：" + "；".join(exag_info))
     return warns, infos

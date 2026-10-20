@@ -44,7 +44,7 @@ class BaselineTests(unittest.TestCase):
     def test_clean_fixture_has_none_of_the_new_codes(self):
         result = run(build())
         self.assertEqual(result['errors'], [], result['errors'])
-        for code in ('W46', 'W47', 'W48', 'W49', 'W51', 'W52'):
+        for code in ('W46', 'W47', 'W48', 'W49', 'W51', 'W52', 'W57'):
             self.assertEqual(codes(result, code), [], code)
 
 
@@ -136,22 +136,26 @@ class HandTests(unittest.TestCase):
 
 
 class ActingTests(unittest.TestCase):
-    def test_flustered_words_in_a_light_clip(self):
+    """1.12.0: W49 retired — flustered / wide-eyed words are A-layer words, reported by W57 whatever the declared tone."""
+
+    def test_flustered_words_are_w57(self):
         shot = SHOT1.replace('他抬眼看着画左的门。', '他慌慌张张往后退，牙关一咬。')
-        hits = codes(run(build(shots=(shot, SHOT2, SHOT3))), 'W49')
+        result = run(build(shots=(shot, SHOT2, SHOT3)))
+        self.assertEqual(codes(result, 'W49'), [])
+        hits = codes(result, 'W57')
         self.assertEqual(len(hits), 1, hits)
         self.assertIn('慌慌张张', hits[0])
+        self.assertIn('牙关一咬', hits[0])
 
-    def test_comedy_declared_is_info(self):
+    def test_comedy_declared_still_reports_the_leak(self):
         overview = OVERVIEW.replace('整条轻松、生活化。', '整条是喜剧。')
         shot = SHOT1.replace('他抬眼看着画左的门。', '他瞪大眼睛。')
         result = run(build(overview=overview, shots=(shot, SHOT2, SHOT3)))
-        self.assertEqual(codes(result, 'W49'), [])
-        self.assertTrue(any(i.startswith('表演幅度词') for i in result['info']), result['info'])
+        self.assertTrue(codes(result, 'W57'), result['warnings'])
 
     def test_negated_is_fine(self):
         shot = SHOT1.replace('他抬眼看着画左的门。', '他只是一愣，不瞪眼、不张大嘴。')
-        self.assertEqual(codes(run(build(shots=(shot, SHOT2, SHOT3))), 'W49'), [])
+        self.assertEqual(codes(run(build(shots=(shot, SHOT2, SHOT3))), 'W57'), [])
 
 
 class ContinuityTests(unittest.TestCase):

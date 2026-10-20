@@ -9,7 +9,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 import stage_check as sc  # noqa: E402
 
-SHOTS = ''.join(f'## 镜头 {n}（0-2s）\n\n**C**：……\n\n' for n in (1, 2, 3))
+TRANSLATION = '- 表演翻译：被逗到 → 外化词典「被逗到 / 认了（轻松）」→ 合着嘴笑，嘴角一边先挑起来，摇一下头\n'
+SHOTS = ''.join(f'## 镜头 {n}（0-2s）\n\n**C**：\n{TRANSLATION}- 有序表演块：0–1 s 嘴角一边先挑起来。\n\n' for n in (1, 2, 3))
 OVERVIEW = ('## 镜头纵览\n| 镜 | 时间 | 景别 | 机位 / 运镜 | 焦点与虚实 | 台词（句 · 画内 / 画外整句） | 无台词秒 | 脸对镜头角度 | 手法 |\n'
             '|---|---|---|---|---|---|---|---|---|\n'
             '| 1 | 0-2s | 近景 | 手持 | A 眼睛 | A 1 句画内 | 0 | 3/4 | 手持 |\n'
@@ -31,8 +32,8 @@ def card_rows(override=None):
     return rows
 
 
-def card(rows=None, overview=OVERVIEW, e_layer=E_LAYER, with_card=True):
-    text = '# 卡\n\n' + SECTIONS + overview + SHOTS + e_layer
+def card(rows=None, overview=OVERVIEW, e_layer=E_LAYER, with_card=True, shots=SHOTS):
+    text = '# 卡\n\n' + SECTIONS + overview + shots + e_layer
     if with_card:
         rows = rows if rows is not None else card_rows()
         table = '## 执行卡\n| # | 项 | 证据 |\n|---|---|---|\n' + ''.join(
@@ -96,6 +97,32 @@ class StageCheckTests(unittest.TestCase):
         self.assertTrue(any(w.startswith('W-C8') for w in warns), warns)
         _, warns = run(card(overview=OVERVIEW.replace('| B 1 句画内 |', '| A 1 句画外整句 |')))
         self.assertFalse(any(w.startswith('W-C8') for w in warns), warns)
+
+    def test_missing_translation_line_is_s04(self):
+        shots = SHOTS.replace(TRANSLATION, '', 1)
+        errors, _ = run(card(shots=shots))
+        self.assertTrue(any(e.startswith('S04') and '镜头1' in e for e in errors), errors)
+
+    def test_two_segment_translation_is_s04(self):
+        shots = SHOTS.replace(TRANSLATION, '- 表演翻译：不可思议 → 皱眉、括号口气\n')
+        errors, _ = run(card(shots=shots))
+        self.assertTrue(any(e.startswith('S04') and '不是三段' in e for e in errors), errors)
+
+    def test_middle_segment_must_be_a_lexicon_row_or_library_entry(self):
+        bad = SHOTS.replace(TRANSLATION, '- 表演翻译：不可思议 → 皱眉 → 眉头一皱\n')
+        errors, _ = run(card(shots=bad))
+        self.assertTrue(any(e.startswith('S05') for e in errors), errors)
+        lib = SHOTS.replace(TRANSLATION, '- 表演翻译：被拆穿 → 情绪库 13 → 眉毛一抬，鼻子里笑出一口气\n')
+        errors, _ = run(card(shots=lib))
+        self.assertFalse(any(e.startswith('S05') for e in errors), errors)
+        none = SHOTS.replace(TRANSLATION, '- 表演翻译：无（物件插入）\n')
+        errors, _ = run(card(shots=none))
+        self.assertFalse(any(e.startswith(('S04', 'S05')) for e in errors), errors)
+
+    def test_a_layer_word_in_c_layer_line_is_w_c9(self):
+        shots = SHOTS.replace('- 有序表演块：0–1 s 嘴角一边先挑起来。', '- 有序表演块：0–1 s 一脸不信，觉得不可思议。')
+        _, warns = run(card(shots=shots))
+        self.assertTrue(any(w.startswith('W-C9') and '不信' in w for w in warns), warns)
 
     def test_template_card_has_all_rows(self):
         template = (ROOT / 'templates' / 'shot-card.md').read_text(encoding='utf-8')

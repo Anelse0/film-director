@@ -248,11 +248,7 @@ def guide_checks(text, metadata_text, shots, dialogue, assets):
         if declared_ids and order != declared_ids:
             warns.append(f"W39 E 层 上传与角色 顺序 {order} 与【素材绑定】顺序 {declared_ids} 不一致（编号 = 上传顺序）")
 
-    # W40 intensity labels; INFO guard line
-    labels = intensity_words(text)
-    if labels:
-        warns.append(f"W40 强情绪词 {labels}：官方 FAQ 情绪过度响应——强烈情绪词会把情绪渲染成眼睛发光等特效；"
-                     f"改为常规描述（惊叹、看着不动、眼睛睁大一点），情绪写进眼神落点、部位先后与动作")
+    # W40 intensity labels: retired in 1.12.0 — folded into W57 (layer_checks.py, dictionary = externalization lexicon).
     if STRONG_BEAT_RE.search(section_text(text, "分镜")) and not GUARD_RE.search(text):
         infos.append("强情绪镜：官方 FAQ 建议在最高优先级写一句「人物为正常人眼，不发光」（放【总述】或【贯穿要求】）")
 

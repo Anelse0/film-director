@@ -148,5 +148,5 @@ def speaker_checks(text, shots, dialogue, metadata_text=""):
                              f"按项目的画外整句镜写时还缺：{'；'.join(conditions)}（阈值 E 层「{MIN_SHOT_KEY}」可覆盖）")
             else:
                 infos.append(f"画外整句镜 {where}：{speaker} 整句画外、{face} 闭着嘴、有排除句、镜长 ≥{floor:g}s——仍登记风险"
-                             f"（[未验证] 听者近景 + 他人整句画外是否仍开口，validation-log 待验证 23）")
+                             f"（[未验证] 听者近景 + 他人整句画外是否仍开口，validation-log 待验证 24）")
     return warns, infos

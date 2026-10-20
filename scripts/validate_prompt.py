@@ -69,9 +69,10 @@ from wording_checks import wording_checks
 from continuity_checks import continuity_checks
 from viewpoint_checks import viewpoint_checks
 from speaker_checks import speaker_checks
+from layer_checks import layer_checks
 
 # Review classes (1.10.0, S7 §7.1): warnings that each came from a render that went wrong.
-RENDER_LESSON_CODES = {"W35", "W46", "W47", "W48", "W49", "W51", "W52", "W54", "W55"}  # W50 (paused) would be a review item, not a render lesson
+RENDER_LESSON_CODES = {"W35", "W46", "W47", "W48", "W51", "W52", "W54", "W55", "W57"}  # 1.12.0: W49 (and W40) folded into W57  # W50 (paused) would be a review item, not a render lesson
 # 1.11.0: one W24 sub-item is a render lesson (offset EP06 s02 clip01 v1.3 / v1.6: 7 s without a line kept with a reason);
 # the share / lead / trail W24 items stay review items.
 RENDER_LESSON_PREFIXES = ("W24 最长连续无台词",)
@@ -452,6 +453,11 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         pw2, pi2 = speaker_checks(text, shots, dialogue, metadata_text)
         warns.extend(pw2)
         for line in pi2:
+            info(line)
+        # 1.12.0: W57 A-layer vocabulary (emotion / judgment / intent words) in the C / D layer; dictionary = the lexicon.
+        lw, li = layer_checks(text, shots, metadata_text)
+        warns.extend(lw)
+        for line in li:
             info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:

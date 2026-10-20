@@ -13,13 +13,24 @@
   W-C6 (WARN)  E 层缺 `最长无台词` 或 `反应镜` 行（S5 §5.2 第 6a / 8a 步）。
   W-C7 (WARN)  E 层 `最长无台词` 的秒数 > 3 s（默认；E 层 `最长无台词上限` 可覆盖）——保留要用户点头，QA 记原话。
   W-C8 (WARN)  镜头纵览"台词"列有「画外」而没有「整句」字样（可能是拆句；S5 §5.2 第 6 步）。
+  S04 (ERROR)  1.12.0 某个 `## 镜头 N` 没有「表演翻译」行，或不是三段 `A 层词 → 词典行 / 情绪库条目 → 可见写法`（两个 →）；
+               写 `表演翻译：无（原因）` 的插入镜跳过。
+  S05 (ERROR)  1.12.0 表演翻译第二段没有引用外化词典的行（`references/externalization-lexicon.md` 第一列，含「（轻松）」变体）
+               或情绪库条目（`情绪库 N` / 条目名）。
+  W-C9 (WARN)  1.12.0 C 层行（有序表演块 / 台词 / 结束状态 …）里出现 A 层词（词典「A 层词」一节 + 第一列）；只允许在 A 创作决策与表演翻译第一段。
 
 退出码：0 = 做了（可有 WARN）；1 = 缺项（ERROR）；2 = 用法错误。
 S5 停靠前：`python3 scripts/stage_check.py --stage s5 <分镜卡>`；S6 入口再跑一次。
 """
+import json
 import re
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from layer_checks import LEXICON, load_vocabulary, scan_text  # noqa: E402
+
+LIBRARY = Path(__file__).resolve().parents[1] / 'assets' / 'emotion-library.json'
 
 CARD_ROWS = {
     1: '场景参数卡', 2: '视觉方案与观众问题', 3: '峰值事件与峰值镜', 4: '决策载体', 5: '走位表', 6: '空间锚点',
@@ -60,9 +71,70 @@ def e_value(text, key):
     return m.group(1).strip() if m else None
 
 
+def lexicon_rows(path=LEXICON):
+    rows = set()
+    try:
+        for line in Path(path).read_text(encoding='utf-8').splitlines():
+            if line.startswith('|') and not line.startswith('|---') and '抽象词' not in line:
+                cell = line.strip().strip('|').split('|')[0].strip()
+                if cell:
+                    rows.add(cell)
+                    rows.add(re.sub(r'[（(].*$', '', cell).strip())
+    except OSError:
+        pass
+    return rows
+
+
+def library_names(path=LIBRARY):
+    try:
+        return {str(e.get('id')): e.get('name', '') for e in json.loads(Path(path).read_text(encoding='utf-8'))}
+    except (OSError, ValueError):
+        return {}
+
+
+def translation_checks(text):
+    """S04 / S05 / W-C9 over each `## 镜头 N` section of the card."""
+    errors, warns = [], []
+    rows = lexicon_rows()
+    names = library_names()
+    vocab = load_vocabulary()
+    parts = re.split(r'^(?=## 镜头\s*\d+)', text, flags=re.M)
+    for part in parts:
+        m = re.match(r'## 镜头\s*(\d+)', part)
+        if not m:
+            continue
+        no = m.group(1)
+        body = re.split(r'^## (?!镜头)', part, maxsplit=1, flags=re.M)[0]
+        line = re.search(r'^[^\n]*表演翻译[^\n]*$', body, flags=re.M)
+        if not line:
+            errors.append(f'S04 镜头{no} 没有「表演翻译」行（S5 §5.2 第 1 步：A 层词 → 词典行 → 可见写法）')
+        else:
+            content = re.sub(r'^.*?表演翻译[^：:]*[：:]\s*', '', line.group(0))
+            if re.match(r'\s*无', content):
+                pass
+            else:
+                segs = [x.strip() for x in re.split(r'→|->|=>', content) if x.strip()]
+                if len(segs) < 3:
+                    errors.append(f'S04 镜头{no} 表演翻译不是三段「A 层词 → 词典行 / 情绪库条目 → 可见写法」：{content[:50]}')
+                else:
+                    middle = segs[1]
+                    ok = any(r and r in middle for r in rows) or re.search(r'情绪库\s*#?\d+', middle) \
+                        or any(n and n.lower() in middle.lower() for n in names.values())
+                    if not ok:
+                        errors.append(f'S05 镜头{no} 表演翻译第二段「{middle[:40]}」不是外化词典的行或情绪库条目：从 externalization-lexicon.md 第一列挑一行（轻松场用「（轻松）」变体）')
+        c_lines = [l for l in body.splitlines() if re.match(r'\s*-\s*(?:有序表演块|表演(?!翻译)|台词|结束状态|起始状态|视线|主要事件|额外动作)', l)]
+        found = scan_text('\n'.join(c_lines), vocab) if c_lines else []
+        if found:
+            warns.append(f'W-C9 镜头{no} C 层行出现 A 层词 {found}：只放在 A 创作决策和表演翻译第一段，C 层写部位 · 先后 · 声音')
+    return errors, warns
+
+
 def check(path, stage='s5'):
     text = Path(path).read_text(encoding='utf-8')
     errors, warns = [], []
+    te, tw = translation_checks(text)
+    errors.extend(te)
+    warns.extend(tw)
     heads = headings(text)
     shots = re.findall(r'^## 镜头\s*(\d+)', text, flags=re.M)
 

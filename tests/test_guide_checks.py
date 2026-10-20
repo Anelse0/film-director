@@ -47,7 +47,7 @@ def codes(result):
     return {w.split()[0] for w in result['warnings']}
 
 
-NEW_CODES = {'W36', 'W37', 'W38', 'W39', 'W40', 'W41'}
+NEW_CODES = {'W36', 'W37', 'W38', 'W39', 'W41', 'W57'}  # W40 folded into W57 (1.12.0)
 
 
 class BaselineTests(unittest.TestCase):
@@ -124,10 +124,12 @@ class W39Tests(unittest.TestCase):
 
 
 class W40Tests(unittest.TestCase):
-    def test_intensity_label_warns_and_guard_line_is_suggested(self):
+    def test_intensity_label_is_w57_and_guard_line_is_suggested(self):
+        # 1.12.0: W40 retired; intensity labels are A-layer words reported by the lexicon-backed W57 (layer_checks.py).
         text = numbered().replace('A 抬眼看向画右的 B，嘴角抬一点。', 'A 极度惊骇地抬眼看向画右的 B。')
         result = run(text)
-        self.assertIn('W40', codes(result))
+        self.assertNotIn('W40', codes(result))
+        self.assertIn('W57', codes(result))
         self.assertTrue(any('不发光' in i for i in result['info']), result['info'])
         guarded = text.replace('；声音：无 bgm', '；人物为正常人眼，不发光；声音：无 bgm')
         self.assertFalse(any('不发光' in i for i in run(guarded)['info']))
@@ -183,7 +185,7 @@ class WiringTests(unittest.TestCase):
         return (ROOT / name).read_text(encoding='utf-8')
 
     def test_documents_carry_the_release(self):
-        self.assertEqual(self.read('VERSION').strip(), '1.11.0')
+        self.assertEqual(self.read('VERSION').strip(), '1.12.0')
         for code in NEW_CODES:
             self.assertIn(f'| {code} |', self.read('references/duration-rhythm.md'), code)
         self.assertIn('## 8.', self.read('references/seedance-2.5-capabilities.md'))

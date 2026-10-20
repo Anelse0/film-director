@@ -327,7 +327,7 @@ def subtext_checks(text, shots, dialogue):
             parts.append(f"{len(uncovered)} 处态度" + "".join(f"「{'，'.join(i)}」（{s}）" for s, i in uncovered) + "同镜没有这个人的可执行拍子")
             advice.append("把 S4 为这句定的载体写进镜头行——眼神 / 脸、手与身体、声音与停顿（括号里写 轻声 / 放慢 / 顿一拍 也算）、对对方的动作，"
                           "任一种，由导演设计定，不限于眼神；在台词窗口内、不另占秒数")
-        warns.append(f"W44 镜头{no} 台词括号里 " + "，".join(parts) + "：" + "；".join(advice) + "；括号里的词不删（S4 §4.4c 第 7 条）")
+        warns.append(f"W44 镜头{no} 台词括号里 " + "，".join(parts) + "：" + "；".join(advice) + "；情绪 / 判断词移到分镜卡 A 层、经词典翻成拍子，括号只留语言 / 音量 / 音色 / 距离 / 可执行声音词（S4 §4.4c 第 7 条，1.12.0；W57）")
     if off_screen_pending:
         listed = "、".join(f"镜头{no}「{'，'.join(i)}」（{s}）" for no, s, i in off_screen_pending)
         infos.append(f"态度拍子：画外 / 背对 / 后景句的态度 {listed} 落在听者反应或下一镜第一拍，本镜与下一镜开头都未见——补一句听者的反应（眼神 / 动作 / 停顿）")

@@ -146,7 +146,7 @@ class ShotTests(unittest.TestCase):
         self.assertEqual(len(hits), 2, hits)
         self.assertIn('镜头1 台词括号里 1 处动作「抬眼，笑一下」（A）：动作写进镜头行（开口前或开口时，由导演定）', hits[0])
         self.assertNotIn('态度', hits[0])      # B's 认出熟客 is carried by 顺手把吧巾搭到肩上
-        self.assertIn('括号里的词不删', hits[0])
+        self.assertIn('情绪 / 判断词移到分镜卡 A 层', hits[0])
         self.assertIn('镜头3 台词括号里 1 处动作「看回他」（B）', hits[1])
         self.assertIn('写进去后它就是同一括号里态度词的拍子', hits[1])   # B's bracket also carries 笑着解释 / 没有要拒绝的意思
         self.assertFalse(any(h.startswith('W44 镜头2') for h in hits), hits)   # the finger tap carries 真诚 / 不推销
@@ -158,7 +158,7 @@ class ShotTests(unittest.TestCase):
         self.assertEqual(len(hits), 1, hits)
         self.assertIn('镜头2 台词括号里 1 处态度「真诚，不推销」（A）同镜没有这个人的可执行拍子', hits[0])
         self.assertIn('不限于眼神', hits[0])
-        self.assertIn('括号里的词不删', hits[0])
+        self.assertIn('情绪 / 判断词移到分镜卡 A 层', hits[0])
         self.assertNotIn('眼神拍子', hits[0])
         self.assertEqual(attitude_info(result), ['态度拍子：0/2 处意图词有可执行拍子'])
 
