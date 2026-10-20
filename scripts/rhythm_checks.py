@@ -34,8 +34,9 @@ DEFAULTS = {
     "时长冗余阈值": 4.0,     # declared − derived reference
     "对话场判定占比": 0.25,  # speech estimate / duration at or above this = dialogue-led clip
     "动作节拍秒数": 0.0,     # declared seconds of physical beats inside dialogue shots (adds to the derived reference)
-    "整句一镜阈值": 4.0,     # fixed shot holding exactly one whole line for at least this long -> W28
-    "台词轨溢出容差": 1.0,   # continuous track: a line may run past its window / into the next shot by this much
+    "整句一镜阈值": 4.0,     # any shot holding exactly one whole line for at least this long -> W28 (1.11.0: camera move no longer exempts)
+    "台词轨溢出容差": 1.0,   # continuous track: estimate pile-up slack for W29 (timing only; a line written across two shots is W54)
+    "最长无台词上限": 3.0,   # 1.11.0 dialogue-led: longest stretch without a dialogue window (lead / gap / trail) -> W24 最长连续无台词, render lesson
 }
 TRACK_MODES = ("窗口", "连续")
 
@@ -180,15 +181,25 @@ def rhythm_checks(shots, rows, duration, metadata_text):
         elif length > cfg["长镜阈值"] and not lines and not moving:
             warns.append(f"W23 镜头{no} 长 {length:g}s 且无台词、标注无运镜（写明观众这几秒在看什么，或缩短 / 拆镜）")
 
-    # W28 one whole line held in one fixed shot for >= 4 s: the cut is waiting for the sentence
+    # W28 one whole line held in one shot for >= 4 s: the cut is waiting for the sentence.
+    # 1.11.0: any camera (a handheld shot waits for the sentence just the same); the remedy is no longer "split the
+    # line off-screen" (W54) but a shorter shot, a change of size / position, or a reaction shot without the line.
+    # INFO: shots that hold ≥1 s after the last line ends (dead air after the sentence) feed the S5 执行卡 rhythm row.
     if dialogue_led:
+        holds = []
         for no, s, e, body in shots:
             length = e - s
             lines = [r for r in rows if r["shot"] == str(no)]
-            tag = tag_of(body)
-            if length >= cfg["整句一镜阈值"] and len(lines) == 1 and not any(w in tag for w in CAMERA_MOVES) \
+            if length >= cfg["整句一镜阈值"] and len(lines) == 1 \
                     and (lines[0]["end"] - lines[0]["start"]) >= length - 1e-9:
-                warns.append(f"W28 镜头{no} {length:g}s 固定机位只承载一整句（{lines[0]['speaker']}）：在信息变化处切——前半句画内、后半句画外落在听者 / 插入 / 视线对象，或换景别（duration-rhythm §九）")
+                warns.append(f"W28 镜头{no} {length:g}s 只承载一整句（{lines[0]['speaker']}）：镜头在等句号——缩短镜长、换景别 / 机位，"
+                             f"或把反应拆成无台词的反应镜；不拆句、不把后半句放画外（duration-rhythm §九，W54）")
+            if lines:
+                last_end = max(r["end"] for r in lines)
+                if e - last_end >= 1.0 - 1e-9:
+                    holds.append(f"镜头{no} 句尾后 {e - last_end:g}s")
+        if holds:
+            infos.append("句尾后停留 ≥1 s：" + "、".join(holds) + "（每处写清这几秒的动作或反应，不写停住）")
 
     # W24 silence outside dialogue windows (only for clips that have dialogue)
     stats = {"mode": mode}
@@ -223,6 +234,24 @@ def rhythm_checks(shots, rows, duration, metadata_text):
                 gaps.append(f"{prev_end:g}-{r['start']:g}s")
             prev_end = max(prev_end or 0, r["end"])
         share = silent / duration
+        # 1.11.0 longest stretch without a dialogue window (lead, any gap, trail); render lesson (W24 最长连续无台词).
+        # `[实测]` offset EP06 s02 clip01 v1.3 / v1.6: 7 s without a line, kept twice with a written reason, called out
+        # twice by the user ("整整 7s 无台词"); the share and the lead / trail items below stay review items.
+        stretches = [(0.0, lead)] if lead > 0 else []
+        prev_end = None
+        for r in sorted(explicit, key=lambda x: x["start"]):
+            if prev_end is not None and r["start"] > prev_end:
+                stretches.append((prev_end, r["start"]))
+            prev_end = max(prev_end or 0, r["end"])
+        if trail > 0:
+            stretches.append((duration - trail, duration))
+        longest = max(stretches, key=lambda x: x[1] - x[0]) if stretches else None
+        if longest and longest[1] - longest[0] > cfg["最长无台词上限"] + 1e-9:
+            inside = [str(no) for no, s0, e0, _ in shots if s0 < longest[1] and e0 > longest[0]]
+            warns.append(
+                f"W24 最长连续无台词 {longest[1] - longest[0]:g}s（{longest[0]:g}-{longest[1]:g}s，镜头{'、'.join(inside)}）> {cfg['最长无台词上限']:g}s："
+                f"能叠进相邻台词的动作叠进去、同一状态不拍两遍、反应镜 1 s、收尾动作交给下一条；"
+                f"保留要用户点头（成片教训类；E 层「最长无台词上限」可覆盖）")
         if share > cfg["无声段占比上限"] + 1e-9:
             warns.append(
                 f"W24 台词窗口外 {silent:g}s（{share:.0%} > {cfg['无声段占比上限']:.0%}）：开头 {lead:g}s，结尾 {trail:g}s"
@@ -231,7 +260,8 @@ def rhythm_checks(shots, rows, duration, metadata_text):
             warns.append(f"W24 开头 {lead:g}s 无台词 > {cfg['首尾无声上限']:g}s（迟进：从事件已在进行的一刻开始，或写明这几秒的信息功能）")
         if trail > cfg["首尾无声上限"] + 1e-9:
             warns.append(f"W24 结尾 {trail:g}s 无台词 > {cfg['首尾无声上限']:g}s（早出：事件完成即停，或写明停留的功能）")
-        stats.update({"silent": silent, "silent_share": share, "lead": lead, "trail": trail, "gaps": gaps})
+        stats.update({"silent": silent, "silent_share": share, "lead": lead, "trail": trail, "gaps": gaps,
+                      "longest_silent": (longest[1] - longest[0]) if longest else 0.0})
 
     # W25 / INFO average shot length and distribution
     lengths = [e - s for _, s, e, _ in shots]

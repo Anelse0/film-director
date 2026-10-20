@@ -11,6 +11,11 @@ left / right first. This checker reads the `## 现行状态` section a QA file o
   Q02 (ERROR)  the Prompt version in 现行状态 differs from the first version in the prompt's E-layer 版本 row.
   Q03 (ERROR)  the WARN codes in the 校验 line differ from a fresh `validate_prompt.py` run on that prompt (ERROR count too).
   W-Q1 (WARN)  the prompt path in 现行状态 cannot be resolved; pass --prompt.
+  Q04 (ERROR)  1.11.0 — 现行状态 names a category the user has already called out on this clip (`用户已点名：节奏（原话）、空间`)
+               and the 校验处置 table keeps a WARN of that category with a written reason instead of 改了 / 用户同意保留.
+               Trigger `[实测]` offset EP06 s02 clip01: the user said 节奏太拖 at v1.3; v1.4 / v1.5 still kept W24 with a
+               reason; the user asked at v1.6 whether anyone had reviewed it. Categories → codes: 节奏 W22–W29, 剪辑 W28 W54 W55,
+               空间 W46 C09 C10 E23, 表演 W35 W49 W40, 台词 W47 W36 W44, 衣着 W45, 道具 W48, 衔接 W51, 视角 W52.
 
 Exit codes: 0 = current (warnings allowed); 1 = drift (ERROR); 2 = usage error.
 """
@@ -21,6 +26,18 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 REQUIRED = ('Prompt', '成片', '校验')
+CATEGORY_CODES = {
+    '节奏': {'W22', 'W23', 'W24', 'W25', 'W26', 'W27', 'W28', 'W29'},
+    '剪辑': {'W28', 'W54', 'W55'},
+    '空间': {'W46', 'C09', 'C10', 'E23'},
+    '表演': {'W35', 'W49', 'W40'},
+    '台词': {'W47', 'W36', 'W44'},
+    '衣着': {'W45'},
+    '道具': {'W48'},
+    '衔接': {'W51'},
+    '视角': {'W52'},
+}
+KEPT_OK = re.compile(r'改了|已改|用户同意保留|用户原话|用户[：:]|用户点头|用户说')
 PLACEHOLDER = re.compile(r'^\s*(?:<[^>]*>|_+|—|-|待定|TODO|TBD)?\s*$', re.I)
 VERSION = re.compile(r'\bv\d+(?:\.\d+)*\b')
 CODE = re.compile(r'\bW\d{2}\b')
@@ -99,7 +116,39 @@ def check(qa_path, prompt=None):
     m = re.search(r'(\d+)\s*(?:个)?\s*ERROR', check_line, flags=re.I)
     if m and int(m.group(1)) != len(result['errors']):
         errors.append(f"Q03 现行状态写 {m.group(1)} 个 ERROR，现在是 {len(result['errors'])} 个")
+    errors.extend(named_category_check(block, text))
     return errors, warns
+
+
+def named_category_check(block, text):
+    """Q04: categories the user already called out on this clip may not keep a matching WARN with a written reason."""
+    named = line(block, '用户已点名')
+    if not named or PLACEHOLDER.match(named) or named.strip().startswith('无'):
+        return []
+    codes = set()
+    hit = []
+    for cat, cs in CATEGORY_CODES.items():
+        if cat in named:
+            codes |= cs
+            hit.append(cat)
+    if not codes:
+        return []
+    errors = []
+    table = re.search(r'###\s*7\s*校验处置(.*?)(?=^##|\Z)', text, flags=re.M | re.S)
+    if not table:
+        return errors
+    for row in table.group(1).splitlines():
+        cells = [c.strip() for c in row.strip().strip('|').split('|')] if row.strip().startswith('|') else []
+        if len(cells) < 4:
+            continue
+        code = re.match(r'[WCE]\d{2}', cells[0])
+        if not code or code.group(0) not in codes:
+            continue
+        verdict = cells[-1]
+        if not KEPT_OK.search(verdict):
+            errors.append(f"Q04 {code.group(0)} 属于用户已点名的类别（{'、'.join(hit)}），处置却是写理由保留：「{verdict[:40]}」——"
+                          f"只能「改了」或「用户同意保留：原话」（S7 §7.1）")
+    return errors
 
 
 def main(argv):

@@ -1,6 +1,14 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.10.0 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.11.0 baseline.
 
-1.10.0 (2026-10-19): the rest of the EP06 review proposal (W50 per-shot action load paused by the user, not in the release) —
+1.11.0 (2026-10-19): offset EP06 s02 review proposal items 0-5 + the S5 checklist (M1) — one line does not cross a cut
+(speaker_checks.py W54 / W55, new to the zone, wired into validate_prompt.py as render lessons), the W24 longest-silence
+sub-item as a render lesson (rhythm_checks.py, RENDER_LESSON_PREFIXES), W28 for any camera, stage_check.py (S5 执行卡 +
+镜头纵览, new to the zone), qa_check.py Q04 (user-named categories), stage-4 / 5 / 6 / 7, the shot-card and QA templates
+carry the rules; hashes re-set in the same change with a CHANGELOG entry. User decision: the 1.4.0 J/L-cut default is
+withdrawn after the v1.6 render gave the off-screen tail to the listener; the whole-line off-screen shot stays as a
+project exception with conditions.
+
+1.10.0 previous baseline. 1.10.0 (2026-10-19): the rest of the EP06 review proposal (W50 per-shot action load paused by the user, not in the release) —
 C10 card-vs-prompt cross-check (camera_plan_check.py --prompt), the closing render-lesson INFO in validate_prompt.py,
 qa_check.py and templates/qa.md (QA current state, new to the zone), seven review passes (stage-7 §7.1 / §7.4), C10 in
 stage-6 §6.6, the platform-difference note (capabilities §2, stage-5 §5.1 hand-off row); hashes re-set in the same
@@ -101,11 +109,11 @@ PROTECTED = {
     'assets/emotion-library.json': 'ef22ac8bfec33567344e13a927d47f7b577c3c6f07b110cc5a2e316523599977',
     'references/emotion-performance.md': 'f2c7aa0b1beb72781117abd310cab2431c703af909e5aa2918946a2f40ae5a5a',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
-    'references/stage-4-performance.md': '8fbfdb57213b17e6d1ce6b2ef0fc55e49d81b517d57a880143bfe1486cbc56c5',
-    'references/stage-5-directing-storyboard.md': '7356bbbd5ba12262d11a4794c3cb5f4050974c6398500ebaad6aac7945cfb46f',
+    'references/stage-4-performance.md': 'aa8b7eb681b93f02714701a8c632777925a3a9460dec20ac866308e4a4e377b0',
+    'references/stage-5-directing-storyboard.md': 'f001491d488c62a8229c87c8dc57fce11d02e036f2c12672f9bc9b1f8bf072d1',
     'references/stage-5b-reference-assets.md': '0ca1e45deee8a4dd5aa97022eed99c47284ca83018d5805aebfe254e9a1af18c',
-    'references/stage-6-prompt-compiler.md': '5c992be1631a2b7ed8e4c13c4ecd1663b9dbfea2eb595810df81ba9720720f18',
-    'references/stage-7-qa-continuity.md': 'c7faae3c63a9363f8fbc035df0654344e789c93ba02b4b0a5d2f63aa507b5b2f',
+    'references/stage-6-prompt-compiler.md': '778a45df0f4341683345df5c902a71de881e6d8d80e4a2a3b7118c3c3e6e11f2',
+    'references/stage-7-qa-continuity.md': '19b7b717676b18891ae02af4b38b153ceeaa3a5297e479999e2567858c50eb1c',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
     'references/seedance-2.5-capabilities.md': 'fc3d1a1b4edf12b08cc333a655067433b8dd2bb12c85d1834cbf1c9a565c113d',
@@ -116,10 +124,10 @@ PROTECTED = {
     'templates/prompt-templates.md': 'eb5732cb7d1e660522ad9d1e5543859b46124a4c62c9afcd8ed1d7c0b1e8b36b',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '96e7fcb783028d6c258005c962c18b9f2cdbd3bc36d52596bc7a5568900b838b',
-    'templates/shot-card.md': 'd6b81744c21e5316aa712693481f8697d87ae40d9d1e28c8a57edaf1424a2631',
+    'templates/shot-card.md': '01479d9b2f63af8d10627ed891df1c96b51a579a30393e1e9587806e2ae0313b',
     'templates/reference-asset-brief.md': '106e08747fd39ce900ca928afef2244ce8071c0ea43fec328581352ce552b441',
     'templates/asset-registry.md': '2b478992e56c0d08bd99e66b04aa3933f9bd6dc46b0ca2eb507ae68632df0bba',
-    'scripts/rhythm_checks.py': '24f4836a1d98b46acfeb1cf95c2f50a5f89f633b2412dd4ffc5d9a10628e61be',
+    'scripts/rhythm_checks.py': 'a51120a62fdec236c2af6ccfd0ed306beb40c50d234fbd47edb48219c5199ff4',
     'scripts/variation_checks.py': '11a116c63f7e32a988da9eedb465d89ad8a3d73b92d7ceeb804c3e487a74c19f',
     'scripts/direction_checks.py': 'fdbd694059a9ca156946345ef4ac29ae95ad10fa22aea5fe52be20969fbf55ea',
     'scripts/tone_checks.py': '565322afadb5a468b6ed86049058e56d49a883f9b437e92f0b1e771eda262482',
@@ -127,7 +135,7 @@ PROTECTED = {
     'scripts/focus_checks.py': '5b5d3110f22c58c272f3c24aa7533e75b9b91f46f951589a829c0eef25a6106c',
     'scripts/subtext_checks.py': 'c060f2bc9c7faf731e4ef8da3230319cdbf5c9916107de6ac1f37f019323a7ed',
     'scripts/costume_checks.py': 'dd11f7a23d3a252378d6f415a7310e16d0bf0811b3f5df29629b6957c74955fc',
-    'scripts/validate_prompt.py': 'e515dfd023eb214fb083504fafbf6e2d752b46c8693b6362a232a56147c6d55b',
+    'scripts/validate_prompt.py': 'b381281ce18700547ceda610c02414397fe9b0a9aa360ce22dcf5fd152cd5f4b',
     'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
     'scripts/production_contract.py': 'adb40d1e05ecb6d298e2bb295a8ef325941812f00a89f9000fe03477a58b780f',
     'scripts/production_preflight.py': 'aab550991f000dac727f744f1c603a5a1519f1adf44d2e288e11c9d3cc859c0d',
@@ -136,8 +144,10 @@ PROTECTED = {
     'scripts/wording_checks.py': 'b4e01868ffe7778b7ce45d90abe36b90fb1a25889a4f9c667ee3afe280a69417',
     'scripts/continuity_checks.py': 'b93b1349b682829892f7e7df7b8459aa0ae953266da017683cd80c1ccebc2c96',
     'scripts/viewpoint_checks.py': 'ef4fec0091e3b99587dfe399e7e4b91e20ca0467030ea6f593cf5eb75b18bda2',
-    'scripts/qa_check.py': '25b2b1e2577aa76b80b5bcab5ff4d90fd0b79308b612c1f001c459e61bc8e8ff',
-    'templates/qa.md': '2dbc43d0153d65fc94349c96d4067494c826ba4fd866db3051bb885393b1e102',
+    'scripts/speaker_checks.py': 'dfd6120130ea78ac3636fe1499380c6c0ba00afc1b4412b417a1fdfced9bb38e',
+    'scripts/stage_check.py': '3e3a02adf5eb91059beee1f0ed920740321d95ea4784fcd28ea48fd5fe8c0e93',
+    'scripts/qa_check.py': '5815f9e068b958c3bf7297b110488dcdc1a1f0950f56b5761d671548b03a34da',
+    'templates/qa.md': '60087b15f000e3e55043b10ced7eebb5df5fbcf3bd9575a95003c1a3838bc980',
     'scripts/performance_checks.py': '5a54ee7c0cb77b67466ee6f7102ded648220cf8b922fea7da186f68ccd869ae0',
 }
 

@@ -102,5 +102,29 @@ class QaCheckTests(unittest.TestCase):
             self.assertIsNotNone(qa_check.line(block, label), label)
 
 
+class NamedCategoryTests(unittest.TestCase):
+    """1.11.0 Q04: a category the user already called out may not keep a matching WARN with a written reason."""
+
+    def check(self, named, verdict):
+        block = ('# QA clip\n\n## 现行状态\n\n- Prompt：`06_prompts/clip.prompt.md` v1\n- 成片：未生成\n'
+                 '- 校验：validate_prompt 2026-10-19 0 ERROR；WARN W24；成片教训类 无\n'
+                 f'- 用户已点名：{named}\n\n## 审阅\n\n### 7 校验处置\n'
+                 '| 代码 | 内容 | 类别 | 处置 |\n|---|---|---|---|\n'
+                 f'| W24 | 窗口外 16 s | 其余 | {verdict} |\n| W17 | 手持三镜 | 其余 | 保留：偏好 |\n\n## 历史\n')
+        return qa_check.named_category_check(qa_check.current_section(block)[0], block)
+
+    def test_reason_on_named_category_is_q04(self):
+        errors = self.check('节奏（v1.3 "节奏太拖"）', '保留：无声段都是动作，用户要的换衣过程')
+        self.assertTrue(errors and errors[0].startswith('Q04') and 'W24' in errors[0], errors)
+
+    def test_fixed_or_user_quote_passes(self):
+        self.assertEqual(self.check('节奏（v1.3 "节奏太拖"）', '改了：最长连续无台词 7 s 压到 3 s'), [])
+        self.assertEqual(self.check('节奏', '用户同意保留："这里整整 4s 可以"'), [])
+
+    def test_other_category_or_none_is_ignored(self):
+        self.assertEqual(self.check('空间（v1 左右反了）', '保留：是动作'), [])
+        self.assertEqual(self.check('无', '保留：是动作'), [])
+
+
 if __name__ == '__main__':
     unittest.main()

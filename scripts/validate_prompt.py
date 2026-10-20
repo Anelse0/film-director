@@ -68,9 +68,18 @@ from costume_checks import costume_checks
 from wording_checks import wording_checks
 from continuity_checks import continuity_checks
 from viewpoint_checks import viewpoint_checks
+from speaker_checks import speaker_checks
 
 # Review classes (1.10.0, S7 §7.1): warnings that each came from a render that went wrong.
-RENDER_LESSON_CODES = {"W35", "W46", "W47", "W48", "W49", "W51", "W52"}  # W50 (paused) would be a review item, not a render lesson
+RENDER_LESSON_CODES = {"W35", "W46", "W47", "W48", "W49", "W51", "W52", "W54", "W55"}  # W50 (paused) would be a review item, not a render lesson
+# 1.11.0: one W24 sub-item is a render lesson (offset EP06 s02 clip01 v1.3 / v1.6: 7 s without a line kept with a reason);
+# the share / lead / trail W24 items stay review items.
+RENDER_LESSON_PREFIXES = ("W24 最长连续无台词",)
+
+
+def is_render_lesson(warning):
+    head = warning.split()[0] if warning.split() else ""
+    return head in RENDER_LESSON_CODES or warning.startswith(RENDER_LESSON_PREFIXES)
 
 # ---------- 词表 ----------
 VAGUE_WORDS = [
@@ -439,6 +448,11 @@ def validate(path, duration_override=None, artifact="production", record=None, e
             warns.extend(xw)
             for line in xi:
                 info(line)
+        # 1.11.0: W54 a line split across two shots, W55 an off-screen line on another character's face (speaker_checks).
+        pw2, pi2 = speaker_checks(text, shots, dialogue, metadata_text)
+        warns.extend(pw2)
+        for line in pi2:
+            info(line)
     # Ancillary prose hints inspect complete shots, including beat-external text.
     for no, s, e, body in shots or beats:
         if re.search(r"\d+\s*秒?内.{0,10}\d+\s*次|\d+\s*times? (?:per|in) \d+", body):
@@ -519,7 +533,7 @@ def validate(path, duration_override=None, artifact="production", record=None, e
         fidelity_errors, fidelity = check_record(record, beats, dur)
         errors.extend(fidelity_errors)
     # 1.10.0 WARN classes (S7 §7.1): codes that came from renders are fixed by default; keeping one needs the user's OK.
-    lesson = sorted({w.split()[0] for w in warns if w.split() and w.split()[0] in RENDER_LESSON_CODES})
+    lesson = sorted({(w.split()[0] if w.split()[0] != "W24" else "W24（最长连续无台词）") for w in warns if is_render_lesson(w)})
     if lesson:
         info(f"成片教训类提醒 {'、'.join(lesson)}：默认改，保留要用户点头（S7 §7.1）；其余 WARN 写理由可保留")
     return {"file": str(path), "errors": errors, "warnings": warns, "info": infos, "lens": lens,

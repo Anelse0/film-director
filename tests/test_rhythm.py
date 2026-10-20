@@ -85,13 +85,44 @@ class RhythmTests(unittest.TestCase):
         self.assertTrue(any(w.startswith('W05') for w in w9))
         self.assertFalse(any(w.startswith('W05') for w in w10))
 
-    def test_whole_line_in_fixed_four_second_shot_is_w28(self):
+    def test_whole_line_in_four_second_shot_is_w28_for_any_camera(self):
+        # 1.11.0: a moving camera no longer exempts the shot (a handheld shot waits for the sentence just the same);
+        # the remedy no longer suggests splitting the line off-screen (W54).
         shots = [(1, 0, 4, '【中景，固定】'), (2, 4, 6, '【近景，固定】'), (3, 6, 10, '【中景，缓推】')]
         rows = [row(1, 'A', 0, 4, 11), row(2, 'B', 4, 6, 5), row(3, 'A', 6, 10, 11)]
-        warns, _, _ = rhythm_checks(shots, rows, 10, META.replace('30', '10'))
+        warns, infos, _ = rhythm_checks(shots, rows, 10, META.replace('30', '10'))
         self.assertTrue(any(w.startswith('W28 镜头1') for w in warns))
         self.assertFalse(any('镜头2' in w and w.startswith('W28') for w in warns))  # 2 s
-        self.assertFalse(any('镜头3' in w and w.startswith('W28') for w in warns))  # camera moves
+        self.assertTrue(any('镜头3' in w and w.startswith('W28') for w in warns))   # camera moves, still waits for the line
+        self.assertTrue(all('画外' not in w or '不把后半句放画外' in w for w in warns if w.startswith('W28')))
+
+    def test_hold_after_last_line_is_info(self):
+        shots = [(1, 0, 4, '【近景，手持】'), (2, 4, 6, '【近景，手持】')]
+        rows = [row(1, 'A', 1, 3, 6), row(2, 'B', 4, 6, 6)]
+        _, infos, _ = rhythm_checks(shots, rows, 6, META.replace('30', '6'))
+        self.assertTrue(any('句尾后停留' in i and '镜头1 句尾后 1s' in i for i in infos), infos)
+
+    def test_longest_silent_stretch_is_w24_sub_item_with_shot_numbers(self):
+        # offset EP06 s02 clip01 v1 shape: lines end at 10 s, next line at 17 s -> 7 s without a window across shots 4-6.
+        shots = [(1, 0, 4, '【近景，手持】'), (2, 4, 6, '【近景，手持】'), (3, 6, 10, '【中近景，手持】'),
+                 (4, 10, 13, '【中景，手持】'), (5, 13, 15, '【近景，手持】'), (6, 15, 18, '【近景，手持】'), (7, 18, 20, '【近景，手持】')]
+        rows = [row(1, 'A', 1, 3, 7), row(2, 'B', 4, 5, 1), row(3, 'A', 8, 10, 8), row(6, 'A', 17, 18, 1), row(7, 'B', 18, 20, 7)]
+        warns, _, stats = rhythm_checks(shots, rows, 20, META.replace('30', '20'))
+        hit = [w for w in warns if w.startswith('W24 最长连续无台词')]
+        self.assertEqual(len(hit), 1, warns)
+        self.assertIn('7s（10-17s，镜头4、5、6）', hit[0])
+        self.assertEqual(stats['longest_silent'], 7.0)
+
+    def test_longest_silent_stretch_threshold_is_tunable_and_three_seconds_is_fine(self):
+        shots = [(1, 0, 3, '【近景，手持】'), (2, 3, 6, '【近景，手持】'), (3, 6, 9, '【近景，手持】')]
+        rows = [row(1, 'A', 0, 2, 7), row(3, 'B', 5, 9, 12)]   # gap 2-5 = 3 s
+        warns, _, _ = rhythm_checks(shots, rows, 9, META.replace('30', '9'))
+        self.assertFalse(any(w.startswith('W24 最长连续无台词') for w in warns), warns)
+        rows2 = [row(1, 'A', 0, 1, 3), row(3, 'B', 5, 9, 12)]  # gap 1-5 = 4 s
+        warns2, _, _ = rhythm_checks(shots, rows2, 9, META.replace('30', '9'))
+        self.assertTrue(any(w.startswith('W24 最长连续无台词 4s') for w in warns2), warns2)
+        warns3, _, _ = rhythm_checks(shots, rows2, 9, META.replace('30', '9') + '| 最长无台词上限 | 4 |\n')
+        self.assertFalse(any(w.startswith('W24 最长连续无台词') for w in warns3), warns3)
 
     def test_continuous_track_allows_spill_and_flags_pileup(self):
         rows = [row(1, 'A', 4, 6, 9), row(2, 'B', 6, 8, 3), row(3, 'A', 8, 10, 8)]   # 2.7 s in a 2 s window spills 0.7

@@ -14,7 +14,7 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_changelog(self):
-        self.assertEqual(read('VERSION').strip(), '1.10.0')
+        self.assertEqual(read('VERSION').strip(), '1.11.0')
         log = read('CHANGELOG.md')
         self.assertIn('## 1.10.0', log)
         self.assertLess(log.index('## 1.10.0'), log.index('## 1.9.0'))
@@ -36,7 +36,7 @@ class WiringTests(unittest.TestCase):
 
     def test_rule_text(self):
         stage7 = read('references/stage-7-qa-continuity.md')
-        self.assertIn('3. **七道审阅**', stage7)
+        self.assertIn('3. **八道审阅**', stage7)  # 1.11.0 added the eighth pass
         self.assertIn('成片教训类', stage7)
         self.assertIn('C10', stage7)
         self.assertIn('qa_check.py', stage7)
