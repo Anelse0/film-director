@@ -12,6 +12,7 @@
   check.py plan <分镜卡>             = 1.14.0 停靠 A（方案）：camera_plan_check --stage s5 + 镜头纵览的算术
                                       （行数、时间是否从 0 连续、台词行数、无台词秒、表下的最长连续无台词 >3 s 提示）；
                                       逐镜小节与执行卡还没写，不跑 stage_check；提示是 NOTE，不是校验码
+  所有子命令：分镜卡版本行 / Prompt E 表「版本」行超过 200 字给 NOTE（1.14.1 版本行一行制，不是校验码）
   check.py s5 <分镜卡>               = camera_plan_check --stage s5 + stage_check --stage s5
   check.py s6 <分镜卡> [<prompt.md>] = camera_plan_check（不带 --stage，C08）+ stage_check --stage s6
                                       + validate_prompt + camera_plan_check --prompt（C10）
@@ -82,6 +83,25 @@ def card_version(text):
         return m.group(1)
     m = VERSION_RE.search(head)
     return m.group(0) if m else None
+
+
+VERSION_LINE_MAX = 200  # 1.14.1 版本行一行制：超过给 NOTE，不是校验码
+
+
+def version_line_notes(card_text=None, prompt_text=None):
+    """分镜卡卡头的版本行 / Prompt E 表的「版本」行超过 VERSION_LINE_MAX 字时各给一条 NOTE（1.14.1）。"""
+    notes = []
+    if card_text:
+        m = re.search(r'^\W*版本[：:].*$', card_text[:6000], re.M)
+        if m and len(m.group(0)) > VERSION_LINE_MAX:
+            notes.append(f'分镜卡版本行 {len(m.group(0))} 字（>{VERSION_LINE_MAX}）：版本行一行制——只留版本 · 日期 · 状态 · skill 版本 · Prompt 版本，'
+                         '改了什么写 QA ## 历史 一版一条，用户原话进执行卡第 22 行（1.14.1）')
+    if prompt_text:
+        m = re.search(r'^\|\s*版本\s*\|[^\n]*$', prompt_text, re.M)
+        if m and len(m.group(0)) > VERSION_LINE_MAX:
+            notes.append(f'Prompt E 表「版本」行 {len(m.group(0))} 字（>{VERSION_LINE_MAX}）：只写版本号和日期，'
+                         '改了什么写 QA ## 历史 一版一条（1.14.1）')
+    return notes
 
 
 def e_row(text, key):
@@ -380,7 +400,7 @@ def pipeline_plan(card, report):
         if f['unfilled']:
             notes.append('纵览未填格：' + '、'.join(f['unfilled'][:6]))
     report.add('镜头纵览算术', [], [], infos)
-    report.notes.extend(notes)
+    report.notes.extend(notes + version_line_notes(card_text=text))
     return facts_from(card=card, camera=(ce, cw))
 
 
@@ -390,6 +410,7 @@ def pipeline_s5(card, report):
     report.add('camera_plan_check --stage s5', ce, cw)
     se, sw = stage_check.check(card, 's5')
     report.add('stage_check --stage s5', se, sw)
+    report.notes.extend(version_line_notes(card_text=Path(card).read_text(encoding='utf-8')))
     return facts_from(card=card, camera=(ce, cw), stage=(se, sw))
 
 
@@ -409,6 +430,8 @@ def pipeline_s6(card, prompt, report):
         camera = (pe, pw)
     else:
         report.notes.append('没有给 Prompt：validate_prompt 与 camera_plan_check --prompt（C10）没跑（S6 入口可以这样；S6 后要带 Prompt 再跑）')
+    report.notes.extend(version_line_notes(card_text=Path(card).read_text(encoding='utf-8'),
+                                           prompt_text=Path(prompt).read_text(encoding='utf-8') if prompt else None))
     return facts_from(card=card, prompt=prompt, result=result, camera=camera, c10_checked=bool(prompt), stage=(se, sw))
 
 

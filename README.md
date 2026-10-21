@@ -49,7 +49,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `scripts/qa_check.py` | QA 改完：现行状态与 Prompt / 校验结果一致（Q01–Q03）、用户已点名类别的 WARN 没写理由保留（Q04） |
 | `scripts/evidence.py` | 按编号读 `references/validation-log.md` 成片表的一行（`evidence.py 8 9`、`--grep 关键词`、`--all`）：规则文里的「证据 #n」查单条，不读整表 |
 | `scripts/session_cost.py` | 量尺（不进保护区）：读会话 .jsonl，按 message id 去重算真实调用数 / output / 缓存读取 / 上下文均值与峰值、输出构成、规则文 Read 次数、脚本跑几次与"无改动重复"、产物整篇 Write 次数；改版后用下一条 clip 的会话和上一版比 |
-| `scripts/check.py` | 一键入口（1.13.0）：`s5 <分镜卡>` / `s6 <分镜卡> [prompt]` / `qa [--sync] <qa.md>` 三个子命令只 import 上面四个脚本的 `check()` / `validate()`，合并报告按 ERROR → 成片教训类 WARN → 其余 WARN → 数字块（可直接粘贴进 QA 现行状态与第 8 道）→ INFO → 输入文件 sha256；`qa --sync` 把现行状态的机器行写回，再独立跑一遍 `qa_check` |
+| `scripts/check.py` | 一键入口（1.13.0）：`s5 <分镜卡>` / `s6 <分镜卡> [prompt]` / `qa [--sync] <qa.md>` 三个子命令只 import 上面四个脚本的 `check()` / `validate()`，合并报告按 ERROR → 成片教训类 WARN → 其余 WARN → 数字块（可直接粘贴进 QA 现行状态与第 8 道）→ INFO → 输入文件 sha256；`qa --sync` 把现行状态的机器行写回，再独立跑一遍 `qa_check`；1.14.1 起所有子命令对超过 200 字的分镜卡版本行 / Prompt E 表「版本」行给 NOTE（版本行一行制，改动叙事进 QA 历史） |
 | `scripts/speaker_checks.py` / `layer_checks.py` | 校验模块（由 validate_prompt 调用）：W54 / W55 跨镜与画外归属；W57 A 层词边界，字典读外化词典 |
 | `scripts/measure_clip.py` | 有成片时：切点 / 有声占比 / 语速校准 / 视觉变化谱对照 Prompt 的时间轨与变化轨（需 ffmpeg） |
 | `examples/example-01-kitchen-keys*.md` | 完整走查 + 通过校验的 Prompt |

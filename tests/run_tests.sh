@@ -64,6 +64,11 @@ out=$(python3 scripts/check.py plan "$tmp/04_shots/clip.md"); rc=$?
 check "check.py plan exits 0" $rc "$out"
 echo "$out" | grep -q "镜头纵览 3 行"; check "check.py plan overview arithmetic" $? "$out"
 echo "$out" | grep -q "执行卡："; rc=$?; [ "$rc" -ne 0 ]; check "check.py plan does not run stage_check" $? "$out"
+# 1.14.1 版本行一行制：超过 200 字的版本行给 NOTE，不改退出码
+sed -i '' "s/^\*\*版本：v1.3 · 2026-10-20\*\*（示例）/**版本：v1.3 · 2026-10-20**（示例）$(printf '改了什么%.0s' $(seq 60))/" "$tmp/04_shots/clip.md"
+out=$(python3 scripts/check.py s5 "$tmp/04_shots/clip.md"); rc=$?
+check "check.py s5 long version line still exits 0" $rc "$out"
+echo "$out" | grep -q "^NOTE  分镜卡版本行"; check "check.py s5 long version line NOTE" $? "$out"
 python3 -c "import sys; sys.path.insert(0, 'tests'); import test_check; test_check.write_fixture('$tmp/door-right', card=test_check.card_text(door_left=False))"
 out=$(python3 scripts/check.py s6 "$tmp/door-right/04_shots/clip.md" examples/example-01-kitchen-keys.prompt.md); rc=$?
 check "check.py s6 with example-01 exits 0" $rc "$out"
