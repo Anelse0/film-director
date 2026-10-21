@@ -8,6 +8,8 @@
 
 分别报告：格式、保真、表演质量、成片验证。无错误不等于四项通过。调用及 sidecar 见 `performance-record.md`；没有记录写保真未自动核对，没有成片写未验证。performance/raw 不检查与任务无关的完整生产字段。
 
+八道在用户看到 Prompt 之前做完（停靠 C 回显的是审完的 Prompt 全文 + 数字块 + 第 7 道处置表 + 未决）；停靠 C 的反馈回来后，措辞 / 执行层的改动只回 S6、QA 只改受影响的行并 `check.py qa --sync`，设计层的反馈先回分镜卡（停靠 A / B）再重编译。
+
 1. 运行 `python3 scripts/validate_prompt.py <prompt.md>`；表演片段加 `--artifact performance`，原文加 `--artifact raw --entry-id N`，上游记录用 `--record`。
    - ERROR 必须修。
    - WARN 分两类：**成片教训类**——W35、W46–W48、W51、W52、W54、W55、W57（原 W40 / W49 并入）和 W24 的「最长连续无台词」子项，每一条都来自一次做错的成片——默认改，保留要用户点头，QA 里记用户的原话；**其余** WARN 逐条写"保留理由"或修改。用户已对本条点名过的类别（QA 现行状态「用户已点名」行：节奏 / 剪辑 / 空间 / 表演 / 台词 …），同类 WARN 不得再写理由保留，只能改或记用户原话（`qa_check.py` Q04；证据：CHANGELOG 1.11.0）。脚本最后的 INFO 行"成片教训类提醒 …"列出本条命中的成片教训类代码。

@@ -9,6 +9,9 @@
   → 数字块（templates/qa.md 现行状态的「校验 / 机位设计 / 执行卡」三行 + 第 8 道那一行，格式一致，可直接粘贴）
   → 原有全部 INFO 行 → 每个输入文件的 sha256 前 12 位（文件没变就不必再跑）。
 
+  check.py plan <分镜卡>             = 1.14.0 停靠 A（方案）：camera_plan_check --stage s5 + 镜头纵览的算术
+                                      （行数、时间是否从 0 连续、台词行数、无台词秒、表下的最长连续无台词 >3 s 提示）；
+                                      逐镜小节与执行卡还没写，不跑 stage_check；提示是 NOTE，不是校验码
   check.py s5 <分镜卡>               = camera_plan_check --stage s5 + stage_check --stage s5
   check.py s6 <分镜卡> [<prompt.md>] = camera_plan_check（不带 --stage，C08）+ stage_check --stage s6
                                       + validate_prompt + camera_plan_check --prompt（C10）
@@ -306,6 +309,81 @@ def gate8_row(cells, last=GATE8_PLACEHOLDER):
     return '| ' + ' | '.join(list(cells) + [last]) + ' |'
 
 
+# ---------- 停靠 A：镜头纵览算术（1.14.0） ----------
+OVERVIEW_TIME = re.compile(r'(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)\s*s')
+UNFILLED = re.compile(r'^\s*(?:_+|待定|TODO|TBD|？|\?)\s*$', re.I)
+NO_LINE = {'—', '-', '无', '─', '——'}
+
+
+def overview_facts(card_text):
+    """`## 镜头纵览` 的算术：行数、时间是否连续、台词行数、无台词秒、表下的最长连续无台词。没有表返回 None。"""
+    block = stage_check.section(card_text, '镜头纵览')
+    if block is None:
+        return None
+    header, rows = stage_check.table_rows(block)
+    facts = {'rows': 0, 'gaps': [], 'lines': 0, 'silent_sum': 0.0, 'silent_max': 0.0, 'end': None, 'unfilled': [],
+             'longest': None, 'shots': len(re.findall(r'^## 镜头\s*(\d+)', card_text, flags=re.M))}
+    m = re.search(r'最长连续无台词\s*\|\s*(\d+(?:\.\d+)?)\s*s', card_text)
+    if m:
+        facts['longest'] = float(m.group(1))
+    if header is None:
+        return facts
+    idx = lambda name: next((i for i, h in enumerate(header) if name in h), None)
+    i_time, i_line, i_silent = idx('时间'), idx('台词'), idx('无台词')
+    prev_end = 0.0
+    for r in rows:
+        if not r or not re.match(r'\d+', r[0]):
+            continue
+        facts['rows'] += 1
+        cell = lambda i: r[i] if i is not None and i < len(r) else ''
+        t = OVERVIEW_TIME.search(cell(i_time))
+        if t:
+            s, e = float(t.group(1)), float(t.group(2))
+            if abs(s - prev_end) > 1e-9:
+                facts['gaps'].append(f'镜 {r[0]} 从 {s:g}s 起，上一镜止于 {prev_end:g}s')
+            prev_end = e
+            facts['end'] = e
+        if cell(i_line).strip() and cell(i_line).strip() not in NO_LINE:
+            facts['lines'] += 1
+        sec = re.search(r'\d+(?:\.\d+)?', cell(i_silent))
+        if sec:
+            v = float(sec.group(0))
+            facts['silent_sum'] += v
+            facts['silent_max'] = max(facts['silent_max'], v)
+        for i, c in enumerate(r[1:], start=2):
+            if UNFILLED.match(c):
+                facts['unfilled'].append(f'镜 {r[0]} 第 {i} 列')
+                break
+    return facts
+
+
+def pipeline_plan(card, report):
+    ce, cw = camera_plan_check.check(card, 's5')
+    report.add('camera_plan_check --stage s5', ce, cw)
+    text = Path(card).read_text(encoding='utf-8')
+    f = overview_facts(text)
+    infos, notes = [], []
+    if f is None:
+        notes.append('没有「## 镜头纵览」表：停靠 A 要先有每镜一行的纵览（S5 §5.2 第 8 步后、§5.6 前）')
+    else:
+        infos.append(f"镜头纵览 {f['rows']} 行"
+                     + (f"，分镜卡已有「## 镜头 N」{f['shots']} 个" if f['shots'] else '，逐镜小节还没写（停靠 A 正常）')
+                     + (f"；时间止于 {f['end']:g}s" if f['end'] is not None else ''))
+        infos.append(f"台词行 {f['lines']}；无台词秒 合计 {f['silent_sum']:g}s / 单镜最大 {f['silent_max']:g}s"
+                     + (f"；表下最长连续无台词 {f['longest']:g}s" if f['longest'] is not None else '；表下没写「最长连续无台词 | N s」'))
+        notes += ['纵览时间不连续：' + g for g in f['gaps']]
+        if f['shots'] and f['rows'] != f['shots']:
+            notes.append(f"纵览 {f['rows']} 行 ≠ 「## 镜头 N」{f['shots']} 个（停靠 B 时 stage_check C11 会报）")
+        if f['longest'] is not None and f['longest'] > stage_check.DEFAULT_MAX_SILENT + 1e-9:
+            notes.append(f"表下最长连续无台词 {f['longest']:g}s > {stage_check.DEFAULT_MAX_SILENT:g} s：停靠 A 就要用户点头"
+                         '（停靠 B 由 stage_check W-C7 按 E 层查；这里是提示，不是校验码）')
+        if f['unfilled']:
+            notes.append('纵览未填格：' + '、'.join(f['unfilled'][:6]))
+    report.add('镜头纵览算术', [], [], infos)
+    report.notes.extend(notes)
+    return facts_from(card=card, camera=(ce, cw))
+
+
 # ---------- pipelines ----------
 def pipeline_s5(card, report):
     ce, cw = camera_plan_check.check(card, 's5')
@@ -452,6 +530,17 @@ def insert_line(block, label, line):
 
 
 # ---------- commands ----------
+def cmd_plan(args):
+    card = Path(args.card)
+    if not card.is_file():
+        print(f'分镜卡不存在：{card}', file=sys.stderr)
+        return None
+    report = Report('plan', [card])
+    facts = pipeline_plan(str(card), report)
+    report.block = block_lines(facts, ('机位设计',), gate8=False)
+    return report
+
+
 def cmd_s5(args):
     card = Path(args.card)
     if not card.is_file():
@@ -534,7 +623,9 @@ def build_parser():
     parser = argparse.ArgumentParser(prog='check.py', description='一键检查入口：合并四个校验脚本的结果，不改任何检查')
     parser.add_argument('--json', action='store_true', help='机器可读输出')
     sub = parser.add_subparsers(dest='command', required=True)
-    p5 = sub.add_parser('s5', help='S5 停靠前：camera_plan_check --stage s5 + stage_check --stage s5')
+    pp = sub.add_parser('plan', help='S5 停靠 A 前（1.14.0）：camera_plan_check --stage s5 + 镜头纵览算术，不跑 stage_check')
+    pp.add_argument('card', metavar='<分镜卡>')
+    p5 = sub.add_parser('s5', help='S5 停靠前（停靠 B）：camera_plan_check --stage s5 + stage_check --stage s5')
     p5.add_argument('card', metavar='<分镜卡>')
     p6 = sub.add_parser('s6', help='S6 入口与 S6 后：camera_plan_check + stage_check --stage s6 + validate_prompt + camera_plan_check --prompt')
     p6.add_argument('card', metavar='<分镜卡>')
@@ -554,7 +645,7 @@ def main(argv):
         args = parser.parse_args(argv[1:])
     except SystemExit as exc:
         return 2 if exc.code else 0
-    report = {'s5': cmd_s5, 's6': cmd_s6, 'qa': cmd_qa}[args.command](args)
+    report = {'plan': cmd_plan, 's5': cmd_s5, 's6': cmd_s6, 'qa': cmd_qa}[args.command](args)
     if report is None:
         return 2
     if getattr(args, 'json', False):

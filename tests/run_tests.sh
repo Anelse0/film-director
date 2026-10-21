@@ -59,6 +59,11 @@ python3 -c "import sys; sys.path.insert(0, 'tests'); import test_check; test_che
 out=$(python3 scripts/check.py s5 "$tmp/04_shots/clip.md"); rc=$?
 check "check.py s5 exits 0" $rc "$out"
 echo "$out" | grep -q "^- 执行卡：stage_check 0 ERROR（S5 25 行；无）"; check "check.py s5 number block" $? "$out"
+# 1.14.0 check.py plan：停靠 A（方案）——机位设计 + 纵览算术，不跑 stage_check
+out=$(python3 scripts/check.py plan "$tmp/04_shots/clip.md"); rc=$?
+check "check.py plan exits 0" $rc "$out"
+echo "$out" | grep -q "镜头纵览 3 行"; check "check.py plan overview arithmetic" $? "$out"
+echo "$out" | grep -q "执行卡："; rc=$?; [ "$rc" -ne 0 ]; check "check.py plan does not run stage_check" $? "$out"
 python3 -c "import sys; sys.path.insert(0, 'tests'); import test_check; test_check.write_fixture('$tmp/door-right', card=test_check.card_text(door_left=False))"
 out=$(python3 scripts/check.py s6 "$tmp/door-right/04_shots/clip.md" examples/example-01-kitchen-keys.prompt.md); rc=$?
 check "check.py s6 with example-01 exits 0" $rc "$out"

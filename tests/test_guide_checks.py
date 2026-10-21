@@ -185,7 +185,7 @@ class WiringTests(unittest.TestCase):
         return (ROOT / name).read_text(encoding='utf-8')
 
     def test_documents_carry_the_release(self):
-        self.assertEqual(self.read('VERSION').strip(), '1.13.0')
+        self.assertEqual(self.read('VERSION').strip(), '1.14.0')
         for code in NEW_CODES:
             self.assertIn(f'| {code} |', self.read('references/checks.md'), code)
         self.assertIn('## 8.', self.read('references/seedance-2.5-capabilities.md'))

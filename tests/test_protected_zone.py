@@ -1,4 +1,13 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.13.0 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.14.0 baseline.
+1.14.0 (2026-10-20): upstream docks and the revision loop (flow, not rules) — dock A 「方案」 after stage-5 §5.2 step 8
+(camera table + shot overview, `check.py plan` = camera_plan_check --stage s5 + overview arithmetic, notes not codes),
+dock B = the existing S5 stop (echo is the change summary + card path, the card is written as a 待确认 draft), dock C = the
+existing S6 → S7 → delivery step written as a stop (the eight passes still run before the user sees the Prompt; C-point
+feedback edits only the affected QA rows, design-level feedback goes back to the card); SKILL.md, stage-5 §5.2, stage-7 §7.1,
+the shot-card template version line and README carry the wording, every earlier sentence kept (sentence-level diff 0 lost);
+hashes for stage-5, stage-7, shot-card and check.py re-set in the same change with a CHANGELOG entry. No new W code.
+1.14.0 previous baseline: 1.13.0.
+
 
 1.13.0 (2026-10-20): execution mechanism only (1.12.1 cost-review proposal M1–M4) — scripts/check.py (new to the zone):
 one entry point whose three sub-commands (s5 / s6 / qa [--sync]) import the four checkers' check() / validate() and merge
@@ -135,10 +144,10 @@ PROTECTED = {
     'references/emotion-performance.md': 'b928678bee8bfc1a6d68953b83f5bc9a86dff022e0a41667b38f8f5e4e8a084e',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': '12eb294f022c8d39350bbb6f5af44af06d972e037cd7483f5f07f3b486155ad7',
-    'references/stage-5-directing-storyboard.md': '7b47bc606585c5e7eb61d5d737e202305c0e414b0326c4e195c7ffbf03646cf5',
+    'references/stage-5-directing-storyboard.md': '36258a6679ccbaa08a3cf8b7a3be64c56cd59ebe5bb4a0b44e49352404457f01',
     'references/stage-5b-reference-assets.md': 'a002a1b033dee2f4e0471c118b7d592e2cb8db4171ff4a95b3c3d6d06306aa09',
     'references/stage-6-prompt-compiler.md': 'a74fe556a9b4c2dd0fb2854d46ba1ddbfaab5f2d9cd58544c92d7ed1863a8773',
-    'references/stage-7-qa-continuity.md': '4751e2bdb612257af9805e82f005e83b129f8966d943d072e5e79d5bcc8da3bd',
+    'references/stage-7-qa-continuity.md': 'cbd72f9379b967605834c140eb950a3a53003e71842d5faa412c6ecbc12ec900',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
     'references/seedance-2.5-capabilities.md': 'be04dcd09e62d3df98a4f8d5ed95d4f79a58272838a35d777c8e509bcc79fad6',
@@ -149,7 +158,7 @@ PROTECTED = {
     'templates/prompt-templates.md': '4582e1eeb68d6b11940ddc699052bafcccc36bb5222aabd080ca8736f187f548',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '96e7fcb783028d6c258005c962c18b9f2cdbd3bc36d52596bc7a5568900b838b',
-    'templates/shot-card.md': '40bc9c292c94fdf1f20a7e1ce64765b264cb88cee44d68318bfbd09a5c8f342c',
+    'templates/shot-card.md': 'c891bb14d92b8ad22ec104c7a223efad2c28985eda09979a6e5e8945c2d59b07',
     'templates/reference-asset-brief.md': '106e08747fd39ce900ca928afef2244ce8071c0ea43fec328581352ce552b441',
     'templates/asset-registry.md': '2b478992e56c0d08bd99e66b04aa3933f9bd6dc46b0ca2eb507ae68632df0bba',
     'scripts/rhythm_checks.py': '5157f9c0a72c119b99f8d09d54756aeb9699f3af947a9df7b84a3a0c10de983f',
@@ -172,7 +181,7 @@ PROTECTED = {
     'scripts/layer_checks.py': '0f6ef4f6b5c267bed9d069b27da5308138be99789468dac1851774e3bf1f74ef',
     'scripts/speaker_checks.py': '583c01941542037e7b97b793a4f90aa58c5aca6979c881f05f899d5ebdc9fa9a',
     'scripts/stage_check.py': '2f837d8d6823aecb76f945b1805b525d378a35a7428d4d265398fa217f61c0b8',
-    'scripts/check.py': 'aefa743a3fbb0db058ea6c2d5c96cb667f814b662431a260858faa048ce708c3',
+    'scripts/check.py': '4398586c5fbb919c4ea4b3eb2514fdec70724142f70f930e07a9705e54e41915',
     'scripts/evidence.py': 'c28d4eaf39dcfff1f0e72f26f20eba8ed1410af4128766c82b1373474d4f8071',
     'scripts/qa_check.py': '5815f9e068b958c3bf7297b110488dcdc1a1f0950f56b5761d671548b03a34da',
     'templates/qa.md': '477c64f7b43a2a0469272741a2099e8fa6acaf09ae7c521600e2acf5d9448346',
