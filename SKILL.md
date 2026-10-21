@@ -52,11 +52,12 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 
 | 时机 | 跑什么 | 拦什么 |
 |---|---|---|
-| S5 停靠前 | `camera_plan_check.py --stage s5 <分镜卡>`；`stage_check.py --stage s5 <分镜卡>` | 机位设计缺项（C01–C07）；执行卡 / 镜头纵览 / 三段表演翻译缺项（S01–S05、C11）。有 ERROR 不停靠 |
-| S6 入口 | 同上两个，不带 `--stage` | 上一条成片回来后的复核没做（C08）不进 S6 |
-| S6 后 | `validate_prompt.py <prompt.md>`；有分镜卡加 `camera_plan_check.py --prompt <prompt.md> <分镜卡>` | 格式 / 契约 ERROR；成片教训类 WARN 默认改；机位表与 Prompt 左右矛盾（C10） |
-| QA 改完 | `qa_check.py <qa.md>` | 现行状态过期（Q01–Q03）；用户已点名类别的 WARN 写理由保留（Q04） |
+| S5 停靠前 | `check.py s5 <分镜卡>`（= `camera_plan_check.py --stage s5` + `stage_check.py --stage s5`） | 机位设计缺项（C01–C07）；执行卡 / 镜头纵览 / 三段表演翻译缺项（S01–S05、C11）。有 ERROR 不停靠 |
+| S6 入口与 S6 后 | `check.py s6 <分镜卡> <prompt.md>`（= `camera_plan_check.py` 不带 `--stage` + `stage_check.py --stage s6` + `validate_prompt.py` + `camera_plan_check.py --prompt`；S6 入口还没有 Prompt 时只给分镜卡，后两步跳过） | 上一条成片回来后的复核没做（C08）不进 S6；格式 / 契约 ERROR；成片教训类 WARN 默认改；机位表与 Prompt 左右矛盾（C10） |
+| QA 改完 | `check.py qa <qa.md>`（= `qa_check.py`；现行状态里有 Prompt / 分镜卡路径时顺带跑一遍 s6）；`check.py qa --sync <qa.md>` 把现行状态的机器行（Prompt / 分镜卡版本、校验、机位设计、执行卡）和第 8 道数字行按运行结果写回，成片 / 上游末帧 / 未决 / 用户已点名四行不动，再独立跑一遍 `qa_check.py` | 现行状态过期（Q01–Q03）；用户已点名类别的 WARN 写理由保留（Q04） |
 | 成片回来 | `measure_clip.py 成片 --prompt <prompt.md>` | 实测切点 / 有声占比 / 语速 / 视觉变化谱，对照时间轨与变化轨；结果记 `validation-log.md` |
+
+`check.py` 的合并报告：ERROR → 成片教训类 WARN → 其余 WARN → 数字块（现行状态「校验 / 机位设计 / 执行卡」三行 + 第 8 道一行，格式同 `templates/qa.md`，可直接粘贴）→ 全部 INFO → 每个输入文件的 sha256（文件没变就不必再跑）；`--json` 保留；有 ERROR 退出码 1。底层模块 `camera_plan_check.py`、`stage_check.py`、`validate_prompt.py`、`qa_check.py` 用法不变、测试不变，`check.py` 只 import 它们的 `check()` / `validate()`，不复制逻辑。
 
 ## 交付原则：对话是默认，落盘是显式动作
 

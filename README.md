@@ -47,6 +47,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `scripts/camera_plan_check.py` | S5 停靠前（`--stage s5`）与 S6 入口：机位设计做没做（C01–C08）、方位换算对不对（C09）、和 Prompt 的左右矛盾（`--prompt`，C10） |
 | `scripts/stage_check.py` | S5 停靠前与 S6 入口：执行卡 25 行、镜头纵览、三段表演翻译（S01–S05、C11、W-C6–W-C10） |
 | `scripts/qa_check.py` | QA 改完：现行状态与 Prompt / 校验结果一致（Q01–Q03）、用户已点名类别的 WARN 没写理由保留（Q04） |
+| `scripts/check.py` | 一键入口（1.13.0）：`s5 <分镜卡>` / `s6 <分镜卡> [prompt]` / `qa [--sync] <qa.md>` 三个子命令只 import 上面四个脚本的 `check()` / `validate()`，合并报告按 ERROR → 成片教训类 WARN → 其余 WARN → 数字块（可直接粘贴进 QA 现行状态与第 8 道）→ INFO → 输入文件 sha256；`qa --sync` 把现行状态的机器行写回，再独立跑一遍 `qa_check` |
 | `scripts/speaker_checks.py` / `layer_checks.py` | 校验模块（由 validate_prompt 调用）：W54 / W55 跨镜与画外归属；W57 A 层词边界，字典读外化词典 |
 | `scripts/measure_clip.py` | 有成片时：切点 / 有声占比 / 语速校准 / 视觉变化谱对照 Prompt 的时间轨与变化轨（需 ffmpeg） |
 | `examples/example-01-kitchen-keys*.md` | 完整走查 + 通过校验的 Prompt |
@@ -70,6 +71,9 @@ python3 scripts/validate_prompt.py <original.txt> --artifact raw --entry-id 6
 python3 scripts/measure_clip.py <成片.mp4> --prompt <prompt.md> [--frames DIR]
 python3 scripts/camera_plan_check.py [--stage s5] [--prompt <prompt.md>] <分镜卡.md>
 python3 scripts/qa_check.py [--prompt <prompt.md>] <qa.md>
+python3 scripts/check.py s5 <分镜卡.md>                                  # S5 停靠前
+python3 scripts/check.py s6 <分镜卡.md> [<prompt.md>] [--json]           # S6 入口（无 Prompt）与 S6 后
+python3 scripts/check.py qa [--sync] [--prompt <prompt.md>] <qa.md>     # QA 改完；--sync 写回机器行
 ```
 
 退出码 0 只代表无确定性错误，不代表表演或视频质量通过。多文件默认按连续片段做提示，独立 A/B 对照加 `--batch independent`。Python 3.9+，基础脚本仅用标准库；真实媒体预检另需 PATH 中的 ffprobe（测试另用 ffmpeg）。

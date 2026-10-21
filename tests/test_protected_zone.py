@@ -1,6 +1,14 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.12.1 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.13.0 baseline.
 
-1.12.1 (2026-10-19): content layering (review proposal §14.2) — version markers, case stories, user quotes and project
+1.13.0 (2026-10-20): execution mechanism only (1.12.1 cost-review proposal M1 / M2) — scripts/check.py (new to the zone):
+one entry point whose three sub-commands (s5 / s6 / qa [--sync]) import the four checkers' check() / validate() and merge
+their output (ERROR → render-lesson WARN → other WARN → the QA number block → INFO → input sha256); `qa --sync` writes the
+machine lines of the QA 现行状态 back and re-runs qa_check. templates/qa.md title carries one added clause. No new codes
+(the new-code freeze holds), no threshold or class change; camera_plan_check / stage_check / validate_prompt / qa_check
+and every rule doc keep their 1.12.1 hashes. Hashes for check.py and templates/qa.md set in the same change with a
+CHANGELOG entry.
+
+1.12.1 previous baseline. 1.12.1 (2026-10-19): content layering (review proposal §14.2) — version markers, case stories, user quotes and project
 paths moved out of the rule docs into CHANGELOG / validation-log (#n rows) / the new references/checks.md code table
 (not in the zone: generated from §七 + script messages); the bracket rule reworded as the voice half of the emotion's
 translation (stage-4 §4.4c, stage-5 §5.2, stage-6 §6.2, lexicon, shot-card template; stage_check.py W-C10); W57 and
@@ -162,8 +170,9 @@ PROTECTED = {
     'scripts/layer_checks.py': '0f6ef4f6b5c267bed9d069b27da5308138be99789468dac1851774e3bf1f74ef',
     'scripts/speaker_checks.py': '583c01941542037e7b97b793a4f90aa58c5aca6979c881f05f899d5ebdc9fa9a',
     'scripts/stage_check.py': '2f837d8d6823aecb76f945b1805b525d378a35a7428d4d265398fa217f61c0b8',
+    'scripts/check.py': 'aefa743a3fbb0db058ea6c2d5c96cb667f814b662431a260858faa048ce708c3',
     'scripts/qa_check.py': '5815f9e068b958c3bf7297b110488dcdc1a1f0950f56b5761d671548b03a34da',
-    'templates/qa.md': '3331f21b35f02ae512a28928012f1171cc1ed02d0edd4e747172d8fb738dbcba',
+    'templates/qa.md': '477c64f7b43a2a0469272741a2099e8fa6acaf09ae7c521600e2acf5d9448346',
     'scripts/performance_checks.py': '5a54ee7c0cb77b67466ee6f7102ded648220cf8b922fea7da186f68ccd869ae0',
 }
 

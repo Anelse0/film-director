@@ -1,6 +1,6 @@
 # QA <scene-XX-clipYY>
 
-## 现行状态（每次改稿重写这一节，不往下追加；`scripts/qa_check.py` 读这一节）
+## 现行状态（每次改稿重写这一节，不往下追加；`scripts/qa_check.py` 读这一节；机器行由 `check.py qa --sync` 写）
 
 - Prompt：`06_prompts/<scene-XX-clipYY>.prompt.md` v<…>（和 Prompt E 表"版本"行的第一个版本号一致）
 - 分镜卡：`04_shots/<scene-XX-clipYY>.md` v<…>

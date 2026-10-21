@@ -53,6 +53,28 @@ out=$($V examples/example-02-lens-B-haneke.prompt.md "$tmp/clip02.prompt.md")
 echo "$out" | grep -q "W16"; check "multi-file W16" $? ""
 rm -rf "$tmp"
 
+# 1.13.0 check.py：一键入口冒烟（分镜卡 / QA 由测试夹具生成，Prompt 用 examples）
+tmp=$(mktemp -d)
+python3 -c "import sys; sys.path.insert(0, 'tests'); import test_check; test_check.write_fixture('$tmp')"
+out=$(python3 scripts/check.py s5 "$tmp/04_shots/clip.md"); rc=$?
+check "check.py s5 exits 0" $rc "$out"
+echo "$out" | grep -q "^- 执行卡：stage_check 0 ERROR（S5 25 行；无）"; check "check.py s5 number block" $? "$out"
+python3 -c "import sys; sys.path.insert(0, 'tests'); import test_check; test_check.write_fixture('$tmp/door-right', card=test_check.card_text(door_left=False))"
+out=$(python3 scripts/check.py s6 "$tmp/door-right/04_shots/clip.md" examples/example-01-kitchen-keys.prompt.md); rc=$?
+check "check.py s6 with example-01 exits 0" $rc "$out"
+echo "$out" | grep -q "^- 校验：validate_prompt [0-9-]* 0 ERROR；WARN 无；成片教训类 无"; check "check.py s6 example-01 clean" $? "$out"
+echo "$out" | grep -q "^- 机位设计：camera_plan_check 0 ERROR；C10 无矛盾；WARN 无"; check "check.py s6 example-01 C10 clean" $? "$out"
+echo "$out" | grep -c "^HASH  " | grep -q "^2$"; check "check.py s6 prints two hashes" $? "$out"
+out=$(python3 scripts/check.py s6 "$tmp/door-right/04_shots/clip.md" examples/bad-example.prompt.md); rc=$?
+[ $rc -eq 1 ]; check "check.py s6 bad-example exits 1" $? "rc=$rc"
+echo "$out" | grep -q "^ERROR \[validate_prompt\] E01"; check "check.py s6 bad-example E01 tagged" $? "$out"
+out=$(python3 scripts/check.py qa --sync "$tmp/07_qa/clip.qa.md"); rc=$?
+check "check.py qa --sync exits 0" $rc "$out"
+echo "$out" | grep -q "^== qa_check（写回后独立跑）"; check "check.py qa --sync reruns qa_check" $? "$out"
+python3 scripts/check.py --json s6 "$tmp/04_shots/clip.md" "$tmp/06_prompts/clip.prompt.md" | python3 -c "import json,sys; d=json.load(sys.stdin); sys.exit(0 if d['exit']==0 and len(d['block'])==4 else 1)"
+check "check.py --json" $? ""
+rm -rf "$tmp"
+
 # 结构：保留已安装的调用名称（目录大小写可以不同）
 grep -q "^name: film-director" SKILL.md; check "SKILL.md invocation name preserved" $? ""
 # 所有 SKILL.md 引用的 references/templates 文件存在
