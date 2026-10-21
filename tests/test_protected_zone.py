@@ -1,9 +1,11 @@
 """film-director protected zone: production/performance core hash-locked at the 1.13.0 baseline.
 
-1.13.0 (2026-10-20): execution mechanism only (1.12.1 cost-review proposal M1 / M2) — scripts/check.py (new to the zone):
+1.13.0 (2026-10-20): execution mechanism only (1.12.1 cost-review proposal M1–M4) — scripts/check.py (new to the zone):
 one entry point whose three sub-commands (s5 / s6 / qa [--sync]) import the four checkers' check() / validate() and merge
 their output (ERROR → render-lesson WARN → other WARN → the QA number block → INFO → input sha256); `qa --sync` writes the
-machine lines of the QA 现行状态 back and re-runs qa_check. templates/qa.md title carries one added clause. No new codes
+machine lines of the QA 现行状态 back and re-runs qa_check; scripts/evidence.py (new to the zone) prints one row of
+validation-log.md by number so a rule's 「证据 #n」 is read without the whole table; SKILL.md gains five sentences (read
+once, edit by section, session boundary, 续接 route, evidence pointer) and templates/qa.md title one clause. No new codes
 (the new-code freeze holds), no threshold or class change; camera_plan_check / stage_check / validate_prompt / qa_check
 and every rule doc keep their 1.12.1 hashes. Hashes for check.py and templates/qa.md set in the same change with a
 CHANGELOG entry.
@@ -171,6 +173,7 @@ PROTECTED = {
     'scripts/speaker_checks.py': '583c01941542037e7b97b793a4f90aa58c5aca6979c881f05f899d5ebdc9fa9a',
     'scripts/stage_check.py': '2f837d8d6823aecb76f945b1805b525d378a35a7428d4d265398fa217f61c0b8',
     'scripts/check.py': 'aefa743a3fbb0db058ea6c2d5c96cb667f814b662431a260858faa048ce708c3',
+    'scripts/evidence.py': 'c28d4eaf39dcfff1f0e72f26f20eba8ed1410af4128766c82b1373474d4f8071',
     'scripts/qa_check.py': '5815f9e068b958c3bf7297b110488dcdc1a1f0950f56b5761d671548b03a34da',
     'templates/qa.md': '477c64f7b43a2a0469272741a2099e8fa6acaf09ae7c521600e2acf5d9448346',
     'scripts/performance_checks.py': '5a54ee7c0cb77b67466ee6f7102ded648220cf8b922fea7da186f68ccd869ae0',

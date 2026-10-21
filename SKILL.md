@@ -7,7 +7,7 @@ description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词�
 
 一句话：**先做导演决策，再把决策翻译成模型能看见的东西，最后才写 Prompt。**
 
-编译以动作、部位表情、视线、空间、节奏、摄影与声音等可观察信息为核心。情绪标签是设计的输入，不能替代表演证据：模型会把"不可思议"演成一张脸，却不知道那张脸该是眉毛一抬还是皱眉——这是写作原则 `[推论]`，不是"模型无法理解情绪"的能力断言。写任何模型能力时带事实标签：`[官方]` 火山方舟指南原文 · `[第三方]` 有出处的外部经验 · `[推论]` 本 Skill 的设计推论 · `[未验证]` 未核实假设。能力表见 `references/seedance-2.5-capabilities.md`；版本与每条规则的来历见 `CHANGELOG.md`；成片证据按编号见 `references/validation-log.md`（规则文里的"证据 #n"指它）。
+编译以动作、部位表情、视线、空间、节奏、摄影与声音等可观察信息为核心。情绪标签是设计的输入，不能替代表演证据：模型会把"不可思议"演成一张脸，却不知道那张脸该是眉毛一抬还是皱眉——这是写作原则 `[推论]`，不是"模型无法理解情绪"的能力断言。写任何模型能力时带事实标签：`[官方]` 火山方舟指南原文 · `[第三方]` 有出处的外部经验 · `[推论]` 本 Skill 的设计推论 · `[未验证]` 未核实假设。能力表见 `references/seedance-2.5-capabilities.md`；版本与每条规则的来历见 `CHANGELOG.md`；成片证据按编号见 `references/validation-log.md`（规则文里的"证据 #n"指它），单条用 `scripts/evidence.py` 按编号查。
 
 ## 表演任务优先路由
 
@@ -34,7 +34,7 @@ description: Seedance 2.5 视频 Prompt 生产：表演外化与情绪提示词�
 S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 ▮（含 S5b 参考资产）→ S6 Prompt 编译 → S7 检查
 ```
 
-▮ = 停靠点（等用户决定）。只读当前阶段需要的文件。
+▮ = 停靠点（等用户决定）。只读当前阶段需要的文件。同一会话里已读过的阶段文件不重读；上下文压缩后以落盘产物、执行卡和脚本的 ERROR 门为准，要核某一条规则时用 `grep -n` 取小节，不整文件重读。
 
 | 阶段 | 读什么 | 产出什么 | 停靠 |
 |---|---|---|---|
@@ -44,7 +44,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | S5 导演与分镜 | `references/stage-5-directing-storyboard.md` ＋ `references/director-grammar.md` ＋ `references/director-lenses.md` ＋ `references/camera-vocabulary.md` ＋ `references/duration-rhythm.md` | `04_shots/scene-XX-clipYY.md` 分镜卡（五层）+ 走位表 + **机位设计** + 决策载体 + **变化轨** + **镜头纵览** + **执行卡**（25 行） | ▮（与 S5b 一起） |
 | S5b 参考资产 | `references/stage-5b-reference-assets.md` | `05_assets/asset-plan.md`：资产清单 + 图像简报 + 上传顺序 + 每张场景图的视角 | 等用户回填 |
 | S6 Prompt 编译 | `references/stage-6-prompt-compiler.md` ＋ `templates/prompt-templates.md` | `06_prompts/scene-XX-clipYY.prompt.md`（D 层 + E 层） | |
-| S7 检查 | `references/stage-7-qa-continuity.md` ＋ `references/checks.md`（码表） | `07_qa/…`（模板 `templates/qa.md`：现行状态 + 八道审阅）；有成片时追加 `references/validation-log.md` | |
+| S7 检查 | `references/stage-7-qa-continuity.md` ＋ `references/checks.md`（码表） | `07_qa/…`（模板 `templates/qa.md`：现行状态 + 八道审阅）；有成片时追加 `references/validation-log.md`；查单条「证据 #n」用 `scripts/evidence.py`（`evidence.py 8 9`），不整表读 | |
 
 **按类型叠加**：基调为动作 / 悬疑恐怖 / UGC 广告 / 蒙太奇 / 视觉喜剧 / 暧昧爱情时，S4–S5 加读 `references/genre-packs.md` 对应一包。状态推进与同步部位的关系读 `references/causal-chain.md`；"画面没有变化"的诊断读 `references/anti-mechanical.md`（变化轨的说明文）。表演测试以状态衔接替代剧情因果链，不为填表增加故事。
 
@@ -53,7 +53,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | 时机 | 跑什么 | 拦什么 |
 |---|---|---|
 | S5 停靠前 | `check.py s5 <分镜卡>`（= `camera_plan_check.py --stage s5` + `stage_check.py --stage s5`） | 机位设计缺项（C01–C07）；执行卡 / 镜头纵览 / 三段表演翻译缺项（S01–S05、C11）。有 ERROR 不停靠 |
-| S6 入口与 S6 后 | `check.py s6 <分镜卡> <prompt.md>`（= `camera_plan_check.py` 不带 `--stage` + `stage_check.py --stage s6` + `validate_prompt.py` + `camera_plan_check.py --prompt`；S6 入口还没有 Prompt 时只给分镜卡，后两步跳过） | 上一条成片回来后的复核没做（C08）不进 S6；格式 / 契约 ERROR；成片教训类 WARN 默认改；机位表与 Prompt 左右矛盾（C10） |
+| S6 入口与 S6 后 | S6 入口（还没有 Prompt）`check.py s6 <分镜卡>`（= `camera_plan_check.py` 不带 `--stage` + `stage_check.py --stage s6`）；S6 后 `check.py s6 <分镜卡> <prompt.md>`（再加 `validate_prompt.py` + `camera_plan_check.py --prompt`） | 上一条成片回来后的复核没做（C08）不进 S6；格式 / 契约 ERROR；成片教训类 WARN 默认改；机位表与 Prompt 左右矛盾（C10） |
 | QA 改完 | `check.py qa <qa.md>`（= `qa_check.py`；现行状态里有 Prompt / 分镜卡路径时顺带跑一遍 s6）；`check.py qa --sync <qa.md>` 把现行状态的机器行（Prompt / 分镜卡版本、校验、机位设计、执行卡）和第 8 道数字行按运行结果写回，成片 / 上游末帧 / 未决 / 用户已点名四行不动，再独立跑一遍 `qa_check.py` | 现行状态过期（Q01–Q03）；用户已点名类别的 WARN 写理由保留（Q04） |
 | 成片回来 | `measure_clip.py 成片 --prompt <prompt.md>` | 实测切点 / 有声占比 / 语速 / 视觉变化谱，对照时间轨与变化轨；结果记 `validation-log.md` |
 
@@ -62,6 +62,8 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 ## 交付原则：对话是默认，落盘是显式动作
 
 任何阶段的产物先在对话里交付。写文件只在两种情况发生：(a) 停靠点用户确认后，写该阶段产物；(b) 用户明确说"存 / 落盘 / 写进项目"。"直接出一个 prompt 看看"只是把范围跑到某一阶段并在对话里交付，不落盘。
+
+改稿只改小节：改分镜卡、Prompt、QA 用局部替换（Edit / 脚本替换），不整篇重写——分镜卡改一镜只重写该镜小节、镜头纵览对应行和执行卡受影响行；Prompt 改一镜只替换该镜段和 E 层受影响行；QA 现行状态的机器行由 `check.py qa --sync` 写，历史节只追加。
 
 ## 运行模式与停靠点
 
@@ -74,6 +76,8 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | **单 clip** | "一个 clip 就行 / 一个镜头" | S5 单卡 ▮ → S6 | 同上 |
 | **全流程** | 一次跑完、不用问我、全部落盘 | S1 → S7 不停 | 用户预先批准了所有停靠 |
 | **看一眼** | 看下 / 试一下 / 先出一个 …… 看 | 跑到指定阶段（缺省 S6），中途不停 | 不落盘，不强制追问；纯表演走优先路由 |
+
+会话边界：一场戏（或一条 clip 定稿）后建议换新会话，按快速路由的「续接」进入；同一会话累积的上下文会把之后每次调用都拖慢、变贵，落盘产物 + 执行卡 + QA 现行状态已经够新会话接着做。
 
 停靠规则（只适用于默认停靠式；全流程、看一眼、单阶段及表演优先路由按上表执行）：
 
@@ -168,6 +172,7 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 导演与分镜 �
 | "把 @视频1 延长 / 改台词 / 换人" | S2 编辑-延长分支 → S6 |
 | "先出一个 prompt 看看效果" | 看一眼：跑到 S6，不落盘；纯表演走优先路由 |
 | "一次跑完 / 全部落盘" | 全流程 |
+| "接着做下一条 clip / 新会话接着做" | 续接：读项目偏好文档（有则）+ 上一条分镜卡的 E 层与 `### 复核` + 上一条 QA 现行状态 + 当前阶段的规则文；S1 沿用 `05_assets/asset-plan.md` 已登记的资产（只补新素材），S2 只重判本条 clip 的任务类型与锁定；不重读已读过的阶段文件 |
 | "构思 / 想故事 / 写剧本 / 改台词" | 越界项：交由 film-story，产出剧本后回本 skill |
 
 不确定入口且结果会实质不同时，只问一个简短问题；用户的指令和已定方向相反时也先问一句，不按字面改。否则按最保守解读推进并写明假设。

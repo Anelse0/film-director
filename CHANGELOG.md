@@ -2,25 +2,30 @@
 
 ## 1.13.0 — 2026-10-20
 
-执行机制，不是规则：按 film-director 1.12.1 执行成本复盘提案 §3 的 M1 / M2（`offset/_proposals/2026-10-20-film-director-1.12.1-cost-review.md`）做一键检查入口与 QA 现行状态的机器写回。**不新增校验码（新 W 码冻结期）、不改阈值与 ERROR / WARN 分类、四个校验脚本的逻辑与消息文案不动、`references/` 规则文一字不动、SKILL.md 脚本表之外的句子不动。**
+执行机制，不是规则：按 film-director 1.12.1 执行成本复盘提案 §3 的 M1–M4（`offset/_proposals/2026-10-20-film-director-1.12.1-cost-review.md`）做一键检查入口、QA 现行状态的机器写回、改稿只改小节、读取策略（读一次 / 续接 / 证据指针 / 会话边界）与会话成本量尺。两次提交：M1 + M2（脚本层），M3 + M4（SKILL 加句、evidence.py、session_cost.py），按提案 §5 第 1、2 步。**不新增校验码（新 W 码冻结期）、不改阈值与 ERROR / WARN 分类、四个校验脚本的逻辑与消息文案不动、`references/` 规则文一字不动、SKILL.md 脚本表之外的句子不动。**
 
 ### 决定（用户 2026-10-20）
 - 用户："方案禁止牺牲 skill 能力或删减规则、流程；只能改执行机制。"定位（提案 §1.1 / §2）：一条 clip 的校验脚本被跑 30 次以上，六成是两次之间没改文件的重复跑——脚本表把四个脚本拆成 7 个必跑时机、`qa_check` Q03 内部再跑一次 `validate_prompt` 并要求现行状态的校验行与之一致、S7 第 8 道要求数字抄脚本，于是"跑脚本 → 抄数字 → 写 QA → 跑 qa_check → 对不上 → 再跑"。脚本本身 ≤0.15 s，不慢；减的是次数，不是检查。
 - 版本号按 1.11.0 加 `stage_check` 的先例升次版本（提案 §5 第 1 步）。
+- 用户："同时执行，另外不开sub agent"；"这里一个会话完成吧"——M1–M4 在一个会话里做完，不派 subagent。提案 §6 未定项按默认：版本号 1.13.0；"一场戏换一次会话"写成建议句不写成规则；量尺放 `scripts/session_cost.py`，不进保护区。
 
 ### Added
 - **`scripts/check.py`（入保护区）**：三个子命令，内部只 import 四个脚本的 `check()` / `validate()`，不复制逻辑——`s5 <分镜卡>` = `camera_plan_check --stage s5` + `stage_check --stage s5`；`s6 <分镜卡> [prompt]` = `camera_plan_check`（不带 --stage，C08）+ `stage_check --stage s6` + `validate_prompt` + `camera_plan_check --prompt`（C10），S6 入口还没有 Prompt 时只给分镜卡；`qa <qa.md>` = `qa_check`，现行状态里能解析出 Prompt / 分镜卡路径时顺带跑一遍 s6。合并报告：ERROR → 成片教训类 WARN（`validate_prompt` 的 RENDER_LESSON_CODES / PREFIXES）→ 其余 WARN → 数字块（现行状态「校验 / 机位设计 / 执行卡」三行 + 第 8 道一行，格式同 `templates/qa.md`，可直接粘贴）→ 原有全部 INFO → 每个输入文件 sha256 前 12 位（文件没变就不必再跑）；`--json` 保留；有 ERROR 退出码 1。第 8 道的数字：最长连续无台词按台词窗口空档算（与 W24 同一定义，附分镜卡 E 层数字）、一句一镜 = 总句 − W54 跨镜句、反应镜数读 E 层「反应镜」、画外句数读括号、句尾后停留按镜尾 − 末句窗口尾（与 rhythm_checks 的 INFO 同一定义）；「不达标项处置」留给人。
 - **`check.py qa --sync`（M2）**：把现行状态里机器能定的五行（Prompt 版本、分镜卡版本、校验、机位设计、执行卡）和第 8 道的数字行按实际运行结果写回 qa.md；成片 / 上游末帧 / 未决 / 用户已点名四行不动；缺的机器行按模板顺序补在该在的位置；第 8 道最后一格原样保留；写完再独立跑一遍 `qa_check` 并打印；再跑一次无变化（幂等）。
 - `tests/test_check.py`：三个子命令与四个脚本直接调用的 ERROR / WARN 集合逐条一致、报告顺序、数字块格式与 Q03 兼容、第 8 道数字、`--sync` 只改机器行且幂等、Q01–Q04 经入口仍报、`--json` 前后位置、退出码；`tests/run_tests.sh` 加 `check.py` 对 examples（example-01 干净、bad-example E01）的冒烟。
+- **`scripts/evidence.py`（M4.2，入保护区）**：按编号打印 `references/validation-log.md` 成片表的一行（`evidence.py 8 9`、`--grep 关键词`、`--all`、`--log <path>`）；只认表头以「#」开头且含「观察」的那张表，不会读到待验证表；退出码 0 / 1 没找到 / 2 用法。规则文里的「证据 #n」查单条不必读整表（23 KB）。`tests/test_evidence.py` 5 个用例，其中一个核对 SKILL 与 stage-4 / 5 / 6 / 7、duration-rhythm 引用的每个「证据 #n」都在真实表里。
+- **`scripts/session_cost.py`（附录量尺，不进保护区）**：读会话 .jsonl，按 message id 去重算真实调用数、output、缓存读取、平均 / 峰值上下文、输出构成、规则文 Read 次数、脚本跑几次及"无改动重复"、产物整篇 Write 次数（`--latest N [--project-dir …]` 或直接给路径）。改版后用下一条 clip 的会话和 1.12.1 的 §1.1 数据比。
 
 ### Changed
-- SKILL.md「脚本」表：四行时机合成三行（S5 停靠前 / S6 入口与 S6 后 / QA 改完），「拦什么」列原文照抄，「成片回来」行不动；表下加一段写合并报告顺序与四个底层模块（用法不变、测试不变）。脚本表之外的 SKILL 句子没动。
+- SKILL.md「脚本」表：四行时机合成三行（S5 停靠前 / S6 入口与 S6 后 / QA 改完），「拦什么」列原文照抄，「成片回来」行不动；S6 行写明两个时机（入口 `check.py s6 <分镜卡>` 不带 Prompt；S6 后带 Prompt）；表下加一段写合并报告顺序与四个底层模块（用法不变、测试不变）。
+- SKILL.md 五处只加不删（M3 / M4）：「流水线」停靠点说明句后加"同一会话里已读过的阶段文件不重读；上下文压缩后以落盘产物、执行卡和脚本的 ERROR 门为准，要核某一条规则时用 `grep -n` 取小节"（M4.1）；流水线表 S7 行与开头段的证据句加 `scripts/evidence.py` 指针（M4.2）；「交付原则」段末加"改稿只改小节：……QA 现行状态的机器行由 `check.py qa --sync` 写，历史节只追加"（M3）；「运行模式」表后加"会话边界"建议句（M4.3）；「快速路由」加"接着做下一条 clip / 新会话接着做 → 续接"一行（M4.4）。其余 SKILL 句子一字不动。
+- 句级对照（1.12.1 对照用的脚本：旧版每一句在新版里最佳相似度 <0.72 算丢失）：对 1.12.1，SKILL.md 249 → 265 句、`templates/qa.md` 23 → 23、README 72 → 77，**丢失 0 句**；对本版第一次提交（M1 / M2）唯一一句差异是本版自己写的脚本表 S6 行措辞（改成写明两个时机），不是 1.12.1 的句子。
 - `templates/qa.md`：现行状态标题只加一句「机器行由 `check.py qa --sync` 写」；行数、格式、规则句不动。
-- README 文件地图与校验脚本用法加 `check.py`；VERSION 1.13.0；保护区哈希重设（`check.py` 入区、`templates/qa.md`）。
+- README 文件地图与校验脚本用法加 `check.py` / `evidence.py` / `session_cost.py`；VERSION 1.13.0；保护区哈希重设（`check.py`、`evidence.py` 入区，`templates/qa.md` 重设；四个原脚本与全部规则文保持 1.12.1 哈希）。
 
 ### 没动的
 - `camera_plan_check.py` / `stage_check.py` / `validate_prompt.py` / `qa_check.py` 的逻辑与消息文案；`references/` 全部规则文；全部校验码、阈值、分类；Q01–Q04 原样（`--sync` 之后 `qa_check` 仍独立跑）；旧测试全部原样（只改 VERSION 断言）。
-- 提案的 M3 / M4 / M5 与量尺（§5 第 2–4 步）不在本版。
+- M5（三遍审阅共用一张清单）等用户看完下一条 clip 的量尺数据再定（提案 §5 第 3、4 步）；`director-grammar.md` 的引文依据列仍缓做。
 
 ## 1.12.1 — 2026-10-19
 
