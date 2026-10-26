@@ -1,6 +1,6 @@
 """Tone-cue review (W35): staging cues that read as suspense in a scene that is not one.
 
-Trigger case [实测] (validation-log.md 2026-10-13, offset EP05 场03 clip02 v1): a light, warm
+Trigger case [实测] (validation-log.md evidence #7): a light, warm
 bar scene — two coworkers bantering, a regular walking in. The ending rendered "like a thriller".
 The prompt text had four pieces of suspense grammar: a hand holding a fry stops halfway (freeze);
 a hard cut to a fixed frontal close-up in which the character slowly turns his head toward an

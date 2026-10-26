@@ -20,7 +20,7 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_code_table(self):
-        self.assertEqual(read('VERSION').strip(), '1.14.1')
+        self.assertEqual(read('VERSION').strip(), '1.14.2')
         table = read('references/checks.md')
         for code in NEW_CODES:
             self.assertIn(f'| {code} |', table, code)

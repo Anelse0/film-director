@@ -235,7 +235,7 @@ def rhythm_checks(shots, rows, duration, metadata_text):
             prev_end = max(prev_end or 0, r["end"])
         share = silent / duration
         # 1.11.0 longest stretch without a dialogue window (lead, any gap, trail); render lesson (W24 最长连续无台词).
-        # `[实测]` offset EP06 s02 clip01 v1.3 / v1.6: 7 s without a line, kept twice with a written reason, called out
+        # `[实测]` evidence #10, v1.3 / v1.6: 7 s without a line, kept twice with a written reason, called out
         # twice by the user ("整整 7s 无台词"); the share and the lead / trail items below stay review items.
         stretches = [(0.0, lead)] if lead > 0 else []
         prev_end = None

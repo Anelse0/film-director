@@ -35,7 +35,7 @@ word in the bracket of a close shot with no executable beat for that speaker in 
 body, voice or pause, an action toward the other character, or a delivery word in the bracket (口气 words stay; one line per shot);
 W45 (costume_checks.py) a sustained wearing-state deviation while the character's binding lines use the image-equals-state
 wording (唯一的服装 / 一律按 @图; E-layer 穿着状态说明 keeps a reviewed design). Shot tags may run to 80 characters.
-1.9.0 (offset EP06 clip01 / clip02 renders): W46-W49 (wording_checks.py) wording the model executes literally — a character's
+1.9.0 (evidence #8 / #9 renders): W46-W49 (wording_checks.py) wording the model executes literally — a character's
 own left / right or an undefined landmark side used as a screen position, and an over-the-shoulder shoulder that disagrees
 with its frame corner (W46); speed words in the dialogue bracket or a fast voice line (W47); a held phone / cup / bottle
 with no grip, or 捂 … 话筒 (W48); flustered / wide-eyed acting words in a light-tone clip (W49). W51 (continuity_checks.py)
@@ -73,7 +73,7 @@ from layer_checks import layer_checks
 
 # Review classes (1.10.0, S7 §7.1): warnings that each came from a render that went wrong.
 RENDER_LESSON_CODES = {"W35", "W46", "W47", "W48", "W51", "W52", "W54", "W55", "W57"}  # 1.12.0: W49 (and W40) folded into W57  # W50 (paused) would be a review item, not a render lesson
-# 1.11.0: one W24 sub-item is a render lesson (offset EP06 s02 clip01 v1.3 / v1.6: 7 s without a line kept with a reason);
+# 1.11.0: one W24 sub-item is a render lesson (evidence #10, v1.3 / v1.6: 7 s without a line kept with a reason);
 # the share / lead / trail W24 items stay review items.
 RENDER_LESSON_PREFIXES = ("W24 最长连续无台词",)
 

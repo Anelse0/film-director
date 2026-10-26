@@ -5,8 +5,8 @@ off on the stool, sleeves pushed up, coat open, shirt soaked). The binding gramm
 one (人物行「X 的衣着一律按 @服装名」, 服装行「X 身上唯一的服装」) and the state-writing one (「X 的衣着一律按每一镜的文字：上身 … 的衬衫，
 外套落座时脱下搭在凳上…」, 「X 身上的衬衫与长裤；外套只在开场穿着、之后搭在凳上」). When the wearing state deviates and stays deviated,
 the pair of lines for that character should use the second variant, the opening state sits in 【起始状态】 and the 分段状态 in
-【贯穿要求】 (S5b §5b.3). That the first variant brings the jacket back is `[推论]`, not a measured mechanism (offset EP05 s03
-clip03 r1 rendered the jacket off with the first variant plus a 分段状态; validation-log 待验证 20), so W45 is a risk reminder.
+【贯穿要求】 (S5b §5b.3). That the first variant brings the jacket back is `[推论]`, not a measured mechanism (one bar-scene
+clip's first render showed the jacket off with the first variant plus a 分段状态; validation-log 待验证 20), so W45 is a risk reminder.
 「不参考 X」 is never suggested for a garment that is still on screen.
 
   W45  服装参考与穿着状态   one per character: a sustained deviation (a state sentence in 【起始状态】 or 【贯穿要求】, or in two or

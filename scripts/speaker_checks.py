@@ -1,8 +1,7 @@
 """Speaker attribution of off-screen lines (1.11.0; S5 §5.2 第 6 步, S6 §6.2 台词条, duration-rhythm §九).
 
-Trigger case `[实测]` offset EP06 s02 clip01 v1.6 (2026-10-19): three L-cuts put the tail of a line "画外，同一个声音接上"
-on the listener's shot, each with "此时 X 闭着嘴". The render gave "The black one." to Theo, the listener whose face
-filled the frame. The official guide (Doubao Seedance 2.5 提示词指南) has no off-screen-dialogue format: its only
+Trigger case `[实测]` `validation-log.md` evidence #10 (2026-10-19): three L-cuts put the tail of a line "画外，同一个声音接上"
+on the listener's shot, each with "此时 X 闭着嘴". The render gave the line to the listener whose face filled the frame. The official guide (Doubao Seedance 2.5 提示词指南) has no off-screen-dialogue format: its only
 "画外音" is an advert voice-over with nobody to mis-attribute it to, its 30 s example puts the grandmother's lines on
 rocket wide shots with no other face in frame, and its four-person case excludes "错误人物发声、多人同时说话" in the
 prompt itself. The evidence covers "a line is spoken while the speaker is not in frame", not "whose mouth moves when

@@ -1,15 +1,15 @@
 """Wording the model executes literally (W46-W49), stdlib only — 1.9.0.
 
-Trigger case [实测] (offset EP06 场01 clip01 / clip02, 2026-10-18 / 19; `validation-log.md` 2026-10-19): the first clip01
-render crushed the dialogue together, gave Theo a wide-eyed open-mouth face, put Jo's phone flat in both palms, turned
-"捂住手机话筒" into a hand over her mouth, and put the door on the wrong side of Theo. Every one of these came from a
+Trigger case [实测] (`validation-log.md` evidence #8, 2026-10-18 / 19): the first render crushed the dialogue together,
+gave the lead a wide-eyed open-mouth face, put the agent's phone flat in both palms, turned "捂住手机话筒" into a hand
+over her mouth, and put the door on the wrong side of him. Every one of these came from a
 phrase in the prompt, every one was already a written rule in the project's director guide, and none of them was
 caught by the validator. The user named the cause of the first one directly: "不是 shot 时长的问题，是台词前面的描述的问题".
 These are review hints (WARN): a reviewed design keeps them with a reason in QA.
 
   W46  方位词     (a) a character's own left / right used as a screen position: 右肩旁边 / 头的右边 / 他左手边 / 往左挪,
                   outside an over-the-shoulder construct and with no 画左 / 画右 in the same clause. A character facing the
-                  camera has his right side on frame left, so the model can resolve either way (EP06 clip01 v1.5: 门框在他
+                  camera has his right side on frame left, so the model can resolve either way (evidence #8: 门框在他
                   右肩旁边 next to 门左边那截窄墙).
                   (b) an over-the-shoulder shot whose shoulder side disagrees with the frame corner it is said to occupy
                   (过 X 右肩 … 画左下角是 X 的右肩: with the back to the camera the right shoulder is frame right).

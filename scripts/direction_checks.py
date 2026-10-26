@@ -11,7 +11,7 @@ the camera never makes a prompt worse, a false stop costs a few characters, a fa
 render, and WARNs in this workflow are routinely kept with a written reason. E22 was already taken
 by the parameter contract, hence E23.
 
-Trigger case [实测] (validation-log.md 2026-10-13, offset EP05 场01 clip01 v2): the scene image
+Trigger case [实测] (validation-log.md evidence #6): the scene image
 was shot from inside the building doorway looking out at the street — camera under the canopy,
 back to the doors. The character gets out of a car at the curb and walks TOWARD the camera, into
 the building. The v2 prompt wrote 朝大门走 / 视线回到前面的大门 / 退向大门, which put the door in

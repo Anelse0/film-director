@@ -1,4 +1,10 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.14.1 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.14.2 baseline.
+1.14.2 (2026-10-26): project references removed from the zone — docstrings, comments and one lexicon row no longer name
+the author's projects, episodes, clips or render files; they point to validation-log evidence #n instead. No rule, threshold,
+code or message semantics changed (one checker message swaps a clip id for an evidence id). Hashes for those files re-set in
+the same change with a CHANGELOG entry. No new W code.
+1.14.2 previous baseline: 1.14.1.
+
 1.14.1 (2026-10-21): 版本行一行制 — the shot card's head version line keeps only version · date · status · skill version · Prompt
 version (plus a pointer 「改动见 QA 历史」), the Prompt E-table 版本 row only version and date; what changed per version goes to
 QA `## 历史` one entry per version (the revision loop's change summary), the user's words to execution-card row 22, the script
@@ -153,14 +159,14 @@ PROTECTED = {
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': '12eb294f022c8d39350bbb6f5af44af06d972e037cd7483f5f07f3b486155ad7',
     'references/stage-5-directing-storyboard.md': '18a8d28f7a90bef60dbd27b966e0d76a7e77a15de70694b478c2dd15c4f49cf0',
-    'references/stage-5b-reference-assets.md': 'a002a1b033dee2f4e0471c118b7d592e2cb8db4171ff4a95b3c3d6d06306aa09',
+    'references/stage-5b-reference-assets.md': '1474f46720197c575ff10b56a355a1a56d83daf3eae389f8d5eb592f86939964',
     'references/stage-6-prompt-compiler.md': '1c8eb5e2d6fcc0eec5c0e2a3a502399d52b1d5b7c636818b742620abacee5707',
     'references/stage-7-qa-continuity.md': '5de1fb499f50723e64077ec8bf619cd61b87ede1386fee417789ecfdea86de23',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
     'references/seedance-2.5-capabilities.md': 'be04dcd09e62d3df98a4f8d5ed95d4f79a58272838a35d777c8e509bcc79fad6',
     'references/camera-vocabulary.md': '27975701c3e1c6e34995418b96a6b66a90e78b4538994dc98c39db108d830b67',
-    'references/externalization-lexicon.md': '047776e5594b68f31ba53ac43893a834d8b3caca25b03bf03e6b8558d1df4965',
+    'references/externalization-lexicon.md': '8b74ea808a17acbd39d27ae331500f3bdfb353c85419cdc3b394e56986a272f8',
     'references/genre-packs.md': 'e8bf4dd45abb22776ac4dec2490551e1a9aedddfd26cca459bc6557df3c95513',
     'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
     'templates/prompt-templates.md': '4582e1eeb68d6b11940ddc699052bafcccc36bb5222aabd080ca8736f187f548',
@@ -169,29 +175,29 @@ PROTECTED = {
     'templates/shot-card.md': 'ba3e528ad6be6f39455d44587052bb2822d9e331d490cffd699aca29125cad3b',
     'templates/reference-asset-brief.md': '106e08747fd39ce900ca928afef2244ce8071c0ea43fec328581352ce552b441',
     'templates/asset-registry.md': '2b478992e56c0d08bd99e66b04aa3933f9bd6dc46b0ca2eb507ae68632df0bba',
-    'scripts/rhythm_checks.py': '5157f9c0a72c119b99f8d09d54756aeb9699f3af947a9df7b84a3a0c10de983f',
+    'scripts/rhythm_checks.py': '58f6be0316bc6baf23bf836f27897393fff77b5561229f93e9dd5d5975390aae',
     'scripts/variation_checks.py': '11a116c63f7e32a988da9eedb465d89ad8a3d73b92d7ceeb804c3e487a74c19f',
-    'scripts/direction_checks.py': 'fdbd694059a9ca156946345ef4ac29ae95ad10fa22aea5fe52be20969fbf55ea',
-    'scripts/tone_checks.py': '565322afadb5a468b6ed86049058e56d49a883f9b437e92f0b1e771eda262482',
+    'scripts/direction_checks.py': '54a7597032ffacbd05a689cd7e3ad0e5c8fb3ba2379f251d2b213839fb4fd992',
+    'scripts/tone_checks.py': '8d290d18d81ece80a2e059d52ad7cb477990d85f07057a2ecc5ffd8a1de4c404',
     'scripts/guide_checks.py': '3c08ca954d0f787bab215a1b5d0181c74b0de4cf6f23fac57ad517ad70da906b',
     'scripts/focus_checks.py': '5b5d3110f22c58c272f3c24aa7533e75b9b91f46f951589a829c0eef25a6106c',
     'scripts/subtext_checks.py': '84ba710d324ed2102701ae0ee2866a205f2c9160527af52b4b6f1cc647408f10',
-    'scripts/costume_checks.py': 'dd11f7a23d3a252378d6f415a7310e16d0bf0811b3f5df29629b6957c74955fc',
-    'scripts/validate_prompt.py': '8ab9299b7a3ce0cf73cb0783714a91c4d63ac037e1c7f312878565c42c5efb7c',
+    'scripts/costume_checks.py': '9f65d3b4fcdac75a5d61a07ccfbe6e63a0cd7a5c11ffd262ac9428d23f44ca59',
+    'scripts/validate_prompt.py': '308921095bceb079d05f5df8494d8e3494e0b88c54c94d8c889db77bb15cbd4e',
     'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
     'scripts/production_contract.py': 'adb40d1e05ecb6d298e2bb295a8ef325941812f00a89f9000fe03477a58b780f',
     'scripts/production_preflight.py': 'aab550991f000dac727f744f1c603a5a1519f1adf44d2e288e11c9d3cc859c0d',
     'scripts/emotion_library.py': '11b1257528d00edbf66a9637a9508966f26d23d1db97917b609127858ac0cc6d',
-    'scripts/camera_plan_check.py': '97e1e20dda466748e7d0f9aa5c46859674fd635234506f54f05a9cc9453c9655',
-    'scripts/wording_checks.py': 'ae8411eb2e8687d73c5e00d15935deeccc26b1af5360f8d92cd68429e80dac08',
-    'scripts/continuity_checks.py': 'b93b1349b682829892f7e7df7b8459aa0ae953266da017683cd80c1ccebc2c96',
-    'scripts/viewpoint_checks.py': 'ef4fec0091e3b99587dfe399e7e4b91e20ca0467030ea6f593cf5eb75b18bda2',
-    'scripts/layer_checks.py': '0f6ef4f6b5c267bed9d069b27da5308138be99789468dac1851774e3bf1f74ef',
-    'scripts/speaker_checks.py': '583c01941542037e7b97b793a4f90aa58c5aca6979c881f05f899d5ebdc9fa9a',
-    'scripts/stage_check.py': '2f837d8d6823aecb76f945b1805b525d378a35a7428d4d265398fa217f61c0b8',
+    'scripts/camera_plan_check.py': '5ac36c464c60e8975b38dbab713aab15d77d60aef9b3dff757fc1d8cae66fa3f',
+    'scripts/wording_checks.py': 'a12700904926ac4329b375c14873f25cb869dd8f337c61a9a50f97427c9702dd',
+    'scripts/continuity_checks.py': '208cf0e08a652f086f5960999c1475c1785facfdadd2db44a25eba234e08ad74',
+    'scripts/viewpoint_checks.py': '187b20fe9ae81935218aa2ae0e9d31488eef9cbce2e9741847622355e5691ae6',
+    'scripts/layer_checks.py': 'd88ecc2ef1554e94e685719a6677e5984092887f81087a92c95ca85c13c3abc8',
+    'scripts/speaker_checks.py': 'a2036a3712bda50ed19d87ab93b30f6efe804c2a7c705e3545678ed4fe4ad75c',
+    'scripts/stage_check.py': '37da07b3743ee137568471e55964a78ddbdb31828d82726d93eb8fd00ad06c58',
     'scripts/check.py': 'c17b51b8ef6fafb74e532c6fbc958f8d75c41b4dc10acc63e0216d40cb9c3597',
     'scripts/evidence.py': 'c28d4eaf39dcfff1f0e72f26f20eba8ed1410af4128766c82b1373474d4f8071',
-    'scripts/qa_check.py': '5815f9e068b958c3bf7297b110488dcdc1a1f0950f56b5761d671548b03a34da',
+    'scripts/qa_check.py': '7761440f162d0abebfb35bdcde08897aad7c742e1d6f1a8e1df78aa0747e1ba6',
     'templates/qa.md': 'ed52b6be4246e4009ccaddad15c59c2781f2c8a50c8708933259640696f5b545',
     'scripts/performance_checks.py': '5a54ee7c0cb77b67466ee6f7102ded648220cf8b922fea7da186f68ccd869ae0',
 }

@@ -1,10 +1,10 @@
 """Reference-image viewpoint against the camera (W52), stdlib only — 1.9.0.
 
-Trigger case [实测] (offset EP06 场01 clip02 shot 8, 2026-10-19; `validation-log.md` 2026-10-19): the shot was designed
-as a reverse — camera inside the dressing room facing the door, Theo walking in from the corridor. The scene image
-@06_greenroom was bound for that one shot, and it looks the other way (from the doorway at the mirror wall). The
-prompt said 灯泡镜台在镜头身后 and lit Theo with 灯泡镜的暖色光 in four places. The render put the camera in the
-corridor with the mirrors behind Theo and had him walk out: the image's viewpoint beat the text, and every mention of
+Trigger case [实测] (`validation-log.md` evidence #9, 2026-10-19): the shot was designed as a reverse — camera inside
+the dressing room facing the door, the character walking in from the corridor. The scene image was bound for that one
+shot, and it looks the other way (from the doorway at the mirror wall). The prompt said 灯泡镜台在镜头身后 and lit him
+with 灯泡镜的暖色光 in four places. The render put the camera in the corridor with the mirrors behind him and had him
+walk out: the image's viewpoint beat the text, and every mention of
 an object behind the camera pulled it into frame. 1.9.0 counts the mentions and flags the one risky binding. User decision
 2026-10-19: camera and shot design start from the reference images the user already provided; the checker never asks
 for a new or regenerated image.
@@ -81,7 +81,7 @@ def viewpoint_checks(text, shots, metadata_text=""):
             continue
         shot = next(iter(used))
         msg = (f"@{name} 绑定行写了不参考视角，且只服务镜头{shot}：只为一个反视角镜绑定的场景图会被当成这一镜的画面"
-               "（offset EP06 clip02 镜 8）。按 S5 §5.1g 在现有参考图覆盖的视角里重选这一镜的机位（和图同视角或同一侧），"
+               "（证据 #9）。按 S5 §5.1g 在现有参考图覆盖的视角里重选这一镜的机位（和图同视角或同一侧），"
                "或保留反打、这一镜不绑这张图，材质和光写进文字；不要求补图")
         if override:
             infos.append(f"反视角参考图（E 层 视角说明：{override.group(1).strip()}）：{msg}")

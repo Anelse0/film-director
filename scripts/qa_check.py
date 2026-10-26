@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """QA current-state check (1.10.0, S7 §7.4; template `templates/qa.md`).
 
-Trigger case [实测] (offset EP06 s01, 2026-10-19 review, proposal G3): the QA files only ever grew. The clip02 QA still
+Trigger case [实测] (2026-10-19 review, proposal G3): the QA files only ever grew. The clip02 QA still
 described the corridor before the mirror ("门在画右"), the clip01 QA's validator table listed a warning that no longer
 fired and missed one that did, and the clip02 prompt stayed "v1" through six changes. The next session reads the stale
 left / right first. This checker reads the `## 现行状态` section a QA file opens with and compares it with the files.
@@ -13,7 +13,7 @@ left / right first. This checker reads the `## 现行状态` section a QA file o
   W-Q1 (WARN)  the prompt path in 现行状态 cannot be resolved; pass --prompt.
   Q04 (ERROR)  1.11.0 — 现行状态 names a category the user has already called out on this clip (`用户已点名：节奏（原话）、空间`)
                and the 校验处置 table keeps a WARN of that category with a written reason instead of 改了 / 用户同意保留.
-               Trigger `[实测]` offset EP06 s02 clip01: the user said 节奏太拖 at v1.3; v1.4 / v1.5 still kept W24 with a
+               Trigger `[实测]` evidence #10: the user said 节奏太拖 at v1.3; v1.4 / v1.5 still kept W24 with a
                reason; the user asked at v1.6 whether anyone had reviewed it. Categories → codes: 节奏 W22–W29, 剪辑 W28 W54 W55,
                空间 W46 C09 C10 E23, 表演 W35 W49 W40, 台词 W47 W36 W44, 衣着 W45, 道具 W48, 衔接 W51, 视角 W52.
 

@@ -1,7 +1,7 @@
 """A-layer vocabulary leaking into the C / D layer (W57), stdlib only — 1.12.0.
 
 The five-layer rule says only the C layer (observable quantities) enters the Prompt; emotion labels locate intent but
-cannot stand in for performance evidence. offset EP06 s02 clip02 v3 (2026-10-19) showed what happens when an A-layer
+cannot stand in for performance evidence. Evidence #12 (2026-10-19) showed what happens when an A-layer
 word slips through: the script's "一脸'你认真的？'" became the card's "不可思议 → 皱眉、括号口气" and the Prompt's
 bracket "觉得不可思议" + "一脸不信"; the render read as suspense. W40 (intensity labels) and W49 (flustered /
 wide-eyed words) were two word lists for the same leak; 1.12.0 folds them into this one check whose dictionary is the
