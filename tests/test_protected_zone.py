@@ -1,4 +1,15 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.14.2 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.15.0 baseline.
+1.15.0 (2026-10-27): the 25-row 执行卡 is no longer copied onto each shot card — its questions live on as the stage-5
+§5.11 收口对照表 and the card answers them in its own slots (head items, 走位表, the three hand-off lines, 贯穿要求
+buckets, E-layer 已知风险); stage_check.py S01–S03 check those slots directly (same codes, still ERROR; legacy cards — a
+执行卡 and a skill version below 1.15 — get NOTEs) and gain notes(); check.py renames the QA machine line to 分镜检查
+(`--sync` renames the legacy 执行卡 line in place) and adds three record NOTEs to `qa` (history entry > 300, 用户已点名
+> 200, a repeated ## section). Records are written once: the user's words only in QA ## 历史, old review rounds are
+rewritten in place, QA opens at dock A (stage-6 §6.5, stage-7, both templates). rhythm_checks.py: comment only. No new
+W code, no threshold or class change; qa_check.py untouched. Hashes for stage-5, stage-6, stage-7, shot-card, qa.md,
+stage_check.py, check.py and rhythm_checks.py re-set in the same change with a CHANGELOG entry.
+1.15.0 previous baseline: 1.14.2.
+
 1.14.2 (2026-10-26): project references removed from the zone — docstrings, comments and one lexicon row no longer name
 the author's projects, episodes, clips or render files; they point to validation-log evidence #n instead. No rule, threshold,
 code or message semantics changed (one checker message swaps a clip id for an evidence id). Hashes for those files re-set in
@@ -158,10 +169,10 @@ PROTECTED = {
     'references/emotion-performance.md': 'b928678bee8bfc1a6d68953b83f5bc9a86dff022e0a41667b38f8f5e4e8a084e',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
     'references/stage-4-performance.md': '12eb294f022c8d39350bbb6f5af44af06d972e037cd7483f5f07f3b486155ad7',
-    'references/stage-5-directing-storyboard.md': '18a8d28f7a90bef60dbd27b966e0d76a7e77a15de70694b478c2dd15c4f49cf0',
+    'references/stage-5-directing-storyboard.md': 'ec8f8e1b639b15e57257c58d4a9e82c213cff4aabed1447f2d0bf5b613facbd9',
     'references/stage-5b-reference-assets.md': '1474f46720197c575ff10b56a355a1a56d83daf3eae389f8d5eb592f86939964',
-    'references/stage-6-prompt-compiler.md': '1c8eb5e2d6fcc0eec5c0e2a3a502399d52b1d5b7c636818b742620abacee5707',
-    'references/stage-7-qa-continuity.md': '5de1fb499f50723e64077ec8bf619cd61b87ede1386fee417789ecfdea86de23',
+    'references/stage-6-prompt-compiler.md': 'd47736102a84e276922c4569590ad0ffa119df6ec05fe432d888abd37ad14e6a',
+    'references/stage-7-qa-continuity.md': '58c343a6b33588721fd43a1f74b8fe62aefc019698d4b49a66963cf5182b3fe8',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
     'references/seedance-2.5-capabilities.md': 'be04dcd09e62d3df98a4f8d5ed95d4f79a58272838a35d777c8e509bcc79fad6',
@@ -172,10 +183,10 @@ PROTECTED = {
     'templates/prompt-templates.md': '4582e1eeb68d6b11940ddc699052bafcccc36bb5222aabd080ca8736f187f548',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '96e7fcb783028d6c258005c962c18b9f2cdbd3bc36d52596bc7a5568900b838b',
-    'templates/shot-card.md': 'ba3e528ad6be6f39455d44587052bb2822d9e331d490cffd699aca29125cad3b',
+    'templates/shot-card.md': 'd0bb3b245c232a677967a8c4c860d0d41c54a979712b25de7b3bd6fe8fd629ef',
     'templates/reference-asset-brief.md': '106e08747fd39ce900ca928afef2244ce8071c0ea43fec328581352ce552b441',
     'templates/asset-registry.md': '2b478992e56c0d08bd99e66b04aa3933f9bd6dc46b0ca2eb507ae68632df0bba',
-    'scripts/rhythm_checks.py': '58f6be0316bc6baf23bf836f27897393fff77b5561229f93e9dd5d5975390aae',
+    'scripts/rhythm_checks.py': '054dede9984ba5e1e48f996285c44202aa6c8f4116344ce0299840b56a7ad106',
     'scripts/variation_checks.py': '11a116c63f7e32a988da9eedb465d89ad8a3d73b92d7ceeb804c3e487a74c19f',
     'scripts/direction_checks.py': '54a7597032ffacbd05a689cd7e3ad0e5c8fb3ba2379f251d2b213839fb4fd992',
     'scripts/tone_checks.py': '8d290d18d81ece80a2e059d52ad7cb477990d85f07057a2ecc5ffd8a1de4c404',
@@ -194,11 +205,11 @@ PROTECTED = {
     'scripts/viewpoint_checks.py': '187b20fe9ae81935218aa2ae0e9d31488eef9cbce2e9741847622355e5691ae6',
     'scripts/layer_checks.py': 'd88ecc2ef1554e94e685719a6677e5984092887f81087a92c95ca85c13c3abc8',
     'scripts/speaker_checks.py': 'a2036a3712bda50ed19d87ab93b30f6efe804c2a7c705e3545678ed4fe4ad75c',
-    'scripts/stage_check.py': '37da07b3743ee137568471e55964a78ddbdb31828d82726d93eb8fd00ad06c58',
-    'scripts/check.py': 'c17b51b8ef6fafb74e532c6fbc958f8d75c41b4dc10acc63e0216d40cb9c3597',
+    'scripts/stage_check.py': '5f54ffd50c4f1b2774b8d9629e80e842a3215d3e1d9d7017b6af589bfac5dd9d',
+    'scripts/check.py': 'c991fef4baae111ea4fc544b14b7298f2186b741329fe59c2b9215c27ee00736',
     'scripts/evidence.py': 'c28d4eaf39dcfff1f0e72f26f20eba8ed1410af4128766c82b1373474d4f8071',
     'scripts/qa_check.py': '7761440f162d0abebfb35bdcde08897aad7c742e1d6f1a8e1df78aa0747e1ba6',
-    'templates/qa.md': 'ed52b6be4246e4009ccaddad15c59c2781f2c8a50c8708933259640696f5b545',
+    'templates/qa.md': 'a654156ad4c039eb2d00d53cf9074c4737b747cecc26fab8018f04c681a4f4f0',
     'scripts/performance_checks.py': '5a54ee7c0cb77b67466ee6f7102ded648220cf8b922fea7da186f68ccd869ae0',
 }
 

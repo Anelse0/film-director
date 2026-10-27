@@ -184,7 +184,7 @@ def rhythm_checks(shots, rows, duration, metadata_text):
     # W28 one whole line held in one shot for >= 4 s: the cut is waiting for the sentence.
     # 1.11.0: any camera (a handheld shot waits for the sentence just the same); the remedy is no longer "split the
     # line off-screen" (W54) but a shorter shot, a change of size / position, or a reaction shot without the line.
-    # INFO: shots that hold ≥1 s after the last line ends (dead air after the sentence) feed the S5 执行卡 rhythm row.
+    # INFO: shots that hold ≥1 s after the last line ends (dead air after the sentence) feed the QA gate-8 row (check.py).
     if dialogue_led:
         holds = []
         for no, s, e, body in shots:

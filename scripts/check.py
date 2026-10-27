@@ -6,22 +6,26 @@
 7 个时机合成 3 个子命令，输出一份合并报告：
 
   ERROR → 成片教训类 WARN（validate_prompt 的 RENDER_LESSON_CODES / RENDER_LESSON_PREFIXES）→ 其余 WARN
-  → 数字块（templates/qa.md 现行状态的「校验 / 机位设计 / 执行卡」三行 + 第 8 道那一行，格式一致，可直接粘贴）
+  → 数字块（templates/qa.md 现行状态的「校验 / 机位设计 / 分镜检查」三行 + 第 8 道那一行，格式一致，可直接粘贴）
   → 原有全部 INFO 行 → 每个输入文件的 sha256 前 12 位（文件没变就不必再跑）。
 
   check.py plan <分镜卡>             = 1.14.0 停靠 A（方案）：camera_plan_check --stage s5 + 镜头纵览的算术
                                       （行数、时间是否从 0 连续、台词行数、无台词秒、表下的最长连续无台词 >3 s 提示）；
-                                      逐镜小节与执行卡还没写，不跑 stage_check；提示是 NOTE，不是校验码
+                                      逐镜小节还没写，不跑 stage_check；提示是 NOTE，不是校验码
   所有子命令：分镜卡版本行 / Prompt E 表「版本」行超过 200 字给 NOTE（1.14.1 版本行一行制，不是校验码）
-  check.py s5 <分镜卡>               = camera_plan_check --stage s5 + stage_check --stage s5
+  check.py s5 <分镜卡>               = camera_plan_check --stage s5 + stage_check --stage s5（含 stage_check.notes()：
+                                      旧卡的兼容提示、写了「不适用」的格子，1.15.0）
   check.py s6 <分镜卡> [<prompt.md>] = camera_plan_check（不带 --stage，C08）+ stage_check --stage s6
                                       + validate_prompt + camera_plan_check --prompt（C10）
                                       S6 入口还没有 Prompt 时只给分镜卡，后两步跳过
   check.py qa [--sync] [--prompt <prompt.md>] <qa.md>
-                                    = qa_check；现行状态里能解析出 Prompt / 分镜卡路径时顺带跑一遍 s6
-    --sync                            把现行状态里机器能定的五行（Prompt 版本、分镜卡版本、校验、机位设计、执行卡）
+                                    = qa_check；现行状态里能解析出 Prompt / 分镜卡路径时顺带跑一遍 s6；
+                                      记录类 NOTE（1.15.0，不是校验码）：## 历史 单条超过 300 字、「用户已点名」超过 200 字、
+                                      同名的 ## 节出现不止一次
+    --sync                            把现行状态里机器能定的五行（Prompt 版本、分镜卡版本、校验、机位设计、分镜检查）
                                       和第 8 道的数字行按实际运行结果写回 qa.md；成片 / 上游末帧 / 未决 / 用户已点名
-                                      四行不动；写完再独立跑一遍 qa_check 并打印结果
+                                      四行不动；旧 QA 的「执行卡：」行就地改名为「分镜检查：」（1.15.0）；
+                                      写完再独立跑一遍 qa_check 并打印结果
   --json                              机器可读输出
 
 第 8 道数字行的来源：最长连续无台词 = Prompt 台词窗口之间最长的空档（和 W24 最长连续无台词用同一定义），括号里附
@@ -46,9 +50,10 @@ import speaker_checks  # noqa: E402
 import stage_check  # noqa: E402
 import validate_prompt  # noqa: E402
 
-STATE_ORDER = ('Prompt', '分镜卡', '成片', '上游末帧', '校验', '机位设计', '未决', '用户已点名', '执行卡')
+STATE_ORDER = ('Prompt', '分镜卡', '成片', '上游末帧', '校验', '机位设计', '未决', '用户已点名', '分镜检查')
 HUMAN_LINES = ('成片', '上游末帧', '未决', '用户已点名')
 MACHINE_LINES = tuple(l for l in STATE_ORDER if l not in HUMAN_LINES)
+LEGACY_LABELS = {'分镜检查': '执行卡'}  # 1.15.0 改名；--sync 把旧标签的行就地改名
 GATE8_HEADER = '| 最长连续无台词 | 一句一镜 / 总句 | 反应镜数 | 画外句数 | 句尾后停留 ≥1 s 的镜 | 不达标项处置 |'
 GATE8_PLACEHOLDER = '<不达标项处置>'
 VERSION_RE = re.compile(r'\bv\d+(?:\.\d+)*\b')
@@ -94,13 +99,49 @@ def version_line_notes(card_text=None, prompt_text=None):
     if card_text:
         m = re.search(r'^\W*版本[：:].*$', card_text[:6000], re.M)
         if m and len(m.group(0)) > VERSION_LINE_MAX:
-            notes.append(f'分镜卡版本行 {len(m.group(0))} 字（>{VERSION_LINE_MAX}）：版本行一行制——只留版本 · 日期 · 状态 · skill 版本 · Prompt 版本，'
-                         '改了什么写 QA ## 历史 一版一条，用户原话进执行卡第 22 行（1.14.1）')
+            notes.append(f'分镜卡版本行 {len(m.group(0))} 字（>{VERSION_LINE_MAX}）：版本行一行制——只留版本 · 日期 · 状态 · skill 版本，'
+                         '改了什么和用户原话写 QA ## 历史 一版一条（1.14.1；1.15.0）')
     if prompt_text:
         m = re.search(r'^\|\s*版本\s*\|[^\n]*$', prompt_text, re.M)
         if m and len(m.group(0)) > VERSION_LINE_MAX:
             notes.append(f'Prompt E 表「版本」行 {len(m.group(0))} 字（>{VERSION_LINE_MAX}）：只写版本号和日期，'
                          '改了什么写 QA ## 历史 一版一条（1.14.1）')
+    return notes
+
+
+HISTORY_ENTRY_MAX = 300  # 1.15.0 记录精简：NOTE，不是校验码
+NAMED_LINE_MAX = 200
+
+
+def section_name(title):
+    """「审阅（S7 §7.1 八道）」「成片反馈，validation-log #31」→ 审阅 / 成片反馈."""
+    return re.split(r'[（(，,]', title, maxsplit=1)[0].strip()
+
+
+def record_notes(qa_text):
+    """QA 记录的格式 NOTE（1.15.0）：历史一条只写镜号 · 改前 → 改后、原话和 #n；「用户已点名」只写类别；旧轮不留。"""
+    notes = []
+    heads = list(re.finditer(r'^## (.+)$', qa_text, flags=re.M))
+    for i, m in enumerate(heads):
+        if section_name(m.group(1)) != '历史':
+            continue
+        end = heads[i + 1].start() if i + 1 < len(heads) else len(qa_text)
+        entries = [e.strip() for e in re.split(r'^- ', qa_text[m.end():end], flags=re.M)[1:] if e.strip()]
+        long = [(n, len(e)) for n, e in enumerate(entries, 1) if len(e) > HISTORY_ENTRY_MAX]
+        if long:
+            notes.append(f'## 历史有 {len(long)} 条超过 {HISTORY_ENTRY_MAX} 字（'
+                         + '、'.join(f'第 {n} 条 {size} 字' for n, size in long[:6])
+                         + '）：一条只写镜号 · 改前 → 改后、用户原话和 #n，改后的完整写法在卡和 Prompt 里（1.15.0）')
+        break
+    span = state_block(qa_text)
+    named = state_line(qa_text[span[0]:span[1]], '用户已点名') if span else None
+    if named and len(named.group(0)) > NAMED_LINE_MAX:
+        notes.append(f'现行状态「用户已点名」{len(named.group(0))} 字（>{NAMED_LINE_MAX}）：只写类别（哪一版），原话写 ## 历史（1.15.0）')
+    names = [section_name(m.group(1)) for m in heads]
+    repeated = [n for n in dict.fromkeys(names) if names.count(n) > 1]
+    if repeated:
+        notes.append('同名的节出现不止一次：' + '、'.join(f'「## {n}」×{names.count(n)}' for n in repeated)
+                     + '——旧轮不留，就地重写，被推翻的结论写进 ## 历史（1.15.0）')
     return notes
 
 
@@ -258,8 +299,11 @@ def facts_from(card=None, prompt=None, result=None, camera=None, c10_checked=Fal
         f['机位设计'] = f"- 机位设计：camera_plan_check {len(errors)} ERROR；{'；'.join(parts)}"
     if stage is not None:
         errors, warnings = stage
-        rows = 'S5 25 行' if not any(e.startswith(('S01', 'S02')) for e in errors) else 'S5 执行卡缺行'
-        f['执行卡'] = f"- 执行卡：stage_check {len(errors)} ERROR（{rows}；{joined(codes(warnings))}）"
+        if stage_check.is_legacy(card_text):
+            struct = '旧卡未迁'
+        else:
+            struct = '结构缺项' if any(e.startswith(('S01', 'S02', 'S03')) for e in errors) else '结构齐'
+        f['分镜检查'] = f"- 分镜检查：stage_check {len(errors)} ERROR（{struct}；{joined(codes(warnings))}）"
     f['第 8 道'] = gate8_cells(card_text, prompt_text, result)
     return f
 
@@ -410,6 +454,7 @@ def pipeline_s5(card, report):
     report.add('camera_plan_check --stage s5', ce, cw)
     se, sw = stage_check.check(card, 's5')
     report.add('stage_check --stage s5', se, sw)
+    report.notes.extend(stage_check.notes(card))
     report.notes.extend(version_line_notes(card_text=Path(card).read_text(encoding='utf-8')))
     return facts_from(card=card, camera=(ce, cw), stage=(se, sw))
 
@@ -419,6 +464,7 @@ def pipeline_s6(card, prompt, report):
     report.add('camera_plan_check', ce, cw)
     se, sw = stage_check.check(card, 's6')
     report.add('stage_check --stage s6', se, sw)
+    report.notes.extend(stage_check.notes(card))
     result, camera = None, (ce, cw)
     if prompt:
         result = validate_prompt.validate(prompt)
@@ -490,7 +536,7 @@ def sync_state(text, facts, state_paths):
             new_lines[label] = f'- {label}：`{path_text}` {version}'
         else:
             skipped.append(f'{label} 行：' + ('文件没找到' if not path_text else '版本号没解析出来') + '，没动')
-    for label in ('校验', '机位设计', '执行卡'):
+    for label in ('校验', '机位设计', '分镜检查'):
         if facts.get(label):
             new_lines[label] = facts[label]
         else:
@@ -499,8 +545,17 @@ def sync_state(text, facts, state_paths):
         if label not in new_lines:
             continue
         m = state_line(block, label)
+        legacy = state_line(block, LEGACY_LABELS[label]) if label in LEGACY_LABELS else None
+        if m is None and legacy:
+            m, legacy = legacy, None
+        if legacy:  # 新旧两行都在：新行照写，旧行去掉
+            cut = legacy.end() + (1 if block[legacy.end():legacy.end() + 1] == '\n' else 0)
+            block = block[:legacy.start()] + block[cut:]
+            m = state_line(block, label)
+            if label not in written:
+                written.append(label)
         if m:
-            if m.group(0) != new_lines[label]:
+            if m.group(0) != new_lines[label] and label not in written:
                 written.append(label)
             block = block[:m.start()] + new_lines[label] + block[m.end():]
         else:
@@ -571,7 +626,7 @@ def cmd_s5(args):
         return None
     report = Report('s5', [card])
     facts = pipeline_s5(str(card), report)
-    report.block = block_lines(facts, ('机位设计', '执行卡'), gate8=False)
+    report.block = block_lines(facts, ('机位设计', '分镜检查'), gate8=False)
     return report
 
 
@@ -583,7 +638,7 @@ def cmd_s6(args):
             return None
     report = Report('s6', [card] + ([prompt] if prompt else []))
     facts = pipeline_s6(str(card), str(prompt) if prompt else None, report)
-    report.block = block_lines(facts, ('校验', '机位设计', '执行卡'))
+    report.block = block_lines(facts, ('校验', '机位设计', '分镜检查'))
     return report
 
 
@@ -603,6 +658,7 @@ def cmd_qa(args):
     card, card_text_path = resolve_from_state(qa, block, '分镜卡')
     inputs = [display(qa)] + [display(p) for p in (card, prompt) if p]
     report = Report('qa', inputs)
+    report.notes.extend(record_notes(text))
     facts = {}
     if card and prompt:
         facts = pipeline_s6(str(card), str(prompt), report)
@@ -617,7 +673,7 @@ def cmd_qa(args):
         report.notes.append('现行状态里没有能找到的 Prompt / 分镜卡：只跑 qa_check（用 --prompt 指定 Prompt）')
     if facts:
         facts['第 8 道处置'] = existing_gate8_last(text)
-        report.block = block_lines(facts, ('校验', '机位设计', '执行卡'))
+        report.block = block_lines(facts, ('校验', '机位设计', '分镜检查'))
         for label, key in (('Prompt', 'Prompt 版本'), ('分镜卡', '分镜卡 版本')):
             path_text = {'Prompt': prompt_text_path, '分镜卡': card_text_path}[label]
             if facts.get(key) and path_text:

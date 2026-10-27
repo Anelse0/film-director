@@ -36,6 +36,7 @@ class PlanTests(unittest.TestCase):
         self.assertIn('- 机位设计：camera_plan_check 0 ERROR；WARN 无', out)
         self.assertNotIn('S01', out)
         self.assertNotIn('执行卡：', out)
+        self.assertNotIn('分镜检查：', out)  # 1.15.0 改名后，停靠 A 仍不跑 stage_check
 
     def test_full_card_counts_shots(self):
         rc, data = run_json('plan', self.write(card_text()))

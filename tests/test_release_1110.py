@@ -1,6 +1,8 @@
 """1.11.0 release wiring: one line does not cross a cut (W54 / W55 in speaker_checks.py, render-lesson class), the W24
 longest-silence sub-item as a render lesson, W28 for any camera, S5 执行卡 + 镜头纵览 with stage_check.py, qa_check Q04.
-Source: offset EP06 场 02 review proposal §4 items 0–5 and §7 M1 (user 2026-10-19)."""
+Source: offset EP06 场 02 review proposal §4 items 0–5 and §7 M1 (user 2026-10-19).
+1.15.0: the 25-row table is no longer copied onto each card — it lives on as the stage-5 §5.11 收口对照表 and
+stage_check.py checks the card's own slots; the pins below follow the new wording."""
 import sys
 import unittest
 from pathlib import Path
@@ -15,7 +17,7 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_changelog(self):
-        self.assertEqual(read('VERSION').strip(), '1.14.2')
+        self.assertEqual(read('VERSION').strip(), '1.15.0')
         log = read('CHANGELOG.md')
         self.assertIn('## 1.11.0', log)
         self.assertLess(log.index('## 1.11.0'), log.index('## 1.10.0'))
@@ -37,7 +39,7 @@ class WiringTests(unittest.TestCase):
     def test_rule_text(self):
         skill = read('SKILL.md')
         self.assertIn('但一句不跨镜', skill)
-        self.assertIn('21. **镜头纵览与执行卡必做。**', skill)
+        self.assertIn('21. **镜头纵览与分镜卡结构检查必做。**', skill)
         self.assertIn('stage_check.py', skill)
         self.assertIn('Q04', skill)
         rhythm = read('references/duration-rhythm.md')
@@ -49,7 +51,7 @@ class WiringTests(unittest.TestCase):
         stage5 = read('references/stage-5-directing-storyboard.md')
         self.assertIn('**6a 反应镜**', stage5)
         self.assertIn('**8a 无台词段预算**', stage5)
-        self.assertIn('## 5.11 执行卡', stage5)
+        self.assertIn('## 5.11 分镜卡收口对照表', stage5)
         stage6 = read('references/stage-6-prompt-compiler.md')
         self.assertIn('一句台词不分两段引号跨镜', stage6)
         self.assertIn('排除错误人物发声', stage6)
@@ -59,7 +61,7 @@ class WiringTests(unittest.TestCase):
         self.assertIn('听者替说话人开了口', stage7)
         self.assertIn('Q04', stage7)
         self.assertIn('W54 / W55', read('references/stage-4-performance.md'))
-        self.assertIn('## 执行卡', read('templates/shot-card.md'))
+        self.assertIn('**用户已点名**', read('templates/shot-card.md'))
         self.assertIn('## 镜头纵览', read('templates/shot-card.md'))
         qa = read('templates/qa.md')
         self.assertIn('用户已点名', qa)

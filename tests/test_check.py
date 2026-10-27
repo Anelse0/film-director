@@ -2,7 +2,8 @@
 merges their results (ERROR → render-lesson WARN → other WARN → 数字块 → INFO → sha256) and, with `qa --sync`, writes the
 machine lines of the QA 现行状态 back. The four scripts, their codes, thresholds and classes are untouched; this suite
 asserts that the merged sets equal the direct calls, that the 数字块 lines satisfy qa_check Q03, and that Q01–Q04 still
-fire through the entry point. Fixtures: the 1.8.0 camera plan + the 1.11.0 执行卡 card, the 1.9.0 corridor prompt."""
+fire through the entry point. Fixtures: the 1.8.0 camera plan + the 1.15.0 card head (no 执行卡; the legacy card lives in
+test_stage_check), the 1.9.0 corridor prompt."""
 import contextlib
 import io
 import json
@@ -21,14 +22,14 @@ import qa_check  # noqa: E402
 import stage_check as sc  # noqa: E402
 from test_camera_plan import ANCHORS, HEADER, REVIEW, ROW  # noqa: E402
 from test_render_lessons import E, SHOT1, SHOT2, SHOT3, build  # noqa: E402
-from test_stage_check import E_LAYER, OVERVIEW, SHOTS, card_rows  # noqa: E402
+from test_stage_check import E_LAYER, HEAD_BLOCK, OVERVIEW, SHOTS, THROUGH, legacy_table  # noqa: E402
 from validate_prompt import validate  # noqa: E402
 
 E_VERSION = E + '| 版本 | v1.2（2026-10-20：示例） |\n'
 CAMERA_PLAN = ('## 机位设计\n\n' + ANCHORS + '### 机位表\n\n' + HEADER + ''.join(ROW.format(n=n) for n in (1, 2, 3)) + '\n'
                + REVIEW + '\n')
-HEAD = '# clip 分镜卡\n\n**版本：v1.3 · 2026-10-20**（示例）\n\n'
-SECTIONS = ('## 走位表\n…\n\n' + CAMERA_PLAN + '## clip 起始状态\n…\n\n## clip 结束状态\n…\n\n## 贯穿要求\n…\n\n')
+HEAD = '# clip 分镜卡\n\n**版本：v1.3 · 2026-10-20**（示例）· film-director 1.15.0\n\n' + HEAD_BLOCK
+SECTIONS = ('## 走位表\n…\n\n' + CAMERA_PLAN + '## clip 起始状态\n…\n\n## clip 结束状态\n…\n\n' + THROUGH)
 
 
 def card_text(plan=True, door_left=True):
@@ -36,24 +37,22 @@ def card_text(plan=True, door_left=True):
     text = HEAD + (SECTIONS if plan else SECTIONS.replace(CAMERA_PLAN, '')) + OVERVIEW + SHOTS + E_LAYER
     if not door_left:
         text = text.replace('| 门 | 墙纸 |', '| 墙纸 | 门 |')
-    rows = card_rows()
-    return text + '## 执行卡\n| # | 项 | 证据 |\n|---|---|---|\n' + ''.join(
-        f'| {n} | {sc.CARD_ROWS[n]} | {rows[n]} |\n' for n in sorted(rows))
+    return text
 
 
 def qa_text(version='v1.2', codes='无', card_version='v1.3', camera='camera_plan_check 0 ERROR；C10 无矛盾；WARN 无',
-            stage='stage_check 0 ERROR（S5 25 行；无）', named='无', drop=(), gate8='| 9 s | 2 / 2 | 1 | 0 | 无 | 无 |',
-            dispositions='', prompt_path='06_prompts/clip.prompt.md', first=True):
+            stage='stage_check 0 ERROR（结构齐；无）', named='无', drop=(), gate8='| 9 s | 2 / 2 | 1 | 0 | 无 | 无 |',
+            dispositions='', prompt_path='06_prompts/clip.prompt.md', first=True, stage_label='分镜检查'):
     lines = [f'- Prompt：`{prompt_path}` {version}', f'- 分镜卡：`04_shots/clip.md` {card_version}', '- 成片：未生成',
              '- 上游末帧：无（人写的一行，脚本不动）', f'- 校验：validate_prompt 2026-10-20 0 ERROR；WARN {codes}；成片教训类 无',
              f'- 机位设计：{camera}', '- 未决：\n  - 等用户定的事（人写的，脚本不动）', f'- 用户已点名：{named}']
     if stage:
-        lines.append(f'- 执行卡：{stage}')
+        lines.append(f'- {stage_label}：{stage}')
     lines = [l for l in lines if not any(l.startswith(f'- {d}') for d in drop)]
     state = '## 现行状态（每次改稿重写这一节，不往下追加）\n\n' + '\n'.join(lines) + '\n\n'
     review = ('## 审阅（S7 §7.1 八道）\n\n### 1 台词\n逐镜结论。\n\n### 7 校验处置\n'
               '| 代码 | 内容 | 类别（成片教训 / 其余） | 处置 |\n|---|---|---|---|\n' + dispositions
-              + '\n### 8 节奏与剪辑（数字抄 validate_prompt 的 WARN / INFO 与分镜卡执行卡，不自填）\n'
+              + '\n### 8 节奏与剪辑（数字抄 validate_prompt 的 WARN / INFO 与分镜卡 E 层，不自填）\n'
               + check.GATE8_HEADER + '\n|---|---|---|---|---|---|\n' + (gate8 + '\n' if gate8 else '') + '\n')
     history = '## 历史\n\n旧的审阅。\n\n'
     return '# QA clip\n\n' + (state + review + history if first else history + state + review)
@@ -121,7 +120,7 @@ class S5Tests(CheckFixture):
 
     def test_block_has_two_state_lines_and_no_gate8(self):
         rc, data = run_json('s5', str(self.card))
-        self.assertEqual(data['block'], ['- 机位设计：camera_plan_check 0 ERROR；WARN 无', '- 执行卡：stage_check 0 ERROR（S5 25 行；无）'])
+        self.assertEqual(data['block'], ['- 机位设计：camera_plan_check 0 ERROR；WARN 无', '- 分镜检查：stage_check 0 ERROR（结构齐；无）'])
 
 
 class S6Tests(CheckFixture):
@@ -182,7 +181,7 @@ class S6Tests(CheckFixture):
         block = data['block']
         self.assertRegex(block[0], r'^- 校验：validate_prompt \d{4}-\d{2}-\d{2} \d+ ERROR；WARN [^；]+；成片教训类 .+$')
         self.assertRegex(block[1], r'^- 机位设计：camera_plan_check \d+ ERROR；C10 [^；]+；WARN .+$')
-        self.assertRegex(block[2], r'^- 执行卡：stage_check \d+ ERROR（S5 25 行；.+）$')
+        self.assertRegex(block[2], r'^- 分镜检查：stage_check \d+ ERROR（结构齐；.+）$')
         self.assertEqual(len(block), 4)
         self.assertEqual(block[3].count('|'), 7)
         # paste the machine 校验 line into the QA: qa_check Q03 accepts it
@@ -259,7 +258,7 @@ class SyncTests(CheckFixture):
         after = self.qa.read_text(encoding='utf-8')
         self.assertEqual(rc, 0, data)
         self.assertTrue(data['sync']['changed'])
-        self.assertEqual(set(data['sync']['written']), {'Prompt', '分镜卡', '校验', '机位设计', '执行卡', '第 8 道'})
+        self.assertEqual(set(data['sync']['written']), {'Prompt', '分镜卡', '校验', '机位设计', '分镜检查', '第 8 道'})
         self.assertEqual(data['qa_check_after_sync'], {'errors': [], 'warnings': []})
         self.assertEqual(qa_check.check(self.qa), ([], []))
         # machine lines now carry the run results
@@ -267,12 +266,12 @@ class SyncTests(CheckFixture):
         self.assertIn('- 分镜卡：`04_shots/clip.md` v1.3\n', after)
         self.assertIn(f'- 校验：validate_prompt {check.today()} 0 ERROR；WARN {self.codes}；成片教训类 无\n', after)
         self.assertIn('- 机位设计：camera_plan_check 0 ERROR；C10 无矛盾；WARN 无\n', after)
-        self.assertIn('- 用户已点名：无\n- 执行卡：stage_check 0 ERROR（S5 25 行；无）\n', after)  # inserted in template order
+        self.assertIn('- 用户已点名：无\n- 分镜检查：stage_check 0 ERROR（结构齐；无）\n', after)  # inserted in template order
         self.assertIn('| 3 s（0-3s，镜头1）；E 层 2 s | 2 / 2 | 1 | 0 | 镜 2（1s）、镜 3（1s） | 用户同意保留：原话「留着」 |\n', after)
         # the four human lines and everything outside the machine lines are byte-identical
         for line in ('- 成片：未生成', '- 上游末帧：无（人写的一行，脚本不动）', '- 未决：\n  - 等用户定的事（人写的，脚本不动）', '- 用户已点名：无'):
             self.assertIn(line, after)
-        strip = lambda t: re.sub(r'^- (Prompt|分镜卡|校验|机位设计|执行卡)：[^\n]*\n|^\| (9 s|3 s)[^\n]*\n', '', t, flags=re.M)
+        strip = lambda t: re.sub(r'^- (Prompt|分镜卡|校验|机位设计|分镜检查|执行卡)：[^\n]*\n|^\| (9 s|3 s)[^\n]*\n', '', t, flags=re.M)
         self.assertEqual(strip(before), strip(after))
         # idempotent
         rc2, data2 = run_json('qa', '--sync', str(self.qa))
@@ -297,6 +296,47 @@ class SyncTests(CheckFixture):
         self.assertEqual(self.qa.read_text(encoding='utf-8'), before)
         self.assertFalse(data['sync']['changed'])
         self.assertTrue(any('没有可写的机器行' in n for n in data['notes']))
+
+    def test_sync_renames_the_legacy_execution_card_line_in_place(self):
+        """1.15.0: a QA written before carries 「- 执行卡：…」; --sync rewrites it as 「- 分镜检查：…」 at the same spot."""
+        self.qa.write_text(qa_text(codes=self.codes, stage_label='执行卡', stage='stage_check 0 ERROR（S5 25 行；无）'), encoding='utf-8')
+        rc, data = run_json('qa', '--sync', str(self.qa))
+        after = self.qa.read_text(encoding='utf-8')
+        self.assertEqual(rc, 0, data)
+        self.assertIn('分镜检查', data['sync']['written'])
+        self.assertNotIn('- 执行卡：', after)
+        self.assertEqual(after.count('- 分镜检查：'), 1)
+        self.assertIn('- 用户已点名：无\n- 分镜检查：stage_check 0 ERROR（结构齐；无）\n', after)
+        rc2, data2 = run_json('qa', '--sync', str(self.qa))
+        self.assertFalse(data2['sync']['changed'])
+
+    def test_sync_drops_the_legacy_line_when_both_exist(self):
+        text = qa_text(codes=self.codes).replace('- 用户已点名：无\n', '- 用户已点名：无\n- 执行卡：stage_check 0 ERROR（S5 25 行；无）\n')
+        self.qa.write_text(text, encoding='utf-8')
+        rc, data = run_json('qa', '--sync', str(self.qa))
+        after = self.qa.read_text(encoding='utf-8')
+        self.assertNotIn('- 执行卡：', after)
+        self.assertEqual(after.count('- 分镜检查：'), 1)
+
+
+class LegacyCardTests(CheckFixture):
+    def test_legacy_card_reports_old_layout_without_new_errors(self):
+        """A card written before 1.15.0 (no head items, no skill version, the 25-row table) keeps exiting 0."""
+        old_head = '# clip 分镜卡\n\n**版本：v1.3 · 2026-10-20**（示例）\n\n'
+        self.card.write_text(card_text().replace(HEAD, old_head) + legacy_table(), encoding='utf-8')
+        rc, data = run_json('s5', str(self.card))
+        self.assertEqual(rc, 0, data)
+        self.assertFalse(any(m['message'].startswith(('S01', 'S02', 'S03')) for m in data['errors']), data['errors'])
+        self.assertIn('- 分镜检查：stage_check 0 ERROR（旧卡未迁；无）', data['block'])
+        self.assertTrue(any(n.startswith('旧卡还有「## 执行卡」') for n in data['notes']), data['notes'])
+        self.assertTrue(any(n.startswith('旧卡（不报错）S02') for n in data['notes']), data['notes'])
+
+    def test_new_card_missing_a_head_item_is_s02_and_blocks(self):
+        self.card.write_text(card_text().replace('- 剧本回写待办：无\n', ''), encoding='utf-8')
+        rc, data = run_json('s5', str(self.card))
+        self.assertEqual(rc, 1)
+        self.assertTrue(any(m['message'].startswith('S02') and '剧本回写待办' in m['message'] for m in data['errors']))
+        self.assertIn('- 分镜检查：stage_check 1 ERROR（结构缺项；无）', data['block'])
 
 
 class CliTests(CheckFixture):

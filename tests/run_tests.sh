@@ -58,12 +58,12 @@ tmp=$(mktemp -d)
 python3 -c "import sys; sys.path.insert(0, 'tests'); import test_check; test_check.write_fixture('$tmp')"
 out=$(python3 scripts/check.py s5 "$tmp/04_shots/clip.md"); rc=$?
 check "check.py s5 exits 0" $rc "$out"
-echo "$out" | grep -q "^- 执行卡：stage_check 0 ERROR（S5 25 行；无）"; check "check.py s5 number block" $? "$out"
+echo "$out" | grep -q "^- 分镜检查：stage_check 0 ERROR（结构齐；无）"; check "check.py s5 number block" $? "$out"
 # 1.14.0 check.py plan：停靠 A（方案）——机位设计 + 纵览算术，不跑 stage_check
 out=$(python3 scripts/check.py plan "$tmp/04_shots/clip.md"); rc=$?
 check "check.py plan exits 0" $rc "$out"
 echo "$out" | grep -q "镜头纵览 3 行"; check "check.py plan overview arithmetic" $? "$out"
-echo "$out" | grep -q "执行卡："; rc=$?; [ "$rc" -ne 0 ]; check "check.py plan does not run stage_check" $? "$out"
+echo "$out" | grep -q "分镜检查："; rc=$?; [ "$rc" -ne 0 ]; check "check.py plan does not run stage_check" $? "$out"
 # 1.14.1 版本行一行制：超过 200 字的版本行给 NOTE，不改退出码
 sed -i '' "s/^\*\*版本：v1.3 · 2026-10-20\*\*（示例）/**版本：v1.3 · 2026-10-20**（示例）$(printf '改了什么%.0s' $(seq 60))/" "$tmp/04_shots/clip.md"
 out=$(python3 scripts/check.py s5 "$tmp/04_shots/clip.md"); rc=$?
