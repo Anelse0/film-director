@@ -22,7 +22,7 @@ OLD_ROWS = ('场景参数卡', '视觉方案与观众问题', '峰值事件与�
 
 class WiringTests(unittest.TestCase):
     def test_version_and_changelog(self):
-        self.assertEqual(read('VERSION').strip(), '1.15.0')
+        self.assertEqual(read('VERSION').strip(), '1.15.1')
         log = read('CHANGELOG.md')
         self.assertIn('## 1.15.0', log)
         self.assertLess(log.index('## 1.15.0'), log.index('## 1.14.2'))

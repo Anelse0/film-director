@@ -1,4 +1,14 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.15.0 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.15.1 baseline.
+1.15.1 (2026-10-31): the Prompt compiler loses its character limits (user: "只去除当前 skill 中 prompt 编译的字符限制") — W38
+retired in guide_checks.py (the 篇幅 INFO keeps the per-section counts; no budget, no trim order, the E-layer 字数上限 /
+词数上限 rows are no longer read), the shot-tag regex drops its 80 / 100-character cap — one parser in prompt_structure.py
+(shot_tag() / tag_text(): the tag only has to open within the first 120 characters of the shot) used by validate_prompt,
+rhythm_checks, tone_checks and variation_checks — and stage-6 / stage-4 / prompt-templates lose the ≤60-character tag
+note, the 字数上限 E-row and the W38 trim-order pointers. No other code, threshold or class changed. Hashes for
+guide_checks.py, validate_prompt.py, prompt_structure.py, rhythm_checks.py, tone_checks.py, variation_checks.py, stage-4,
+stage-6 and prompt-templates re-set in the same change with a CHANGELOG entry.
+1.15.1 previous baseline: 1.15.0.
+
 1.15.0 (2026-10-27): the 25-row 执行卡 is no longer copied onto each shot card — its questions live on as the stage-5
 §5.11 收口对照表 and the card answers them in its own slots (head items, 走位表, the three hand-off lines, 贯穿要求
 buckets, E-layer 已知风险); stage_check.py S01–S03 check those slots directly (same codes, still ERROR; legacy cards — a
@@ -168,10 +178,10 @@ PROTECTED = {
     'assets/emotion-library.json': 'ef22ac8bfec33567344e13a927d47f7b577c3c6f07b110cc5a2e316523599977',
     'references/emotion-performance.md': 'b928678bee8bfc1a6d68953b83f5bc9a86dff022e0a41667b38f8f5e4e8a084e',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
-    'references/stage-4-performance.md': '12eb294f022c8d39350bbb6f5af44af06d972e037cd7483f5f07f3b486155ad7',
+    'references/stage-4-performance.md': '35b6997cca2c38b80a6459ffa36864d047b5db5772b9fa02a75e04ebc066c19f',
     'references/stage-5-directing-storyboard.md': 'ec8f8e1b639b15e57257c58d4a9e82c213cff4aabed1447f2d0bf5b613facbd9',
     'references/stage-5b-reference-assets.md': '1474f46720197c575ff10b56a355a1a56d83daf3eae389f8d5eb592f86939964',
-    'references/stage-6-prompt-compiler.md': 'd47736102a84e276922c4569590ad0ffa119df6ec05fe432d888abd37ad14e6a',
+    'references/stage-6-prompt-compiler.md': 'a2f4c00bd88c14c8cbdb69e31f645325c4cb253e3871bced2da9482c1289ed06',
     'references/stage-7-qa-continuity.md': '58c343a6b33588721fd43a1f74b8fe62aefc019698d4b49a66963cf5182b3fe8',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
@@ -180,22 +190,22 @@ PROTECTED = {
     'references/externalization-lexicon.md': '8b74ea808a17acbd39d27ae331500f3bdfb353c85419cdc3b394e56986a272f8',
     'references/genre-packs.md': 'e8bf4dd45abb22776ac4dec2490551e1a9aedddfd26cca459bc6557df3c95513',
     'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
-    'templates/prompt-templates.md': '4582e1eeb68d6b11940ddc699052bafcccc36bb5222aabd080ca8736f187f548',
+    'templates/prompt-templates.md': 'c42c24831ece2d21272501d8286abbb6caf239f92169bb64db34ebb6cddba7ef',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '96e7fcb783028d6c258005c962c18b9f2cdbd3bc36d52596bc7a5568900b838b',
     'templates/shot-card.md': 'd0bb3b245c232a677967a8c4c860d0d41c54a979712b25de7b3bd6fe8fd629ef',
     'templates/reference-asset-brief.md': '106e08747fd39ce900ca928afef2244ce8071c0ea43fec328581352ce552b441',
     'templates/asset-registry.md': '2b478992e56c0d08bd99e66b04aa3933f9bd6dc46b0ca2eb507ae68632df0bba',
-    'scripts/rhythm_checks.py': '054dede9984ba5e1e48f996285c44202aa6c8f4116344ce0299840b56a7ad106',
-    'scripts/variation_checks.py': '11a116c63f7e32a988da9eedb465d89ad8a3d73b92d7ceeb804c3e487a74c19f',
+    'scripts/rhythm_checks.py': '2a6b4453e3ed67a9667380795b4ed74319a3de92013501e5e8132995f5895ad7',
+    'scripts/variation_checks.py': 'a6270d219111ea8dd2325e82744050b4d13d1ba9b8105ab44ad4ab8f2661f621',
     'scripts/direction_checks.py': '54a7597032ffacbd05a689cd7e3ad0e5c8fb3ba2379f251d2b213839fb4fd992',
-    'scripts/tone_checks.py': '8d290d18d81ece80a2e059d52ad7cb477990d85f07057a2ecc5ffd8a1de4c404',
-    'scripts/guide_checks.py': '3c08ca954d0f787bab215a1b5d0181c74b0de4cf6f23fac57ad517ad70da906b',
+    'scripts/tone_checks.py': '235ac433adf38d54cf74a5e0cc48dedfd53fbd86726ebbfbe46d1544f4b1bbd4',
+    'scripts/guide_checks.py': '59f1d15edad1b45d47c7d1531ba366f6b88bdf6f124486b5f7d896a30c107361',
     'scripts/focus_checks.py': '5b5d3110f22c58c272f3c24aa7533e75b9b91f46f951589a829c0eef25a6106c',
     'scripts/subtext_checks.py': '84ba710d324ed2102701ae0ee2866a205f2c9160527af52b4b6f1cc647408f10',
     'scripts/costume_checks.py': '9f65d3b4fcdac75a5d61a07ccfbe6e63a0cd7a5c11ffd262ac9428d23f44ca59',
-    'scripts/validate_prompt.py': '308921095bceb079d05f5df8494d8e3494e0b88c54c94d8c889db77bb15cbd4e',
-    'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
+    'scripts/validate_prompt.py': '3b8cae120da457805d8e1b07bd1c617b701c730b16c0d88e20a8b8b61348ac72',
+    'scripts/prompt_structure.py': '2beaf19fbc1e37e202fbbea432f0fd640169c3b83eaca13fa1429fa5f0cb4e5e',
     'scripts/production_contract.py': 'adb40d1e05ecb6d298e2bb295a8ef325941812f00a89f9000fe03477a58b780f',
     'scripts/production_preflight.py': 'aab550991f000dac727f744f1c603a5a1519f1adf44d2e288e11c9d3cc859c0d',
     'scripts/emotion_library.py': '11b1257528d00edbf66a9637a9508966f26d23d1db97917b609127858ac0cc6d',

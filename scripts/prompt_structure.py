@@ -12,6 +12,21 @@ SHOT_RE = re.compile(rf"^(?:镜头|Shot)\s*(\d+)\s*[（(]\s*{INTERVAL}[^)）]*[)
 BEAT_RE = re.compile(rf"^\s*(?:(?:节拍|Beat)\s+([^\s（(]+)\s*[（(])?{INTERVAL}\s*[)）]?\s*[:：]\s*", re.M | re.I)
 BOUNDARY_RE = re.compile(r"^\s*(?:【|(?:镜头|Shot)\s*\d+\s*[（(]|\|\s*(?:项|参数项)\s*\||#{1,6}\s|```)", re.M | re.I)
 SECTION_RE = re.compile(r"^\s*(?:【[^】]+】|(?:REFERENCES|OVERVIEW|LOOK|OPENING STATE|TIMELINE|GLOBAL RULES|AUDIO)\s*:)", re.M | re.I)
+# 1.15.1: the shot's opening 【景别，角度，运镜…】 tag has no length cap (the ≤60 / 80-character limit is gone); it only
+# has to open within the first 120 characters of the shot body. One parser for validate_prompt / rhythm / tone / variation.
+TAG_RE = re.compile(r"【([^】\n]{2,})】|\[([^\]\n]{2,})\]")
+
+
+def shot_tag(body):
+    """Match object of the shot's opening tag (group 1 = 【】 form, group 2 = [] form), or None."""
+    m = TAG_RE.search(body)
+    return m if m and m.start() < 120 else None
+
+
+def tag_text(body):
+    """The tag's text without its brackets, or '' when the shot has none."""
+    m = shot_tag(body)
+    return (m.group(1) or m.group(2)) if m else ""
 
 
 @dataclass(frozen=True)

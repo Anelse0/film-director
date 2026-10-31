@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.15.1 — 2026-10-31
+
+去掉 Prompt 编译的字符限制（用户 10-31："做一个小版本迭代 1.15.1；只去除当前 skill 中 prompt 编译的字符限制"）。只动这一件事：流程、停靠、其余校验码、阈值与分类不变。
+
+### Changed
+- W38 篇幅退役（码保留不再报）：`scripts/guide_checks.py` 不再有 3000 字 / 6000 词预算、删减顺序和 E 层 `字数上限` / `词数上限` 覆盖；INFO 仍给各段字数，句尾改为"不设上限（1.15.1），表演不为篇幅删"。`references/checks.md` W38 行改为退役说明，"并入 / 暂停 / 退役"一行加 W38；SKILL 硬规则 12 同步。
+- 镜头标注不限字数：stage-6 §6.2 的"标注 ≤ 60 字"与 `templates/prompt-templates.md` 的"（≤60 字）"删去；识别标注的正则去掉 80 / 100 字上限：解析器收进 `scripts/prompt_structure.py`（`shot_tag()` / `tag_text()`：标注只需在镜头段前 120 字内开头，长度不限），`validate_prompt.py`（W08 / W10 / W17）、`rhythm_checks.py`、`tone_checks.py`、`variation_checks.py` 各自的同一条正则都改为调用它——否则超过 80 字的标注会从景别 / 运镜 / 基调检查里消失。
+- E 层参数表删 `字数上限` 行（stage-6 §6.5、prompt-templates 示例）；stage-6 §6.2【贯穿要求】与 §6.6 自检、stage-4 §4.4a 里指向 W38 删减顺序的括号改为"正文不设字数上限"。
+- 测试：`tests/test_guide_checks.py` 的 W38 用例改为"超长正文不再报 W38、`字数上限` 行不再起作用"；新增 `tests/test_release_1151.py`；保护区重设 guide_checks.py、validate_prompt.py、prompt_structure.py、rhythm_checks.py、tone_checks.py、variation_checks.py、stage-4、stage-6、prompt-templates 哈希；VERSION 1.15.1，release 测试版本钉到 1.15.1。
+
+### 没动的
+- 硬规则 7 / 15："S6 不因篇幅删表演""一镜一个主要事件 + 至多一个记忆点细节"照旧——负载上限管的是一镜的内容，不是字数。
+- `check.py` 的版本行 200 字 NOTE、QA 历史单条 300 字 / 「用户已点名」200 字 NOTE 是记录格式提示（1.14.1 / 1.15.0），不是 Prompt 编译限制，不动。
+- 官方"中文 ≤500 字 / 英文 ≤1000 词"留在 `references/seedance-2.5-capabilities.md` 作为 `[官方]` 事实，不作为任何阈值。
+- 其余校验码、ERROR / WARN 分类、成片教训类、停靠 A / B / C、八道、改稿回路。
+
 ## 1.15.0 — 2026-10-27
 
 删执行卡，精简记录。调查现有项目产物：16 张现行分镜卡的执行卡 25 行里，21 行是"见 ## X"的指针或复述，约 42% 的字在卡内其他小节或 QA 里逐字出现过，400 行只有 1 行写过"不适用"；第 25 行（脚本结果）一集里重写 27 次，和 QA 现行状态的机器行是同一件事；第 21 行和同一张卡的卡头已经对不上；停靠 A 要回显第 21 行，那时执行卡还没写；"执行卡 25 行填了几行"永远是 25，从没记过。记录这一侧：用户原话写四五处（第 22 行 76% 和别处重复），QA 历史 94 条里有 30–35% 在复述卡和 Prompt，一份 QA 留着一整轮没标替代的旧八道（6,444 字），Prompt E 表「已知风险」70–100% 照抄卡 E 层。

@@ -24,8 +24,8 @@ voice / approach toward camera with no state / head-down-eyes-up or eyes-only gl
 the tone word says; WARN per shot when the prompt declares a light tone, or when such cues cluster with no tone
 declared; INFO when 悬疑 / 喜剧 is declared (freeze and deadpan are those genres' own devices).
 1.6.0 (guide_checks.py, official FAQ): W36 delivery notes after a quoted line / re-quoted fragments (subtitle trigger),
-W37 audio policy at start and end with music synonyms enumerated, W38 length budget (INFO always; WARN > 1,500 CJK /
-900 EN words, E-layer 字数上限 / 词数上限), W39 character assets in first-appearance order and E-layer 上传与角色 order,
+W37 audio policy at start and end with music synonyms enumerated, W38 length budget (retired 1.15.1: the 篇幅 INFO keeps
+the per-section counts; no WARN, no E-layer cap), W39 character assets in first-appearance order and E-layer 上传与角色 order,
 W40 intensity labels (眼睛发光 trigger), W41 declared-but-unreferenced assets. Assets may be numbered (图1 / @图片1) or
 named (`@Theo-基础形象：…` declaration lines, `@Theo-基础形象` references). The variation track is read from the E-layer
 `变化轨` row first (inline 【变化：…】 fields are legacy).
@@ -55,7 +55,7 @@ import sys
 from pathlib import Path
 
 from performance_checks import split_beats, timing_errors, check_record, check_raw, repeated_blocks
-from prompt_structure import Document, dialogue_checks
+from prompt_structure import Document, dialogue_checks, shot_tag
 from production_contract import metadata, task_type, parameters, roles_from_fields, check_parameters, TASKS
 from rhythm_checks import rhythm_checks, settings as rhythm_settings, track_mode, scene_mode
 from variation_checks import variation_checks
@@ -379,14 +379,14 @@ def validate(path, duration_override=None, artifact="production", record=None, e
 
     # Camera checks remain shot-level; dialogue below uses the smallest timed unit.
     for no, s, e, body in shots:
-        head = body[:120]   # 1.7.0: the tag ends with 焦点在 X and may run to 80 characters
-        if not re.search(r"【[^】]{2,80}】|\[[^\]]{2,100}\]", head):
+        tag = shot_tag(body)   # 1.15.1: the tag has no length cap; it only has to open within the first 120 characters
+        tag_txt = (tag.group(1) or tag.group(2)) if tag else ""
+        head = body[:120]
+        if not tag:
             warn("W08", f"镜头{no} 段首缺少【景别，角度，运镜】标注")
-        elif not any(w in head for w in SHOT_SIZE_WORDS):
+        elif not any(w in tag_txt or w in head for w in SHOT_SIZE_WORDS):
             warn("W08", f"镜头{no} 标注里没有景别词")
         # 去掉与"推门""拉开"等动作误报：只在标注括号内统计
-        tag = re.search(r"【([^】]{2,80})】|\[([^\]]{2,100})\]", head)
-        tag_txt = (tag.group(1) or tag.group(2)) if tag else ""
         tag_moves = [w for w in CAMERA_MOVES if w in tag_txt]
         if len(tag_moves) > 2:
             warn("W10", f"镜头{no} 标注含多个运镜词 {tag_moves}（核对同步/先后关系与表演可见性，不自动删复合运镜）")
@@ -484,7 +484,7 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     # W17 同一运镜连续 ≥ 3 镜（只看段首标注）
     tag_moves_seq = []
     for no, s_, e_, body in shots:
-        tag = re.search(r"【([^】]{2,80})】|\[([^\]]{2,100})\]", body[:120])
+        tag = shot_tag(body)
         tag_txt = (tag.group(1) or tag.group(2)) if tag else ""
         mv = next((w for w in ["固定", "locked", "static"] if w in tag_txt), None) or \
              next((w for w in CAMERA_MOVES if w in tag_txt), None)

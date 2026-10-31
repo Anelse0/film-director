@@ -18,6 +18,8 @@ W30-W33. No mode reduces every check to INFO.
 import math
 import re
 
+from prompt_structure import tag_text
+
 CAMERA_MOVES = [
     "推", "拉", "摇", "横移", "跟拍", "跟随", "跟进", "跟下", "环绕", "升", "降", "俯冲", "后拉", "手持", "随",
     "push", "pull", "pan", "tilt", "truck", "track", "orbit", "crane", "dolly", "handheld", "zoom",
@@ -139,8 +141,7 @@ def union_length(intervals):
 
 
 def tag_of(body):
-    tag = re.search(r"【([^】]{2,80})】|\[([^\]]{2,100})\]", body[:120])
-    return (tag.group(1) or tag.group(2)) if tag else ""
+    return tag_text(body)   # 1.15.1: shared parser, no length cap on the tag
 
 
 def rhythm_checks(shots, rows, duration, metadata_text):

@@ -47,7 +47,7 @@ def codes(result):
     return {w.split()[0] for w in result['warnings']}
 
 
-NEW_CODES = {'W36', 'W37', 'W38', 'W39', 'W41', 'W57'}  # W40 folded into W57 (1.12.0)
+NEW_CODES = {'W36', 'W37', 'W39', 'W41', 'W57'}  # W40 folded into W57 (1.12.0); W38 retired (1.15.1)
 
 
 class BaselineTests(unittest.TestCase):
@@ -90,16 +90,17 @@ class W37Tests(unittest.TestCase):
         self.assertTrue(any('同义词' in h or '音乐类词' in h for h in hits), hits)
 
 
-class W38Tests(unittest.TestCase):
-    def test_info_always_warn_over_budget_and_override(self):
+class LengthInfoTests(unittest.TestCase):
+    def test_info_only_never_warns_and_ignores_the_old_cap_row(self):
+        """1.15.1: no length budget — the 篇幅 INFO stays, W38 never fires, the E-layer 字数上限 row is no longer read."""
         base = run(numbered())
         self.assertTrue(any(i.startswith('篇幅') and '贯穿要求' in i for i in base['info']))
         self.assertNotIn('W38', codes(base))
-        filler = '人物放在画面中间区域。' * 300   # ~3,300 CJK characters, above the 3,000 budget
+        filler = '人物放在画面中间区域。' * 300   # ~3,300 CJK characters, above the old 3,000 budget
         long = numbered().replace('不要字幕。\n', '不要字幕。' + filler + '\n')
-        self.assertIn('W38', codes(run(long)))
-        self.assertNotIn('W38', codes(run(long + '| 字数上限 | 4000 |\n')))
-        self.assertTrue(any('不是目标' in i and '500' not in i for i in base['info'] if i.startswith('篇幅')))
+        self.assertNotIn('W38', codes(run(long)))
+        self.assertNotIn('W38', codes(run(long + '| 字数上限 | 100 |\n')))
+        self.assertTrue(any('不设上限' in i and '预算' not in i and '500' not in i for i in base['info'] if i.startswith('篇幅')))
         cjk, words, per = length_profile('【总述】十个字十个字十个字十个\n【贯穿要求】五个字五个字')
         self.assertEqual((cjk, [p[0] for p in per]), (23, ['总述', '贯穿要求']))   # labels count: the model reads them too
 
@@ -185,7 +186,7 @@ class WiringTests(unittest.TestCase):
         return (ROOT / name).read_text(encoding='utf-8')
 
     def test_documents_carry_the_release(self):
-        self.assertEqual(self.read('VERSION').strip(), '1.15.0')
+        self.assertEqual(self.read('VERSION').strip(), '1.15.1')
         for code in NEW_CODES:
             self.assertIn(f'| {code} |', self.read('references/checks.md'), code)
         self.assertIn('## 8.', self.read('references/seedance-2.5-capabilities.md'))

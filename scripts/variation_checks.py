@@ -28,6 +28,8 @@ never at the start of a line):
 """
 import re
 
+from prompt_structure import tag_text
+
 DIM_ALIASES = {
     "景别": "景别", "size": "景别", "shot": "景别",
     "机位": "机位", "运镜": "机位", "机位或运镜": "机位", "camera": "机位", "move": "机位",
@@ -99,8 +101,7 @@ def camera_of(text):
 
 
 def tag_of(body):
-    tag = re.search(r"【([^】]{2,80})】|\[([^\]]{2,100})\]", body[:120])
-    return (tag.group(1) or tag.group(2)) if tag else ""
+    return tag_text(body)   # 1.15.1: shared parser, no length cap on the tag
 
 
 TRACK_ROW_RE = re.compile(r"\|\s*变化轨\s*\|\s*([^|\n]+)\|")

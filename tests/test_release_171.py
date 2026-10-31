@@ -21,7 +21,7 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_changelog(self):
-        self.assertEqual(read('VERSION').strip(), '1.15.0')
+        self.assertEqual(read('VERSION').strip(), '1.15.1')
         log = read('CHANGELOG.md')
         self.assertIn('## 1.7.1', log)
         self.assertLess(log.index('## 1.7.1'), log.index('## 1.7.0'))

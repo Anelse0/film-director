@@ -28,6 +28,8 @@ Regex over the documented local format; semantic acting quality is still needs_r
 """
 import re
 
+from prompt_structure import tag_text
+
 OWN_TEXT = re.compile(r"【变化[：:][^】]*】|\[CHANGE[：:][^\]]*\]", re.I)
 
 # ---------- declared tone ----------
@@ -84,8 +86,7 @@ def own_text(unit):
 
 
 def shot_tag(unit):
-    m = re.search(r"【([^】]{2,80})】|\[([^\]]{2,100})\]", unit[:120])
-    return (m.group(1) or m.group(2)) if m else ""
+    return tag_text(unit)   # 1.15.1: shared parser, no length cap on the tag
 
 
 def shot_cues(body):
