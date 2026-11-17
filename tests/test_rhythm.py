@@ -1,0 +1,152 @@
+"""W22-W26 duration / rhythm review hints (rhythm_checks.py)."""
+import sys
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'scripts'))
+from rhythm_checks import recommended_window, rhythm_checks, scene_mode, track_schedule, track_mode, DEFAULTS  # noqa: E402
+
+META = '| 项 | 值 |\n|---|---|\n| duration | 30 |\n| 语速词每秒 | 3 |\n'
+
+
+def row(shot, speaker, start, end, words):
+    return {'speaker': speaker, 'text': 'x ' * words, 'start': float(start), 'end': float(end),
+            'estimate': words / 3, 'explicit': True, 'shot': str(shot)}
+
+
+class RhythmTests(unittest.TestCase):
+    def test_recommended_window_rounds_up_to_half_second_with_one_second_floor(self):
+        self.assertEqual(recommended_window(11 / 3, 0.9), 4.5)   # 3.67 / 0.9 = 4.07 -> 4.5
+        self.assertEqual(recommended_window(1.0, 0.9), 1.5)      # 1.11 -> 1.5
+        self.assertEqual(recommended_window(1 / 3, 0.9), 1.0)    # one word still needs 1 s
+
+    def test_wide_window_is_w22_but_recommended_plus_one_second_is_not(self):
+        shots = [(1, 0, 3, '【近景，固定】'), (2, 3, 6, '【近景，固定】')]
+        rows = [row(1, 'A', 0, 3, 4), row(2, 'B', 3, 6, 9)]  # A: 1.33 s -> rec 1.5, window 3 -> +1.5
+        warns, _, _ = rhythm_checks(shots, rows, 6, META.replace('30', '6'))
+        self.assertTrue(any(w.startswith('W22 A') for w in warns))
+        self.assertFalse(any(w.startswith('W22 B') for w in warns))   # 3 s -> rec 3.5, window 3
+
+    def test_dialogue_led_clip_flags_silence_long_shot_asl_and_redundancy(self):
+        shots = [(1, 0, 2, '【全景，固定】'), (2, 2, 8, '【中景，固定】'), (3, 8, 14, '【中景，固定】'),
+                 (4, 14, 19, '【近景，固定】'), (5, 19, 24, '【近景，固定】'), (6, 24, 30, '【全景，固定】')]
+        rows = [row(2, 'A', 2, 7, 11), row(3, 'B', 8, 12, 10), row(4, 'A', 14, 17, 8), row(5, 'B', 19, 23, 10)]
+        warns, infos, stats = rhythm_checks(shots, rows, 30, META)
+        codes = {w.split()[0] for w in warns}
+        self.assertIn('W23', codes)   # shot 6: 6 s, no line, fixed camera
+        self.assertIn('W24', codes)   # 30 - 16 = 14 s outside windows (47 %), trailing 7 s
+        self.assertIn('W25', codes)   # ASL 5.0 > 4.5
+        self.assertIn('W26', codes)   # track 13.0/0.9 = 14.4 + 8 silent = 23 vs 30
+        self.assertEqual(stats['derived'], 23)
+        self.assertTrue(any('平均镜长 5.0s' in i for i in infos))
+
+    def test_performance_led_single_shot_only_reports_info(self):
+        shots = [(1, 0, 20, '【中景，固定】')]
+        rows = [row(1, 'A', 6, 8, 3)]
+        warns, infos, _ = rhythm_checks(shots, rows, 20, META.replace('30', '20'))
+        self.assertEqual(warns, [])
+        self.assertTrue(any('节奏档 表演' in i for i in infos))
+
+    def test_performance_mode_selects_a_check_set_not_info_only(self):
+        # 1.4.0: 表演档 = W24 (silent stretches carry a declared function) + W30-W33; W22 / W23 / W25-W29 off.
+        shots = [(1, 0, 10, '【中景，固定】'), (2, 10, 20, '【近景，固定】')]
+        rows = [row(1, 'A', 2, 8, 3)]                 # 1 s of speech in a 6 s window: W22 would fire in 对话
+        meta = META.replace('30', '20')
+        warns, infos, stats = rhythm_checks(shots, rows, 20, meta)
+        self.assertEqual(stats['mode'], '表演')
+        self.assertTrue(any(w.startswith('W24 表演档') for w in warns), warns)
+        self.assertFalse(any(w.startswith(('W22', 'W23', 'W25', 'W26', 'W27', 'W28', 'W29')) for w in warns), warns)
+        self.assertTrue(any('检查集 W24' in i and 'W30–W33' in i for i in infos))
+        warns2, infos2, _ = rhythm_checks(shots, rows, 20, meta + '| 无声段理由 | 开头建立；结尾出画停留 |\n')
+        self.assertEqual(warns2, [])
+        self.assertTrue(any('已登记功能' in i for i in infos2))
+        # the dialogue set is unchanged: the same wide window is W22 there
+        warns3, infos3, _ = rhythm_checks(shots, rows, 20, meta + '| 节奏档 | 对话 |\n')
+        self.assertTrue(any(w.startswith('W22') for w in warns3))
+        self.assertTrue(any('检查集 W22–W29 + W30–W33' in i for i in infos3))
+
+    def test_e_layer_overrides_mode_and_beats(self):
+        shots = [(1, 0, 5, '【中景，固定】'), (2, 5, 10, '【中景，固定】')]
+        rows = [row(1, 'A', 0, 4, 9), row(2, 'B', 5, 9, 9)]
+        meta = META.replace('30', '10')
+        self.assertEqual(scene_mode(meta + '| 节奏档 | 表演 |\n', 6, 10, 2, DEFAULTS), '表演')
+        with self.assertRaises(ValueError):
+            scene_mode(meta + '| 节奏档 | 快 |\n', 6, 10, 2, DEFAULTS)
+        _, infos, stats = rhythm_checks(shots, rows, 10, meta + '| 动作节拍秒数 | 2 |\n')
+        self.assertEqual(stats['derived'], 9)   # 3.5 + 3.5 + 0 + 2 = 9
+
+    def test_w05_threshold_follows_fill_setting(self):
+        from prompt_structure import Document, dialogue_checks
+        text = '镜头1（0-4s）：【近景，固定】\n台词（A，0-4s，英语）："one two three four five six seven eight nine ten eleven"\n'
+        doc = Document(text)
+        _, w9, _, _ = dialogue_checks(doc, 4, (4.0, 3.0, 1.0))             # 3.67 > 3.6 -> W05
+        _, w10, _, _ = dialogue_checks(doc, 4, (4.0, 3.0, 1.0), fill=1.0)   # 3.67 <= 4.0 -> clean
+        self.assertTrue(any(w.startswith('W05') for w in w9))
+        self.assertFalse(any(w.startswith('W05') for w in w10))
+
+    def test_whole_line_in_four_second_shot_is_w28_for_any_camera(self):
+        # 1.11.0: a moving camera no longer exempts the shot (a handheld shot waits for the sentence just the same);
+        # the remedy no longer suggests splitting the line off-screen (W54).
+        shots = [(1, 0, 4, '【中景，固定】'), (2, 4, 6, '【近景，固定】'), (3, 6, 10, '【中景，缓推】')]
+        rows = [row(1, 'A', 0, 4, 11), row(2, 'B', 4, 6, 5), row(3, 'A', 6, 10, 11)]
+        warns, infos, _ = rhythm_checks(shots, rows, 10, META.replace('30', '10'))
+        self.assertTrue(any(w.startswith('W28 镜头1') for w in warns))
+        self.assertFalse(any('镜头2' in w and w.startswith('W28') for w in warns))  # 2 s
+        self.assertTrue(any('镜头3' in w and w.startswith('W28') for w in warns))   # camera moves, still waits for the line
+        self.assertTrue(all('画外' not in w or '不把后半句放画外' in w for w in warns if w.startswith('W28')))
+
+    def test_hold_after_last_line_is_info(self):
+        shots = [(1, 0, 4, '【近景，手持】'), (2, 4, 6, '【近景，手持】')]
+        rows = [row(1, 'A', 1, 3, 6), row(2, 'B', 4, 6, 6)]
+        _, infos, _ = rhythm_checks(shots, rows, 6, META.replace('30', '6'))
+        self.assertTrue(any('句尾后停留' in i and '镜头1 句尾后 1s' in i for i in infos), infos)
+
+    def test_longest_silent_stretch_is_w24_sub_item_with_shot_numbers(self):
+        # offset EP06 s02 clip01 v1 shape: lines end at 10 s, next line at 17 s -> 7 s without a window across shots 4-6.
+        shots = [(1, 0, 4, '【近景，手持】'), (2, 4, 6, '【近景，手持】'), (3, 6, 10, '【中近景，手持】'),
+                 (4, 10, 13, '【中景，手持】'), (5, 13, 15, '【近景，手持】'), (6, 15, 18, '【近景，手持】'), (7, 18, 20, '【近景，手持】')]
+        rows = [row(1, 'A', 1, 3, 7), row(2, 'B', 4, 5, 1), row(3, 'A', 8, 10, 8), row(6, 'A', 17, 18, 1), row(7, 'B', 18, 20, 7)]
+        warns, _, stats = rhythm_checks(shots, rows, 20, META.replace('30', '20'))
+        hit = [w for w in warns if w.startswith('W24 最长连续无台词')]
+        self.assertEqual(len(hit), 1, warns)
+        self.assertIn('7s（10-17s，镜头4、5、6）', hit[0])
+        self.assertEqual(stats['longest_silent'], 7.0)
+
+    def test_longest_silent_stretch_threshold_is_tunable_and_three_seconds_is_fine(self):
+        shots = [(1, 0, 3, '【近景，手持】'), (2, 3, 6, '【近景，手持】'), (3, 6, 9, '【近景，手持】')]
+        rows = [row(1, 'A', 0, 2, 7), row(3, 'B', 5, 9, 12)]   # gap 2-5 = 3 s
+        warns, _, _ = rhythm_checks(shots, rows, 9, META.replace('30', '9'))
+        self.assertFalse(any(w.startswith('W24 最长连续无台词') for w in warns), warns)
+        rows2 = [row(1, 'A', 0, 1, 3), row(3, 'B', 5, 9, 12)]  # gap 1-5 = 4 s
+        warns2, _, _ = rhythm_checks(shots, rows2, 9, META.replace('30', '9'))
+        self.assertTrue(any(w.startswith('W24 最长连续无台词 4s') for w in warns2), warns2)
+        warns3, _, _ = rhythm_checks(shots, rows2, 9, META.replace('30', '9') + '| 最长无台词上限 | 4 |\n')
+        self.assertFalse(any(w.startswith('W24 最长连续无台词') for w in warns3), warns3)
+
+    def test_continuous_track_allows_spill_and_flags_pileup(self):
+        rows = [row(1, 'A', 4, 6, 9), row(2, 'B', 6, 8, 3), row(3, 'A', 8, 10, 8)]   # 2.7 s in a 2 s window spills 0.7
+        warns, finishes, slack = track_schedule(rows, 21, 1.0)
+        self.assertEqual(warns, [])
+        self.assertAlmostEqual(finishes[0], 7.0, places=1)   # 9 words / 3 = 3.0 s from 4
+        rows2 = [row(1, 'A', 4, 6, 15), row(2, 'B', 6, 8, 3)]                     # 5 s from 4 -> 9, pileup 3 s
+        warns2, _, _ = track_schedule(rows2, 21, 1.0)
+        self.assertTrue(any(w.startswith('W29') for w in warns2))
+        warns3, _, _ = track_schedule([row(1, 'A', 18, 20, 12)], 20, 1.0)          # 4 s from 18 > 20
+        self.assertTrue(any('片长' in w for w in warns3))
+
+    def test_track_mode_setting_and_track_sum_derivation(self):
+        self.assertEqual(track_mode(META), '连续')             # dialogue-led default
+        self.assertEqual(track_mode(META, '表演'), '窗口')
+        self.assertEqual(track_mode(META + '| 台词轨 | 窗口 |\n'), '窗口')
+        with self.assertRaises(ValueError):
+            track_mode(META + '| 台词轨 | 快 |\n')
+        shots = [(1, 0, 2, '【中景，固定】'), (2, 2, 4, '【近景，固定】'), (3, 4, 6, '【近景，固定】'), (4, 6, 8, '【近景，固定】')]
+        rows = [row(2, 'A', 2, 4, 8), row(3, 'B', 4, 6, 8), row(4, 'A', 6, 8, 8)]   # 24 words = 8.0 s track
+        _, infos, stats = rhythm_checks(shots, rows, 8, META.replace('30', '8') + '| 台词填充率 | 1.0 |\n')   # no 台词轨 field: dialogue-led -> 连续
+        self.assertEqual(stats['derived'], 10)   # ceil(8.0 + 2 silent) — not 3 x ceil(2.67)=9 + 2 = 11
+        self.assertEqual(stats['track_mode'], '连续')
+
+
+if __name__ == '__main__':
+    unittest.main()
