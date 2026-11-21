@@ -1,11 +1,15 @@
 """Speaker attribution of off-screen lines (1.11.0; S5 §5.2 第 6 步, S6 §6.2 台词条, duration-rhythm §九).
 
-Trigger case `[实测]` `validation-log.md` evidence #10 (2026-10-19): three L-cuts put the tail of a line "画外，同一个声音接上"
-on the listener's shot, each with "此时 X 闭着嘴". The render gave the line to the listener whose face filled the frame. The official guide (Doubao Seedance 2.5 提示词指南) has no off-screen-dialogue format: its only
-"画外音" is an advert voice-over with nobody to mis-attribute it to, its 30 s example puts the grandmother's lines on
-rocket wide shots with no other face in frame, and its four-person case excludes "错误人物发声、多人同时说话" in the
-prompt itself. The evidence covers "a line is spoken while the speaker is not in frame", not "whose mouth moves when
-another face is in close-up". Both codes are render lessons (fixed by default; keeping one needs the user's words).
+The official guide (Doubao Seedance 2.5 提示词指南) writes off-screen sound three ways: `角色（V.O.）说："…"` over the
+character's own close-up with the lips written closed, `画外音："…"` in an advert shot, and a plain `台词 (角色): "…"`
+on shots where the speaker is not in frame (the 30 s example's rocket wide shots); its four-person case excludes
+"错误人物发声、多人同时说话" in the prompt itself. No official or platform guide shows a line carried across a cut onto
+another character's face (checked 2026-11: Volcano guide and tutorial, Dreamina, Higgsfield, Runway, fal, WaveSpeed).
+Both codes were render lessons through 1.15.x. 1.16.0 (user decision 2026-11-21, references/shot-requirements.md
+R1): off-screen sound is an ordinary technique — 句中切听者 / 先闻其声 / 画外整句 / 旁白与 V.O. — and the evidence row that
+banned it was withdrawn. W54 / W55 now check that an off-screen segment is written out in full (whose voice — the first
+item of the 台词（…） bracket —, the visible listener's mouth closed, the line count and exclusion sentences in
+【贯穿要求】); a complete one is an INFO. They are ordinary WARNs, no longer render lessons.
 
   W54  one line split across two shots: the same speaker's consecutive lines sit in different shots and the second is
        marked 画外 / 接上 / 后半句, or the shot prose says the line spills into the next shot (溢出 / 落在下一镜), or the
@@ -26,7 +30,9 @@ SPLIT_WORDS_RE = re.compile(r"接上|后半句|后半截|接着说|同一个声�
 TRACK_SPLIT_RE = re.compile(r"\|\s*台词轨\s*\|[^|\n]*(?:跨镜|拆句)[^|\n]*\|")
 WIDE_TAG_RE = re.compile(r"全景|远景|大全景|wide|establishing", re.I)
 CLOSE_TAG_RE = re.compile(r"特写|近景|中近|中景|双人|过肩|越肩|close|medium", re.I)
-CLOSED_MOUTH_RE = re.compile(r"闭着嘴|合着嘴|抿着嘴|没有?出声|不出声|没有?说话|没开口|不开口|嘴闭着|含着烟|咬着|mouth (?:closed|shut)", re.I)
+CLOSED_MOUTH_RE = re.compile(r"闭着嘴|合着嘴|抿着嘴|没有?出声|不出声|没有?说话|没开口|不开口|嘴闭着|嘴唇闭合|闭口|含着烟|咬着|mouth (?:closed|shut)|lips? closed", re.I)
+LINE_COUNT_RE = re.compile(r"只有这?\s*[0-9一二两三四五六七八九十]+\s*句台词|此外没有人说话|除此之外没有人说话|nothing else (?:is )?spoken|only (?:these|the) \w+ (?:scripted )?lines?", re.I)
+VO_RE = re.compile(r"V\.?O\.?|内心独白|心声", re.I)
 EXCLUSION_RE = re.compile(r"错误人物发声|错人发声|多人同时说话|只有\S{1,6}(?:在)?说话时\S{0,6}动嘴")
 CLAUSE_RE = re.compile(r"[。；;\n]")
 MIN_SHOT_KEY = "画外整句镜最短秒数"
@@ -90,62 +96,87 @@ def speaker_checks(text, shots, dialogue, metadata_text=""):
     span_of = {str(no): (s, e) for no, s, e, _ in shots}
     global_text = text.split("【贯穿要求】", 1)[1] if "【贯穿要求】" in text else ""
     has_exclusion = bool(EXCLUSION_RE.search(global_text))
-    floor = min_shot(metadata_text)
+    floor = min_shot(metadata_text)  # kept for callers that read the E-layer key; no longer a W55 condition (1.16.0)
 
-    # W54: one line split across two shots
-    split_hits = set()
+    has_count = bool(LINE_COUNT_RE.search(global_text))
+
+    def tag_details(body, text_start):
+        for speaker, details, line in speech_tags(body):
+            if line.strip() and line.strip()[:12] in text_start:
+                return details
+        return ""
+
+    def missing(body, speaker):
+        """What an off-screen segment written in this shot still lacks (R1)."""
+        lacks = []
+        face = other_face_in_frame(body, speaker, names)
+        if face and not CLOSED_MOUTH_RE.search(picture_text(body)):
+            lacks.append(f"没写{face}闭着嘴")
+        if not has_exclusion:
+            lacks.append("【贯穿要求】没有「排除错误人物发声、多人同时说话」")
+        if not has_count:
+            lacks.append("【贯穿要求】没有「全条只有这 N 句台词，此外没有人说话」")
+        return lacks
+
+    # W54: one line carried across two shots (句中切听者 / 先闻其声) — is the off-screen half written out in full?
+    split_hits = {}
     rows = sorted([r for r in (dialogue or []) if r.get("explicit") and r.get("shot")], key=lambda r: (r["start"], r["end"]))
     for a, b in zip(rows, rows[1:]):
         if normalize_speaker(a["speaker"]) != normalize_speaker(b["speaker"]) or a["shot"] == b["shot"]:
             continue
-        body_b = body_of.get(str(b["shot"]), "")
-        details_b = ""
-        for speaker, details, line in speech_tags(body_b):
-            if line.strip() and line.strip()[:12] in b["text"]:
-                details_b = details
-                break
-        marked = bool(OFF_RE.search(details_b)) or bool(SPLIT_WORDS_RE.search(body_b))
-        if marked:
-            split_hits.add((a["shot"], b["shot"], normalize_speaker(a["speaker"]), a["text"][:20], b["text"][:20]))
+        body_a, body_b = body_of.get(str(a["shot"]), ""), body_of.get(str(b["shot"]), "")
+        off_a = bool(OFF_RE.search(tag_details(body_a, a["text"])))
+        off_b = bool(OFF_RE.search(tag_details(body_b, b["text"])))
+        # one sentence carried across the cut: the first half is not a finished sentence (no closing 。！？), or the
+        # prose says so (接上 / 后半句 / 同一个声音). Two finished sentences in two shots are two lines, not a split —
+        # the off-screen one is then a 画外整句 and W55 looks at it.
+        unfinished = not re.search(r"[。！？.!?…]\s*$", a["text"].strip())
+        if ((off_a or off_b) and unfinished) or SPLIT_WORDS_RE.search(body_b):
+            off_shot = str(a["shot"]) if (off_a and not off_b) else str(b["shot"])
+            split_hits[(str(a["shot"]), str(b["shot"]))] = (normalize_speaker(a["speaker"]), a["text"][:20], b["text"][:20],
+                                                           off_shot, "先闻其声" if (off_a and not off_b) else "句中切听者")
     for no, s, e, body in shots:
         if re.search(r"溢出到(?:下一|镜头)|落在下一镜|最后几个词落在|这句的最后", body):
             lines = speech_tags(body)
             spk = lines[-1][0] if lines else "？"
-            split_hits.add((str(no), str(no + 1), spk, lines[-1][2][:20] if lines else "", ""))
+            warns.append(f"W54 镜头{no}→镜头{no + 1} {spk} 的台词写成溢出到下一镜：一句要跨镜时分成两段、各写在各的镜里，"
+                         f"画外那段写 台词（{spk}，画外音，…）并写全（shot-requirements R1；duration-rhythm §九）")
     if TRACK_SPLIT_RE.search(metadata_text or ""):
-        warns.append("W54 E 层「台词轨」写了跨镜 / 拆句：一句不跨镜，台词轨写「连续」（S5 §5.2 第 6 步）")
-    for shot_a, shot_b, spk, ta, tb in sorted(split_hits, key=lambda x: (int(re.sub(r"\D", "", x[0]) or 0))):
-        how = f"「{ta}」/「{tb}」后半句画外" if tb else f"「{ta}」句尾溢出到镜头{shot_b}"
-        warns.append(f"W54 镜头{shot_a}→镜头{shot_b} {spk} 的一句拆成两段跨镜（{how}）："
-                     f"一句不跨镜，合回说话人出镜的那一镜；要让听者的脸承担反应，用无台词的反应镜或双人镜"
-                     f"（S5 §5.2 第 6 步；duration-rhythm §九；证据 validation-log #10：听者替说话人开了口）")
+        infos.append("E 层「台词轨」写了跨镜 / 拆句：按 shot-requirements R1 分成两段、各写各的镜，台词轨仍写「连续」")
+    for (shot_a, shot_b), (spk, ta, tb, off_shot, kind) in sorted(split_hits.items(), key=lambda x: int(re.sub(r"\D", "", x[0][0]) or 0)):
+        lacks = missing(body_of.get(off_shot, ""), spk)
+        if not OFF_RE.search(tag_details(body_of.get(off_shot, ""), tb if off_shot == shot_b else ta)):
+            lacks.insert(0, f"镜头{off_shot} 那一段的括号没标「画外音」")
+        if lacks:
+            warns.append(f"W54 镜头{shot_a}→镜头{shot_b} {spk} 的一句分在两镜（{kind}：「{ta}」/「{tb}」），画外段还没写全："
+                         f"{'；'.join(lacks)}（shot-requirements R1；duration-rhythm §九）")
+        else:
+            infos.append(f"画外段 镜头{shot_a}→镜头{shot_b}：{spk}（{kind}），写法齐——是谁的声音、画里的人闭着嘴、句数与排除句"
+                         f"（R1；[未验证] 没有官方范例，成片回来记 validation-log，待验证 24）")
+    carried = {v[3] for v in split_hits.values()}
 
-    # W55: off-screen line on another character's face
+    # W55: a whole off-screen line / V.O. over a visible face — is it written out in full?
     for no, s, e, body in shots:
         tag = tag_of(body)
         if WIDE_TAG_RE.search(tag) and not CLOSE_TAG_RE.search(tag):
             continue
         for speaker, details, line in speech_tags(body):
-            if not OFF_RE.search(details) or NARRATION_RE.search(details):
+            if not OFF_RE.search(details) or str(no) in carried:
+                continue
+            where = f"镜头{no}（{s:g}-{e:g}s）"
+            if NARRATION_RE.search(details):
+                continue
+            if VO_RE.search(details) and speaker in picture_text(body):
+                if not CLOSED_MOUTH_RE.search(picture_text(body)):
+                    warns.append(f"W55 {where} {speaker} 的 V.O.「{line[:20]}」：同镜没写 {speaker} 嘴唇闭合（shot-requirements R1；官方 V.O. 范例的写法）")
                 continue
             face = other_face_in_frame(body, speaker, names)
             if not face:
                 continue
-            conditions = []
-            if e - s < floor - 1e-9:
-                conditions.append(f"镜长 {e - s:g}s < {floor:g}s")
-            if SPLIT_WORDS_RE.search(body) or any(h[1] == str(no) for h in split_hits):
-                conditions.append("不是整句（接上 / 后半句）")
-            if not CLOSED_MOUTH_RE.search(picture_text(body)):
-                conditions.append(f"没写{face}闭着嘴")
-            if not has_exclusion:
-                conditions.append("【贯穿要求】没有「排除错误人物发声、多人同时说话」")
-            where = f"镜头{no}（{s:g}-{e:g}s）"
-            if conditions:
-                warns.append(f"W55 {where} {speaker} 的台词「{line[:20]}」画外，画里是 {face} 的脸：模型会把这句给画里那张脸"
-                             f"（证据 validation-log #10）。改成 {speaker} 出镜说，或改成无台词的反应镜；"
-                             f"按项目的画外整句镜写时还缺：{'；'.join(conditions)}（阈值 E 层「{MIN_SHOT_KEY}」可覆盖）")
+            lacks = missing(body, speaker)
+            if lacks:
+                warns.append(f"W55 {where} {speaker} 的台词「{line[:20]}」是画外音，画里是 {face} 的脸，画外段还没写全："
+                             f"{'；'.join(lacks)}（shot-requirements R1）")
             else:
-                infos.append(f"画外整句镜 {where}：{speaker} 整句画外、{face} 闭着嘴、有排除句、镜长 ≥{floor:g}s——仍登记风险"
-                             f"（[未验证] 听者近景 + 他人整句画外是否仍开口，validation-log 待验证 24）")
+                infos.append(f"画外整句 {where}：{speaker} 的声音在画外、{face} 闭着嘴、有句数与排除句，写法齐（R1；成片回来记账本，待验证 24）")
     return warns, infos

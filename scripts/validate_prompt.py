@@ -68,12 +68,14 @@ from costume_checks import costume_checks
 from wording_checks import wording_checks
 from continuity_checks import continuity_checks
 from viewpoint_checks import viewpoint_checks
-from speaker_checks import speaker_checks
-from layer_checks import layer_checks
+from speaker_checks import speaker_checks, speech_tags, OFF_RE
+from layer_checks import layer_checks, eye_light_hits, source_mark_hits, prompt_body
+from subtext_checks import carriers
+from focus_checks import character_names, normalize_speaker
 
 # Review classes (1.10.0, S7 §7.1): warnings that each came from a render that went wrong.
-RENDER_LESSON_CODES = {"W35", "W46", "W47", "W48", "W51", "W52", "W54", "W55", "W57"}  # 1.12.0: W49 (and W40) folded into W57  # W50 (paused) would be a review item, not a render lesson
-# 1.11.0: one W24 sub-item is a render lesson (evidence #10, v1.3 / v1.6: 7 s without a line kept with a reason);
+RENDER_LESSON_CODES = {"W35", "W46", "W47", "W48", "W51", "W52", "W57"}  # 1.16.0: W54 / W55 check off-screen write-up completeness (R1), ordinary WARNs  # 1.12.0: W49 (and W40) folded into W57  # W50 (paused) would be a review item, not a render lesson
+# 1.11.0: one W24 sub-item is a render lesson (CHANGELOG 1.11.0, v1.3 / v1.6: 7 s without a line kept with a reason);
 # the share / lead / trail W24 items stay review items.
 RENDER_LESSON_PREFIXES = ("W24 最长连续无台词",)
 
@@ -505,6 +507,39 @@ def validate(path, duration_override=None, artifact="production", record=None, e
     hits = [n for n in DIRECTOR_NAMES if re.search(re.escape(n), name_prose, re.I)]
     if hits:
         warn("W13", f"Prompt 正文出现导演/影片人名 {hits}（名字不是可观察量，改写为机位/光/运镜/部位）")
+    # 1.16.0 — references/shot-requirements.md R4: shot deliverables carry no method / source marks.
+    marks = source_mark_hits(prompt_body(text))
+    if marks:
+        warn("W13", f"Prompt 正文出现方法 / 出处标记 {marks[:8]}（事实标签、证据号、透镜号、校验码、§ 只写在卡头、A 层、E 层和 QA；"
+                    f"正文只写镜头里的事——shot-requirements R4）")
+    # 1.16.0 — R5: no eye light anywhere in the Prompt body; ERROR, not waivable (evidence #25).
+    if artifact in {"production", "performance"}:
+        eye = eye_light_hits(prompt_body(text))
+        if eye:
+            err("W57", f"眼睛的光线 {eye[:8]}：Prompt 不写眼睛的光线描述（反光、亮、闪、映着什么、泪光、眼神光，防护句「正常人眼 / 不发光」也算），"
+                       f"写了会被画成眼睛发光；光只写到脸上，眼睛只写眼神——看哪里、怎么动、开合"
+                       f"（shot-requirements R5；证据 validation-log #25；不可保留）")
+    # 1.16.0 — R2 / R4 INFO: speaking shots without a body action by the speaker; shots without 可见画面.
+    if artifact == "production" and shots:
+        names = character_names(text, dialogue)
+        still = []
+        for no, _, _, body in shots:
+            off = {spk for spk, details, _ in speech_tags(body) if OFF_RE.search(details)}  # an off-screen voice has no body in frame
+            speakers = {normalize_speaker(r["speaker"]) for r in (dialogue or []) if str(r.get("shot")) == str(no)} - off
+            if not speakers:
+                continue
+            found = carriers(body, names)
+            for spk in sorted(speakers):
+                if spk in body.split("台词", 1)[0] or spk in names:
+                    kinds = found.get(spk, set())
+                    if not ({"身体", "互动"} & kinds):
+                        still.append(f"镜头{no}（{spk}）")
+        if still:
+            info(f"说话的人在动（R2）：{'、'.join(still[:10])} 的台词窗口内没认出说话人的身体动作或互动——动作取自分镜卡「台词动作表」，"
+                 f"表里写「站定：原因」的照写，其余补上（脚本只认动作词，不判剧情）")
+        no_visible = [str(no) for no, _, _, body in shots if "可见画面" not in body]
+        if no_visible:
+            info(f"可见画面（R4）：镜头{'、'.join(no_visible)} 没写「可见画面：」一句（画里看得见谁、在画面哪里、露到身体哪儿、前景是什么）")
 
     # W15 反套路
     for pat, label in CLICHE_PATTERNS:

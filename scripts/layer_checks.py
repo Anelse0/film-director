@@ -27,6 +27,55 @@ VOICE_WORDS = {"随口", "懒洋洋", "轻描淡写", "平平的", "干脆", "�
                "笑着", "小声", "轻轻", "不当回事", "发现", "被提醒看", "等对方", "出去", "回答"}
 
 
+# 1.16.0 — references/shot-requirements.md R5 (evidence #25): no description of light in or on the eyes anywhere in the
+# Prompt. A form check, not a word list: an eye noun followed in the same clause — with no gaze verb in between — by a
+# light word, light said to fall into the eyes, shining tears, catchlight terms, and the guard sentence itself
+# (正常人眼 / 眼睛不发光), which is also a sentence about eye light. Gaze wording (看向 / 落在 / 抬眼 / 眨眼) never matches:
+# a gaze verb between the eye noun and the light word breaks the pattern (眼睛看向亮着灯的厨房).
+EYE_NOUN = r"(?:眼睛|眼里|眼中|眼底|眼角|眼眶|眼眸|双眼|两眼|瞳孔|瞳仁|眸子|眼神|目光)"
+GAZE_GAP = r"[^，。；、：:\n看望盯瞥扫瞟向朝落转对跟随移躲回]{0,8}"
+LIGHT_WORD = (r"(?:反光|高光|光点|光斑|泪光|闪光|发光|放光|冒光|发亮|闪亮|晶亮|晶莹|亮晶晶|闪着|闪烁|闪了|闪动|映着|映出|映照|倒映"
+              r"|一亮|亮起来|亮了|亮一下|亮着|有光|的光|光芒|光泽|很亮|更亮|明亮)")
+EYE_LIGHT_RES = (
+    re.compile(r"眼神光|眼睛光|catch ?lights?|eye[- ]?lights?|eye glints?|(?:glint|light|sparkle|gleam) in (?:his|her|their|the) eyes?"
+               r"|eyes? (?:glow|glint|gleam|sparkle|shine|twinkle|shimmer)\w*|(?:glowing|shining|sparkling|gleaming|twinkling) eyes", re.I),
+    re.compile(EYE_NOUN + r"(?:里|中|底|上|内)?" + GAZE_GAP + LIGHT_WORD),
+    re.compile(r"(?:光|灯光|烛光|火光|反光|光线|光斑|高光|光点)[^，。；、\n]{0,8}(?:落进|照进|打进|映进|映在|落在|照在|打在|点亮|照亮)"
+               r"[^，。；、\n脸颊额下巴鼻嘴肩手]{0,4}(?:眼睛|眼里|眼中|眼底|瞳孔|眼眸|双眼|眸)"),
+    re.compile(r"泪[^，。；、\n]{0,8}(?:发亮|闪|晶莹|亮晶晶|光)"),
+    re.compile(r"正常(?:的)?(?:人)?眼(?:睛)?(?![镜科])|眼[^。；、\n]{0,10}不发光|normal (?:human )?eyes|no (?:eye )?glow", re.I),
+)
+# 1.16.0 — R4: shot deliverables carry no method / source marks (fact labels, evidence numbers, lens ids, check codes, §).
+SOURCE_MARK_RE = re.compile(r"\[(?:官方|第三方|推论|未验证|实测|一手)[^\]\n]{0,12}\]|证据\s*#\s*\d+|validation-log"
+                            r"|(?<![A-Za-z0-9@_])L\d{1,2}(?![A-Za-z0-9])|(?<![A-Za-z0-9@_])(?:W-C\d+|[WECSQ]\d{2})(?![A-Za-z0-9])"
+                            r"|§\s*\d|硬规则\s*\d+")
+E_TABLE_RE = re.compile(r"^\|\s*项\s*\|\s*值\s*\|", re.M)
+
+
+def prompt_body(text):
+    """Prompt text without the E-layer parameter table at the end of the file (the table may name lenses and codes)."""
+    m = E_TABLE_RE.search(text)
+    return text[:m.start()] if m else text
+
+
+def eye_light_hits(prose):
+    """Snippets that describe light in / on the eyes (R5), in order, no duplicates. Dialogue quotes are not scanned."""
+    masked = QUOTE_RE.sub("“…”", prose)
+    found = []
+    for rx in EYE_LIGHT_RES:
+        for m in rx.finditer(masked):
+            hit = m.group(0)
+            if hit not in found:
+                found.append(hit)
+    return found
+
+
+def source_mark_hits(prose):
+    """Method / source marks in a shot deliverable (R4), in order, no duplicates. Dialogue quotes are not scanned."""
+    masked = QUOTE_RE.sub("“…”", prose)
+    return list(dict.fromkeys(m.group(0) for m in SOURCE_MARK_RE.finditer(masked)))
+
+
 def load_vocabulary(path=LEXICON):
     """A-layer words: lexicon table first column (full cell and its base before （) + every 、-separated item in the
     `## A 层词` section's `- 类名：w1、w2` lines. Returns a list sorted longest first."""

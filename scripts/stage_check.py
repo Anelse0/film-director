@@ -20,7 +20,7 @@
   C11 (ERROR)  没有 `## 镜头纵览` 表，或表缺列（镜 / 时间 / 景别 / 台词 / 无台词 / 角度），或行数 ≠ `## 镜头 N` 的数量。
   W-C6 (WARN)  E 层缺 `最长无台词` 或 `反应镜` 行（S5 §5.2 第 6a / 8a 步）。
   W-C7 (WARN)  E 层 `最长无台词` 的秒数 > 3 s（默认；E 层 `最长无台词上限` 可覆盖）——保留要用户点头，QA 记原话。
-  W-C8 (WARN)  镜头纵览"台词"列有「画外」而没有「整句」字样（可能是拆句；S5 §5.2 第 6 步）。
+  W-C8 (WARN)  1.16.0（R1）：镜头纵览连续 3 行单人一句；或画外音 / V.O. 没写是谁的声音。（1.15.x 的「画外没写整句」已撤。）
   S04 (ERROR)  1.12.0 某个 `## 镜头 N` 没有「表演翻译」行，或不是三段 `A 层词 → 词典行 / 情绪库条目 → 可见写法`（两个 →）；
                写 `表演翻译：无（原因）` 的插入镜跳过。
   S05 (ERROR)  1.12.0 表演翻译第二段没有引用外化词典的行（`references/externalization-lexicon.md` 第一列，含「（轻松）」变体）
@@ -32,6 +32,13 @@
 
 退出码：0 = 做了（可有 WARN / NOTE）；1 = 缺项（ERROR）；2 = 用法错误。
 S5 停靠前：`python3 scripts/stage_check.py --stage s5 <分镜卡>`；S6 入口再跑一次。
+
+1.16.0 — references/shot-requirements.md R1–R5 (cards whose head names film-director ≥ 1.16; older cards get NOTEs):
+  S01 also: a card with dialogue has `## 台词动作表`, every line's 出处 filled（站定：原因 / 缺口 count as filled）.
+  C11 also: 镜头纵览 has the 可见画面 / 画面深处 / 人物动作 columns.
+  W-C6 also: a speaking row of 镜头纵览 has an empty 人物动作 cell.
+  W-C8 now: three 镜头纵览 rows in a run that are single-speaker, one line each; or an off-screen voice with no name.
+  W-C9 also: method / source marks, or light in the eyes, in 镜头纵览 rows, C-layer lines or 贯穿要求.
 """
 import json
 import re
@@ -39,7 +46,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from layer_checks import LEXICON, load_vocabulary, scan_text  # noqa: E402
+from layer_checks import LEXICON, load_vocabulary, scan_text, eye_light_hits, source_mark_hits  # noqa: E402
 
 LIBRARY = Path(__file__).resolve().parents[1] / 'assets' / 'emotion-library.json'
 
@@ -244,6 +251,205 @@ def structure_checks(text):
     return findings, legacy
 
 
+# ---------- 1.16.0: references/shot-requirements.md R1–R5 on the card ----------
+OVERVIEW_COLUMNS_116 = ('可见画面', '画面深处', '人物动作')
+ECHO_COLUMNS = ('镜', '时间', '景别', '运镜', '可见画面', '画面深处', '人物动作', '台词')
+OFF_LABEL = re.compile(r'画外|V\.?O\.?|旁白|内心独白|off[- ]?screen', re.I)
+TWO_SHOT = re.compile(r'双人|两人|二人|三人|过肩|越肩|同框|群')
+QUOTED = re.compile(r'[“"][^”"\n]*[”"]')
+SPEAKER_LABEL = re.compile(r'([^\s"“”：:；;，,（(/·]{1,14})\s*(?:[（(]([^）)]*)[）)])?\s*[：:]\s*[“"]')
+NO_LINE_CELLS = ('无', '—', '——', '-', '─', '无台词')
+SINGLE_RUN = 3
+C_LINE = re.compile(r'\s*-\s*(?:可见画面|有序表演块|表演(?!翻译)|台词|结束状态|起始状态|视线|主要事件|额外动作)')
+
+
+def card_version(text):
+    m = SKILL_VERSION.search(head_region(text))
+    return (int(m.group(1)), int(m.group(2))) if m else None
+
+
+def since_116(text):
+    """The card's head names film-director 1.16 or later: the R1–R5 slots are required (older cards only get NOTEs)."""
+    v = card_version(text)
+    return v is not None and v >= (1, 16)
+
+
+def overview_table(text):
+    """(header, data rows) of `## 镜头纵览`; (None, []) when the table is missing."""
+    block = section(text, '镜头纵览')
+    if block is None:
+        return None, []
+    header, rows = table_rows(block)
+    if header is None:
+        return None, []
+    return header, [r for r in rows if r and re.match(r'\d+', r[0])]
+
+
+def has_line(cell):
+    c = cell.strip()
+    return bool(c) and not PLACEHOLDER.match(c) and c not in NO_LINE_CELLS and '__' not in c
+
+
+def line_segments(cell):
+    """[(speaker, details, off-screen?)] for each labelled quoted line in an overview 台词 cell."""
+    out = []
+    for m in SPEAKER_LABEL.finditer(cell):
+        details = m.group(2) or ''
+        out.append((m.group(1), details, bool(OFF_LABEL.search(details) or OFF_LABEL.search(m.group(1)))))
+    return out
+
+
+def overview_findings(text):
+    """R1–R3 on the 镜头纵览 table. Returns (warnings, facts); checks only run on columns the table has."""
+    warns = []
+    facts = {'lines': 0, 'off_lines': 0, 'longest_single': 0, 'single_run': None, 'voiceless': [], 'no_action': [],
+             'no_depth': [], 'no_visible': [], 'has_table': False, 'dialogue': False}
+    header, data = overview_table(text)
+    if header is None:
+        return warns, facts
+    facts['has_table'] = True
+    col = lambda key: next((i for i, h in enumerate(header) if key in h), None)
+    i_line, i_vis, i_depth, i_act, i_size = col('台词'), col('可见画面'), col('画面深处'), col('人物动作'), col('景别')
+    cell = lambda r, i: r[i] if i is not None and i < len(r) else ''
+    speakers = set()
+    for r in data:
+        for spk, _, off in line_segments(cell(r, i_line)):
+            if not OFF_LABEL.search(spk):
+                speakers.add(spk)
+    run, run_start = 0, None
+    for r in data:
+        line = cell(r, i_line)
+        spoken = has_line(line)
+        segs = line_segments(line)
+        quotes = len(QUOTED.findall(line))
+        facts['lines'] += quotes if quotes else (1 if spoken else 0)
+        facts['off_lines'] += sum(1 for _, _, off in segs if off)
+        if spoken:
+            facts['dialogue'] = True
+        for spk, details, off in segs:
+            if off and OFF_LABEL.search(spk) and not spk.startswith('旁白') and '的' not in spk:
+                facts['voiceless'].append(r[0])
+        if i_vis is not None and unfilled(cell(r, i_vis)):
+            facts['no_visible'].append(r[0])
+        if i_depth is not None and unfilled(cell(r, i_depth)):
+            facts['no_depth'].append(r[0])
+        if i_act is not None and spoken and unfilled(cell(r, i_act)):
+            facts['no_action'].append(r[0])
+        on = [s for s in segs if not s[2]]
+        frame = cell(r, i_size) + ' ' + cell(r, i_vis)
+        single = (i_vis is not None and quotes == 1 and len(segs) == 1 and len(on) == 1 and not TWO_SHOT.search(frame)
+                  and not any(s in cell(r, i_vis) for s in speakers if s != on[0][0]))
+        if single:
+            run, run_start = run + 1, (run_start or r[0])
+            if run > facts['longest_single']:
+                facts['longest_single'], facts['single_run'] = run, (run_start, r[0])
+        else:
+            run, run_start = 0, None
+    if facts['longest_single'] >= SINGLE_RUN:
+        a, b = facts['single_run']
+        warns.append(f"W-C8 镜{a}–{b} 连续 {facts['longest_single']} 行单人一句（画里只有说话人、各一句）：对白排成了一人一句、一镜一句——"
+                     '先定这段对白的形状：抢话叠在同一画面 / 双人镜一来一回 / 反应写进说话镜 / 句中切听者（shot-requirements R1；证据 #26、#33）')
+    if facts['voiceless']:
+        warns.append('W-C8 镜' + '、'.join(facts['voiceless']) + ' 的画外音 / V.O. 没写是谁的声音：台词列写「说话人（画外音）："…"」（shot-requirements R1）')
+    if facts['no_action']:
+        warns.append('W-C6 镜头表有台词的行「人物动作」空：镜' + '、'.join(facts['no_action'])
+                     + '——说话的人在动，动作取自「## 台词动作表」；站定写「站定：原因」（shot-requirements R2）')
+    return warns, facts
+
+
+def action_table_findings(text):
+    """`## 台词动作表` (R2): present when the card has dialogue, every line's 出处 filled. Returns (S01 findings, facts)."""
+    facts = {'present': False, 'rows': 0, 'blank': [], 'still': 0, 'gaps': 0}
+    block = section(text, '台词动作表')
+    if block is None:
+        return ['S01 缺必做段「## 台词动作表」（有台词的卡必做：每句台词写说的时候在做什么和出处，先做剧情分析、不凭空造；'
+                'shot-requirements R2；模板 templates/shot-card.md）'], facts
+    facts['present'] = True
+    header, rows = table_rows(block)
+    if not rows and '不适用' in block:
+        return [], facts
+    i_src = next((i for i, h in enumerate(header or []) if '出处' in h), None)
+    i_do = next((i for i, h in enumerate(header or []) if '在做什么' in h), None)
+    for r in rows:
+        if not r or not r[0].strip() or PLACEHOLDER.match(r[0]):
+            continue
+        facts['rows'] += 1
+        src = r[i_src] if i_src is not None and i_src < len(r) else ''
+        act = r[i_do] if i_do is not None and i_do < len(r) else ''
+        if unfilled(src) or unfilled(act):
+            facts['blank'].append(r[0])
+        if '站定' in src or '站定' in act:
+            facts['still'] += 1
+        if '缺口' in src:
+            facts['gaps'] += 1
+    out = []
+    if i_src is None:
+        out.append('S01 「## 台词动作表」缺「出处」一列（剧本写明的动作 / 处境里本来在做的事 / 这句话对对方做的事；shot-requirements R2）')
+    elif facts['blank']:
+        out.append('S01 「## 台词动作表」还有没填的格：句 ' + '、'.join(facts['blank']) + '（取不到写「站定：原因」或「缺口」，不凭空编；shot-requirements R2）')
+    return out, facts
+
+
+def deliverable_findings(text):
+    """R4 / R5 on the card's shot deliverables: the 镜头纵览 rows, each shot's C-layer lines, and (R5 only) 贯穿要求.
+    Returns {'marks': [(where, hits)], 'eye': [(where, hits)]}."""
+    out = {'marks': [], 'eye': []}
+    header, data = overview_table(text)
+    if header is not None:
+        keep = [i for i, h in enumerate(header) if any(k in h for k in ECHO_COLUMNS)]
+        for r in data:
+            row = ' | '.join(r[i] for i in keep if i < len(r))
+            marks, eye = source_mark_hits(row), eye_light_hits(row)
+            if marks:
+                out['marks'].append((f'镜头表 镜{r[0]}', marks))
+            if eye:
+                out['eye'].append((f'镜头表 镜{r[0]}', eye))
+    for part in re.split(r'^(?=## 镜头\s*\d+)', text, flags=re.M):
+        m = re.match(r'## 镜头\s*(\d+)', part)
+        if not m:
+            continue
+        body = re.split(r'^## (?!镜头)', part, maxsplit=1, flags=re.M)[0]
+        content = '\n'.join(re.sub(r'^[^：:\n]*[：:]', '', l, count=1) for l in body.splitlines() if C_LINE.match(l))
+        marks, eye = source_mark_hits(content), eye_light_hits(content)
+        if marks:
+            out['marks'].append((f'镜头{m.group(1)} C 层行', marks))
+        if eye:
+            out['eye'].append((f'镜头{m.group(1)} C 层行', eye))
+    through = section(text, '贯穿要求')
+    if through:
+        eye = eye_light_hits(through)
+        if eye:
+            out['eye'].append(('贯穿要求', eye))
+    return out
+
+
+def requirement_findings(text):
+    """All 1.16.0 card findings in one place: (errors, warnings, notes). Cards older than 1.16 get notes, not codes."""
+    errors, warns, notes_ = [], [], []
+    strict = since_116(text)
+    header, _ = overview_table(text)
+    ow, facts = overview_findings(text)
+    warns.extend(ow)
+    if header is not None:
+        missing = [c for c in OVERVIEW_COLUMNS_116 if not any(c in h for h in header)]
+        if missing:
+            msg = '镜头纵览缺列：' + '、'.join(missing) + '（1.16 起每镜必填；shot-requirements R2–R4）'
+            (errors if strict else notes_).append(('C11 ' if strict else '1.16 前的卡（不报错）') + msg)
+    has_dialogue = facts['dialogue'] or bool(re.search(r'^\s*-\s*台词[^\n]*[“"]', text, flags=re.M))
+    if has_dialogue:
+        af, _ = action_table_findings(text)
+        if strict:
+            errors.extend(af)
+        else:
+            notes_.extend('1.16 前的卡（不报错）' + f for f in af)
+    d = deliverable_findings(text)
+    for where, hits in d['marks']:
+        warns.append(f'W-C9 {where} 出现方法 / 出处标记 {hits[:6]}：镜头交付物只写镜头里的事，标记写在卡头、A 层、E 层和 QA（shot-requirements R4）')
+    for where, hits in d['eye']:
+        warns.append(f'W-C9 {where} 写了眼睛的光线 {hits[:6]}：只写眼神，不写光、亮、闪、反光、泪光；光只写到脸上（shot-requirements R5；证据 #25）')
+    return errors, warns, notes_
+
+
 def not_applicable(text):
     """Head items written as 「不适用…」（前六项写「无」也算）and E rows written as 无 / 不适用, for the dock-B echo."""
     head = head_region(text)
@@ -271,6 +477,7 @@ def notes(path):
         out += [f'旧卡（不报错）{f}' for f in findings]
     elif section(text, '执行卡') is not None:
         out.append('卡里还抄着「## 执行卡」：1.15.0 起答案写在各自的格子里，删掉这张表（S5 §5.11）')
+    out += requirement_findings(text)[2]
     na = not_applicable(text)
     if na:
         out.append('写了「不适用」的格子（停靠 B 回显单列）：' + '；'.join(na))
@@ -303,12 +510,11 @@ def check(path, stage='s5'):
             data = [r for r in rows if r and re.match(r'\d+', r[0])]
             if shots and len(data) != len(shots):
                 errors.append(f'C11 镜头纵览 {len(data)} 行，分镜卡有 {len(shots)} 个镜头')
-            idx = next((i for i, h in enumerate(header) if '台词' in h), None)
-            if idx is not None:
-                for r in data:
-                    cell = r[idx] if idx < len(r) else ''
-                    if '画外' in cell and '整句' not in cell:
-                        warns.append(f'W-C8 镜{r[0]} 纵览的台词列写了画外却没写「整句」：一句不跨镜，画外只用整句镜（S5 §5.2 第 6 步）')
+
+    # 1.16.0 — references/shot-requirements.md R1–R5 (W-C8 no longer bans an off-screen line that is not 「整句」)
+    re_, rw, _ = requirement_findings(text)
+    errors.extend(re_)
+    warns.extend(rw)
 
     longest = e_value(text, '最长无台词')
     reactions = e_value(text, '反应镜')

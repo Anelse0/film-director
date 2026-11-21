@@ -187,6 +187,18 @@ def check(path, stage='s6', prompt=None):
             table_bearings = bearing_table(anchors or '')
             if anchors and not table_bearings:
                 warns.append('W-C3 空间锚点没给固定物件写绝对方位（方位：门=北，西长墙=西 …），机位表的画左 / 画右核不了（C09）')
+            # 1.16.0 — references/shot-requirements.md R3: the table says what is deep in each frame (evidence #32, #33).
+            # Cards whose head names no film-director version ≥ 1.16 are left alone unless they already have the column.
+            depth_i = next((i for i, h in enumerate(header) if '画面深处' in h), None)
+            version = re.search(r'film-director\s*v?(\d+)\.(\d+)', text[:1500])
+            if depth_i is None:
+                if version and (int(version.group(1)), int(version.group(2))) >= (1, 16):
+                    warns.append('W-C3 机位表没有「画面深处有什么」一列：每镜写画面最深处的物件（方位行里的名字），'
+                                 'S6 据此写「画面深处是 X」（shot-requirements R3；证据 #32）')
+            else:
+                no_depth_rows = [f'镜{n}' for n, r in sorted(seen.items()) if depth_i >= len(r) or PLACEHOLDER.match(r[depth_i])]
+                if no_depth_rows:
+                    warns.append('W-C3 机位表「画面深处有什么」未填：' + '、'.join(no_depth_rows) + '（每镜都填，和参考图同视角也填；shot-requirements R3）')
             cell = lambda r, col: r[idx[col]] if idx.get(col) is not None and idx[col] < len(r) else ''
             bare = []
             for n, r in sorted(seen.items()):

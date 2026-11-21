@@ -58,7 +58,7 @@ KUBRICK = re.compile(r"低着头[^。；\n]{0,10}(?:抬眼|抬起眼|眼睛(?:�
                      r"|head (?:down|lowered)[^.;\n]{0,30}eyes (?:up|raised)|looks? up from under", re.I)
 SIDE_EYE = re.compile(r"只动眼珠|只有眼珠|眼珠(?:转|斜|瞟)|斜眼|斜着眼|眼睛斜|余光(?:看|瞥|扫|瞄)|头不(?:动|转)[^。；，\n]{0,8}(?:眼|视线)"
                       r"|side-?eye|eyes only|without turning (?:his |her |their )?head", re.I)
-LIGHT_CUE = re.compile(r"笑|嚼|吃着|哼|聊|打趣|挑眉|眉毛[^。；，\n]{0,3}挑|眨|眼睛亮|轻快|随意|放松|继续|不停|没停|手上的活|边(?:走|说|吃|嚼)边|乐|逗|哈"
+LIGHT_CUE = re.compile(r"笑|嚼|吃着|哼|聊|打趣|挑眉|眉毛[^。；，\n]{0,3}挑|眨|轻快|随意|放松|继续|不停|没停|手上的活|边(?:走|说|吃|嚼)边|乐|逗|哈"
                        r"|smil|grin|laugh|chew|chat|shrug|wink|keeps? (?:working|stirring|eating)", re.I)
 
 SECTION_ALIASES = {

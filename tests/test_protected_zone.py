@@ -1,4 +1,16 @@
-"""film-director protected zone: production/performance core hash-locked at the 1.15.1 baseline.
+"""film-director protected zone: production/performance core hash-locked at the 1.16.0 baseline.
+1.16.0 (2026-11-21): one table for writing and checking the shot deliverables — references/shot-requirements.md R1–R5
+(dialogue shape and off-screen sound; the speaker is doing something taken from the story; what is deep in each frame;
+deliverables carry only what is in the shot; no light in the eyes). Evidence #10 withdrawn by the user and the ban built
+on it lifted: W54 / W55 / W-C8 keep their codes and now check that an off-screen segment is written out in full (no
+longer render lessons). W57 gains a non-waivable eye-light group (ERROR, form check over the whole Prompt body); the
+「正常人眼，不发光」 reminder is retired. W52 gains the per-shot 画面深处 slot, W13 / W-C9 the method / source marks,
+S01 / C11 / W-C3 / W-C6 the new card slots (cards older than 1.16 get NOTEs). check.py prints the dock echo block.
+No new code. Hashes for stage-4 / 5 / 6 / 7, emotion-performance, capabilities, genre-packs, the lexicon, the three
+templates, and speaker / layer / viewpoint / guide / tone / rhythm / stage / camera-plan / qa checks, validate_prompt and
+check.py re-set in the same change with a CHANGELOG entry; shot-requirements.md joins the zone.
+1.16.0 previous baseline: 1.15.1.
+
 1.15.1 (2026-11-05): `## 表演设计稿` gets a slot of its own (stage_check S01 checks presence, rows and blanks, never the
 content; check.py plan gives the same finding as a note; 表演翻译's first segment comes from the draft; dock A echoes it)
 and W38's budget becomes 15,000 characters of Prompt body (E-layer 字符上限; 字数上限 / 词数上限 no longer read). No new
@@ -173,50 +185,51 @@ ROOT = Path(__file__).resolve().parents[1]
 
 PROTECTED = {
     'assets/emotion-library.json': 'ef22ac8bfec33567344e13a927d47f7b577c3c6f07b110cc5a2e316523599977',
-    'references/emotion-performance.md': 'b928678bee8bfc1a6d68953b83f5bc9a86dff022e0a41667b38f8f5e4e8a084e',
+    'references/emotion-performance.md': 'dafd8c46170a540dc50e3ac080818cadb1292bd256f4e6b0ce5277ea6d059940',
     'references/emotion-index.json': '3fe3f2946669c2e649f79bdc82917dfa8bc528220d992f7166350623ee03e3d5',
-    'references/stage-4-performance.md': '4f1a0b9f1a40aaa8b17887579d9670d796b900e4336f5d0511877abda6d41a3f',
-    'references/stage-5-directing-storyboard.md': '7a6f2aeb1ab0007cd9b4b4cd01612e7d54e6b630e74e56856615977a3f26484b',
+    'references/stage-4-performance.md': '0316675133ce6796e736a1b0f9e36738aad720ae0f9ea912a6b18dcd63e16860',
+    'references/stage-5-directing-storyboard.md': '2d91cf78ecccc73ce3ee5567fc6122e7d481a6a49517741bdf88624f21719151',
     'references/stage-5b-reference-assets.md': '1474f46720197c575ff10b56a355a1a56d83daf3eae389f8d5eb592f86939964',
-    'references/stage-6-prompt-compiler.md': '8c199d618f50643ba23323a8dbb92f9813236a33483545552329a9cf9dc1eed5',
-    'references/stage-7-qa-continuity.md': '58c343a6b33588721fd43a1f74b8fe62aefc019698d4b49a66963cf5182b3fe8',
+    'references/stage-6-prompt-compiler.md': '24b8ea8651f84db04402c31169e6d5b80adf79762626f8fb635eba0ef2ba0928',
+    'references/stage-7-qa-continuity.md': 'f962c32c84ec2c2b7dc58af63605806ad39c8a908faab4bd0b8f65eecbc70b83',
     'references/production-workflow.md': '4ee084b36dc9a2ef1ddb0e9c46e1dd45727383b24385c40e7b03e34cb1f8840a',
     'references/performance-record.md': '1c970fd3dc7db2d45706361e8f283ae2f2d6d70c00e55f3f369e0f1bb8bcd4eb',
-    'references/seedance-2.5-capabilities.md': 'be04dcd09e62d3df98a4f8d5ed95d4f79a58272838a35d777c8e509bcc79fad6',
+    'references/seedance-2.5-capabilities.md': 'c303fba78790dec9f06d4daf8355e6750f475cfc571c3357066cfa8d06e0bcad',
     'references/camera-vocabulary.md': '27975701c3e1c6e34995418b96a6b66a90e78b4538994dc98c39db108d830b67',
-    'references/externalization-lexicon.md': '8b74ea808a17acbd39d27ae331500f3bdfb353c85419cdc3b394e56986a272f8',
-    'references/genre-packs.md': 'e8bf4dd45abb22776ac4dec2490551e1a9aedddfd26cca459bc6557df3c95513',
+    'references/externalization-lexicon.md': '3982b9cdd021d6647897266021259aff7cf1d84e80829527c5d630c3e6c8d8a3',
+    'references/genre-packs.md': '27a3ad4ad2428479c21164aa7097b1b92341958aaa0e44fbfa5d8d442f3569df',
     'references/director-lenses.md': '8964042aed92fb30c6daaba7ed66e891274cb96bbdbaa3a0514037c29f4aa894',
-    'templates/prompt-templates.md': 'fb6797e3a31b30749d635e4f47e94f8a2218ca74bc5bb86d873bc15bb372a74b',
+    'templates/prompt-templates.md': '7eaa17089b501e36ee500847e62d0befd2ebfd6d81ee0316861b2c3c626eb8b6',
     'templates/performance-record.json': 'aced33a04bd1e72fe33e6e78ca64e4a938402654cdb3028ee4139d75ae64d159',
     'templates/production-record.json': '96e7fcb783028d6c258005c962c18b9f2cdbd3bc36d52596bc7a5568900b838b',
-    'templates/shot-card.md': 'c91221171aff1f786847abc6979240146cc2c13b7e08f62f57792665d02e7216',
+    'templates/shot-card.md': '9183f0c92f05ec50d5404913c900b393ea85e113c1dee627d0d4d492afe2a33a',
     'templates/reference-asset-brief.md': '106e08747fd39ce900ca928afef2244ce8071c0ea43fec328581352ce552b441',
     'templates/asset-registry.md': '2b478992e56c0d08bd99e66b04aa3933f9bd6dc46b0ca2eb507ae68632df0bba',
-    'scripts/rhythm_checks.py': '054dede9984ba5e1e48f996285c44202aa6c8f4116344ce0299840b56a7ad106',
+    'scripts/rhythm_checks.py': '54945abfb4e3849cbe82a8e481bd5420a12d52dfbdadaee4f542051b4f0eb1db',
     'scripts/variation_checks.py': '11a116c63f7e32a988da9eedb465d89ad8a3d73b92d7ceeb804c3e487a74c19f',
     'scripts/direction_checks.py': '54a7597032ffacbd05a689cd7e3ad0e5c8fb3ba2379f251d2b213839fb4fd992',
-    'scripts/tone_checks.py': '8d290d18d81ece80a2e059d52ad7cb477990d85f07057a2ecc5ffd8a1de4c404',
-    'scripts/guide_checks.py': 'e359422919c76cea3494464069a7396787db1e07c76af3dd69688659e351b461',
+    'scripts/tone_checks.py': '1d836d6366587ebb763693eebc61b7aaa9a51158cd29d6d3f6bdde44f0063c1c',
+    'scripts/guide_checks.py': 'cb2bc889727724e227025d2c6e7ba7b10e20ed80847b41d293171de78eaff7ef',
     'scripts/focus_checks.py': '5b5d3110f22c58c272f3c24aa7533e75b9b91f46f951589a829c0eef25a6106c',
     'scripts/subtext_checks.py': '84ba710d324ed2102701ae0ee2866a205f2c9160527af52b4b6f1cc647408f10',
     'scripts/costume_checks.py': '9f65d3b4fcdac75a5d61a07ccfbe6e63a0cd7a5c11ffd262ac9428d23f44ca59',
-    'scripts/validate_prompt.py': '308921095bceb079d05f5df8494d8e3494e0b88c54c94d8c889db77bb15cbd4e',
+    'scripts/validate_prompt.py': '511f5db52dfbb8c9d6d376fa687584a4b882e263b13c4caabb2cb3520a4174ad',
     'scripts/prompt_structure.py': 'efbd86c1eb8fb7a7a451e291e2b0e58d2e7220e97a8fae3d0c1bd37a2307fc7d',
     'scripts/production_contract.py': 'adb40d1e05ecb6d298e2bb295a8ef325941812f00a89f9000fe03477a58b780f',
     'scripts/production_preflight.py': 'aab550991f000dac727f744f1c603a5a1519f1adf44d2e288e11c9d3cc859c0d',
     'scripts/emotion_library.py': '11b1257528d00edbf66a9637a9508966f26d23d1db97917b609127858ac0cc6d',
-    'scripts/camera_plan_check.py': '5ac36c464c60e8975b38dbab713aab15d77d60aef9b3dff757fc1d8cae66fa3f',
+    'scripts/camera_plan_check.py': '45138f69a861210ea967c7d0fe36b4c20dded64a2c76fa2666ef3715a695d1d9',
     'scripts/wording_checks.py': 'a12700904926ac4329b375c14873f25cb869dd8f337c61a9a50f97427c9702dd',
     'scripts/continuity_checks.py': '208cf0e08a652f086f5960999c1475c1785facfdadd2db44a25eba234e08ad74',
-    'scripts/viewpoint_checks.py': '187b20fe9ae81935218aa2ae0e9d31488eef9cbce2e9741847622355e5691ae6',
-    'scripts/layer_checks.py': 'd88ecc2ef1554e94e685719a6677e5984092887f81087a92c95ca85c13c3abc8',
-    'scripts/speaker_checks.py': 'a2036a3712bda50ed19d87ab93b30f6efe804c2a7c705e3545678ed4fe4ad75c',
-    'scripts/stage_check.py': '0c657be25b9f3e9b877fb83b6ced4016015c9b215b24c0a0cc3cbf1e2f616783',
-    'scripts/check.py': '6a96cb95e043169fe24200f41f7e3920d789c1ca63bcce0caca420dfac753fa1',
+    'scripts/viewpoint_checks.py': '4216537edadbb2fcfdbe7c05aa5d621ff6cb88b39f6b5b453638e5d62e92903a',
+    'scripts/layer_checks.py': '590dca196be1a40a7e5156539a72e6da7947bd5ebbef09adbde815c0bddfc8c8',
+    'scripts/speaker_checks.py': '9c46c728b84531249499ce3cadc87280cb064cf3a9ef66f3ac961b40484bfb5a',
+    'scripts/stage_check.py': '598a8a40154b41e7a2cc1ad51697d0b4f3545e236e4210d6351863a1096438e9',
+    'scripts/check.py': '92748f197e14861dcb3354ade1fc7528e7d0929e4306f3c41821f494d349335b',
     'scripts/evidence.py': 'c28d4eaf39dcfff1f0e72f26f20eba8ed1410af4128766c82b1373474d4f8071',
-    'scripts/qa_check.py': '7761440f162d0abebfb35bdcde08897aad7c742e1d6f1a8e1df78aa0747e1ba6',
-    'templates/qa.md': 'a654156ad4c039eb2d00d53cf9074c4737b747cecc26fab8018f04c681a4f4f0',
+    'scripts/qa_check.py': 'c44df6dfe0993f2e6917bd9f3eff4446d3fcaead27780e8282f3e38cbaaab62f',
+    'templates/qa.md': '6f2e31f563155b4ef8c1d653e37e9c5b2bb8050f8ac3ecfd8cdae8dcf8e785b6',
+    'references/shot-requirements.md': '727bb12c8108ee8e4fcb281c769f08773e118d73861fcee7f0f10fef4479b2a6',
     'scripts/performance_checks.py': '5a54ee7c0cb77b67466ee6f7102ded648220cf8b922fea7da186f68ccd869ae0',
 }
 

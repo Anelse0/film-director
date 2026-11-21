@@ -38,6 +38,8 @@ NOT_VIEW = re.compile(r"不参考[^。；\n]{0,12}视角|视角[^。；\n]{0,6}�
 BIND_NAME = re.compile(r"^\s*@(?P<name>[^\s：:=＝，。；、（）()【】\[\]\"“”→@,;!?<>|]+)\s*[：:]", re.M)
 SHOT_NO = re.compile(r"镜头\s*(\d+)")
 SCENE_WORDS = re.compile(r"空间|陈设|材质|光色|场景|房间|化妆间|走廊|室内|街|scene|room|set", re.I)
+DEPTH_RE = re.compile(r"画面深处|画面最深处|景深处|in the (?:deep )?background|deep in (?:the )?frame", re.I)
+BACKING_RE = re.compile(r"背靠|背对着?[^，。；\n]{0,10}(?:拍|朝)|镜头(?:身后|后方|背后)|机位[^，。；\n]{0,6}背对")
 OVERRIDE = re.compile(r"\|\s*视角说明\s*\|\s*([^|\n]+)\|")
 
 
@@ -68,6 +70,14 @@ def viewpoint_checks(text, shots, metadata_text=""):
             if own > 1 or glob > 1:
                 warns.append(f"W52 镜头{no} 镜头身后的「{obj}」本镜提了 {own} 次、提到镜头{no}的全局句里 {glob} 次（各留一句方向句）："
                              "多提一次就多一分被拉进画面的可能，写成光源（X 的暖光）也算；正文只写画面里有什么")
+    # 1.16.0 — references/shot-requirements.md R3 (evidence #32, #33): every shot says what is deep in the frame; a shot that
+    # only says what the camera backs onto (背靠 / 背对 / 镜头身后) is rendered facing that thing.
+    no_depth = [no for no, _, _, body in shots if not DEPTH_RE.search(body)]
+    backed = [no for no in no_depth if BACKING_RE.search(dict((n, b) for n, _, _, b in shots)[no])]
+    if no_depth:
+        extra = f"；其中镜头{'、'.join(str(n) for n in backed)} 只写了镜头背靠 / 背对 / 身后什么，会被拍成朝着那样东西" if backed else ""
+        warns.append(f"W52 镜头{'、'.join(str(n) for n in no_depth)} 没写「画面深处是 X」{extra}：每镜写明画面深处是什么，有参考图也逐镜写，"
+                     "朝向靠这一句交代（shot-requirements R3；证据 #32）")
     refs = section_text(text, "素材绑定")
     override = OVERRIDE.search(metadata_text)
     for line in refs.splitlines():

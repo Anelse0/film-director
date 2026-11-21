@@ -16,10 +16,10 @@ REFS = ('【素材绑定】\n@A-基础形象：A 的人物参考，只参考面�
         '@01_hall：走廊的空间、陈设、材质与光色参考：尽头正中一扇门，门左右各一截窄墙。人物站位以门右边那截窄墙为准：人站在那里时，门在他的画左。\n')
 OVERVIEW = '【总述】9秒3:4竖屏，走廊（@01_hall），B 走来跟 A 说一句话。整条轻松、生活化。声音：无 bgm，只有环境音与台词。\n【画面基调】暖光，深景深。\n'
 OPENING = '【起始状态】A（@A-基础形象，穿 @01_A_outfit）站在门右边那截窄墙前，门在他的画左。\n'
-SHOT1 = '镜头1（0-3s）：【近景，正对门，轻微手持，焦点在 A】A 在画面中间，门在他的画左。他抬眼看着画左的门。\n'
-SHOT2 = ('镜头2（3-6s）：【中景双人，正对门，轻微手持，焦点在 B】B（@B-基础形象，穿 @01_B_outfit）从画左前景入画，停在 A 前方。'
+SHOT1 = '镜头1（0-3s）：【近景，正对门，轻微手持，焦点在 A】画面深处是走廊尽头的门。A 在画面中间，门在他的画左。他抬眼看着画左的门。\n'
+SHOT2 = ('镜头2（3-6s）：【中景双人，正对门，轻微手持，焦点在 B】画面深处是走廊尽头的门。B（@B-基础形象，穿 @01_B_outfit）从画左前景入画，停在 A 前方。'
          '台词（B，3-5s，英语，随口）："You good?"；此时 A 闭着嘴。\n')
-SHOT3 = '镜头3（6-9s）：【近景，正对门，轻微手持，焦点在 A】A 在画面中间，嘴角撇一下。台词（A，6-8s，英语，平平的）："Fine."；此时 B 闭着嘴。\n'
+SHOT3 = '镜头3（6-9s）：【近景，正对门，轻微手持，焦点在 A】画面深处是走廊尽头的门。A 在画面中间，嘴角撇一下。台词（A，6-8s，英语，平平的）："Fine."；此时 B 闭着嘴。\n'
 GLOBAL = ('【贯穿要求】保持一致：A、B 的脸和衣着与参考图一致。空间与机位：门在 A 的画左。'
           '声音：A 是 21 岁男声，偏低；B 是 25 岁女声，干脆。无 bgm：不要音乐、背景音乐、配乐、器乐、旋律与铺底音，只生成环境音与台词；不要字幕。\n')
 E = '\n| 项 | 值 |\n|---|---|\n| duration | 9 |\n| 上传与角色 | @A-基础形象、@01_A_outfit、@B-基础形象、@01_B_outfit、@01_hall |\n'
@@ -178,7 +178,7 @@ class ContinuityTests(unittest.TestCase):
 
 class ViewpointTests(unittest.TestCase):
     ROOM = '@01_room：化妆间的材质与光色参考，只用在镜头3：胡桃木墙板、暖色柔光。不参考这张图的视角和构图。\n'
-    REVERSE = ('镜头3（6-9s）：【中近景，机位在屋里正对门，焦点在 A】机位在屋里朝门拍，灯泡镜台在镜头身后。门被推开，A 站在门口，'
+    REVERSE = ('镜头3（6-9s）：【中近景，机位在屋里正对门，焦点在 A】画面深处是门外的走廊。机位在屋里朝门拍，灯泡镜台在镜头身后。门被推开，A 站在门口，'
                '镜头身后灯泡镜的暖色柔光照亮他的脸。他进门，从画左出画。\n')
 
     def test_behind_camera_object_mentioned_repeatedly(self):
@@ -204,7 +204,7 @@ class ViewpointTests(unittest.TestCase):
 
     def test_e23_landmark_and_direction_sentence_are_not_counted(self):
         """E23 wants the door anchored in every unit that moves toward it, and a 方向： sentence in 【贯穿要求】."""
-        walk = ('镜头3（6-9s）：【中近景，后退跟拍，焦点在 A】A 朝镜头走来，门在镜头身后；他看着镜头后方的门，'
+        walk = ('镜头3（6-9s）：【中近景，后退跟拍，焦点在 A】画面深处是走廊另一头。A 朝镜头走来，门在镜头身后；他看着镜头后方的门，'
                 '越走越近，镜头身后的门开着一条缝。\n')
         glob = GLOBAL + '方向：镜头3 机位背对门，门在镜头身后，A 朝镜头走来，走向门。\n'
         self.assertEqual(codes(run(build(shots=(SHOT1, SHOT2, walk), global_rules=glob)), 'W52'), [])
@@ -215,6 +215,70 @@ class ViewpointTests(unittest.TestCase):
         result = run(build(refs=REFS + self.ROOM, shots=(SHOT1, SHOT2, shot), e=e))
         self.assertFalse(any('@01_room' in h for h in codes(result, 'W52')))
         self.assertTrue(any(i.startswith('反视角参考图') for i in result['info']), result['info'])
+
+
+class DepthTests(unittest.TestCase):
+    """1.16.0 — references/shot-requirements.md R3 (evidence #32, #33): every shot says what is deep in the frame."""
+
+    def test_shot_without_depth_sentence_is_w52(self):
+        shot = SHOT3.replace('画面深处是走廊尽头的门。', '')
+        hits = codes(run(build(shots=(SHOT1, SHOT2, shot))), 'W52')
+        self.assertEqual(len(hits), 1, hits)
+        self.assertIn('镜头3', hits[0])
+        self.assertIn('画面深处', hits[0])
+        self.assertNotIn('镜头1', hits[0])
+
+    def test_camera_backing_without_depth_is_called_out(self):
+        shot = ('镜头3（6-9s）：【中近景，镜头背靠玻璃朝屋里拍，焦点在 A】A 站在屋子中间，手里拿着一张纸。\n')
+        hits = codes(run(build(shots=(SHOT1, SHOT2, shot))), 'W52')
+        self.assertTrue(hits and '只写了镜头背靠' in hits[0], hits)
+
+    def test_depth_sentence_is_required_even_with_a_scene_image(self):
+        result = run(build())  # REFS binds @01_hall; every fixture shot still states 画面深处
+        self.assertEqual(codes(result, 'W52'), [])
+
+
+class EyeLightTests(unittest.TestCase):
+    """1.16.0 — R5 (evidence #25): light in / on the eyes is an ERROR anywhere in the Prompt body; gaze wording is not."""
+
+    def eye_errors(self, text):
+        return [e for e in run(text)['errors'] if e.startswith('W57 眼睛的光线')]
+
+    def test_eye_light_wordings_are_errors(self):
+        for wording in ('眼睛里有一点台灯的反光', '眼睛亮起来', '眼睛一亮', '瞳孔里映着吊灯', '眼底有光', '眼中闪着泪光',
+                        '吊灯的光落进他的眼睛', '眼角亮了一下', '眼睛里有眼神光'):
+            shot = SHOT3.replace('嘴角撇一下。', f'嘴角撇一下，{wording}。')
+            self.assertTrue(self.eye_errors(build(shots=(SHOT1, SHOT2, shot))), wording)
+
+    def test_eye_light_outside_the_timeline_is_caught_too(self):
+        self.assertTrue(self.eye_errors(build(overview=OVERVIEW.replace('暖光，深景深。', '暖光，深景深，人物眼睛里有眼神光。'))))
+        self.assertTrue(self.eye_errors(build(global_rules=GLOBAL.replace('声音：', '人物光：眼睛里有一点台灯的反光。声音：', 1))))
+
+    def test_guard_sentence_is_not_written_either(self):
+        self.assertTrue(self.eye_errors(build(global_rules=GLOBAL.replace('声音：', '人物为正常人眼，不发光。声音：', 1))))
+
+    def test_gaze_wording_is_not_eye_light(self):
+        for wording in ('眼神先落在门上，再转向画右', '目光转向画右亮着灯的房间', '他抬眼看她，眨了一下眼', '眼睛看向亮着灯的走廊',
+                        '眼睛看着手机屏幕的光', '台灯的暖光从画右照他半边脸', '眼睛跟着她的手往上走'):
+            shot = SHOT3.replace('嘴角撇一下。', f'嘴角撇一下，{wording}。')
+            self.assertEqual(self.eye_errors(build(shots=(SHOT1, SHOT2, shot))), [], wording)
+
+    def test_dialogue_quotes_are_not_scanned(self):
+        shot = SHOT3.replace('"Fine."', '"你眼睛里有光。"')
+        self.assertEqual(self.eye_errors(build(shots=(SHOT1, SHOT2, shot))), [])
+
+
+class SourceMarkTests(unittest.TestCase):
+    """1.16.0 — R4: the Prompt body carries no method / source marks; the E table may."""
+
+    def test_marks_in_the_body_are_w13(self):
+        shot = SHOT3.replace('嘴角撇一下。', '嘴角撇一下（L3 静止，证据 #25，[官方]）。')
+        hits = codes(run(build(shots=(SHOT1, SHOT2, shot))), 'W13')
+        self.assertTrue(hits and '出处标记' in hits[0] and 'L3' in hits[0] and '[官方]' in hits[0], hits)
+
+    def test_e_table_may_name_lenses_and_codes(self):
+        result = run(build(e=E + '| 透镜 | L4（主） |\n| 已知风险 | W55 待核 |\n'))
+        self.assertEqual(codes(result, 'W13'), [])
 
 
 class WarnClassTests(unittest.TestCase):

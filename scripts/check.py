@@ -29,7 +29,7 @@
   --json                              机器可读输出
 
 第 8 道数字行的来源：最长连续无台词 = Prompt 台词窗口之间最长的空档（和 W24 最长连续无台词用同一定义），括号里附
-分镜卡 E 层「最长无台词」；一句一镜 / 总句 = 总句数 − W54 报的跨镜句；反应镜数 = E 层「反应镜」行里「同镜」之前的镜号数；
+分镜卡 E 层「最长无台词」；一句一镜 / 总句 = 总句数 − 跨镜句（W54 报的和写法齐的画外段都算；这只是数字，不是达标数）；反应镜数 = E 层「反应镜」行里「同镜」之前的镜号数；
 画外句数 = 括号里写了画外 / off-screen 的台词数；句尾后停留 ≥1 s 的镜 = 镜尾比该镜最后一句窗口尾晚 ≥1 s 的镜
 （和 rhythm_checks 的 INFO 同一定义）；最后一格「不达标项处置」留给人，--sync 原样保留。
 
@@ -191,6 +191,7 @@ class Report:
         self.inputs = [Path(p) for p in inputs]
         self.runs = []      # (tool label, errors, warnings, infos)
         self.block = []     # 数字块 lines
+        self.echo = []      # 回显块 lines (1.16.0): the shot table + R1–R5 要求核对
         self.notes = []     # one-line remarks (missing files, skipped steps)
         self.sync = None    # --sync summary
         self.after = None   # qa_check after --sync: (errors, warnings)
@@ -240,6 +241,9 @@ class Report:
         if self.block:
             lines.append('-- 数字块（现行状态机器行 + 第 8 道数字行，格式同 templates/qa.md，可直接粘贴）')
             lines += self.block
+        if self.echo:
+            lines.append('-- 回显块（停靠回显的镜头表与要求核对，直接贴，不手写；shot-requirements R1–R5）')
+            lines += self.echo
         infos = self.infos()
         lines.append(f'-- INFO {len(infos)}')
         lines += [f'INFO  [{t}] {m}' if not m.startswith('CHECK ') else f'CHECK [{t}] {m[6:]}' for t, m in infos]
@@ -266,6 +270,7 @@ class Report:
             'render_lessons': [{'tool': t, 'message': m} for t, m in self.render_lessons()],
             'warnings': [{'tool': t, 'message': m} for t, m in self.other_warnings()],
             'block': self.block,
+            'echo': self.echo,
             'info': [{'tool': t, 'message': m} for t, m in self.infos()],
             'sha256': self.hashes(),
             'sync': self.sync,
@@ -340,7 +345,7 @@ def gate8_cells(card_text, prompt_text, result):
         if number:
             cells[0] = cells[0] + f'；E 层 {number.group(0)} s'
     # 2 一句一镜 / 总句（总句数 − W54 跨镜句）
-    split = sum(1 for w in result['warnings'] if re.match(r'W54 镜头\d+→镜头', w))
+    split = sum(1 for w in list(result['warnings']) + list(result.get('info', [])) if re.match(r'(?:W54 |画外段 )镜头\d+→镜头', w))
     cells[1] = f'{len(rows) - split} / {len(rows)}'
     # 3 反应镜数（分镜卡 E 层）
     cells[2] = reaction_count(card_text) if card_text else '—'
@@ -446,7 +451,82 @@ def pipeline_plan(card, report):
     report.add('镜头纵览算术', [], [], infos)
     notes += [f.removeprefix('S01 ') for f in stage_check.design_findings(text)]
     report.notes.extend(notes + version_line_notes(card_text=text))
+    report.echo = echo_block(text)
     return facts_from(card=card, camera=(ce, cw))
+
+
+# ---------- 回显块（1.16.0）：镜头表 + R1–R5 要求核对，停靠回显的 ④⑤ 直接贴 ----------
+def echo_block(card_text, prompt_text=None, result=None):
+    """The dock echo's shot table (the eight echo columns of `## 镜头纵览`) and one line per requirement R1–R5
+    (references/shot-requirements.md). Card-side numbers come from stage_check; Prompt-side ones from `result`."""
+    lines = []
+    header, data = stage_check.overview_table(card_text)
+    if header is None:
+        lines.append('（分镜卡还没有「## 镜头纵览」表，镜头表贴不了）')
+    else:
+        keep = []
+        for key in stage_check.ECHO_COLUMNS:
+            i = next((n for n, h in enumerate(header) if key in h), None)
+            if i is not None and i not in keep:
+                keep.append(i)
+        lines.append('| ' + ' | '.join(header[i] for i in keep) + ' |')
+        lines.append('|' + '---|' * len(keep))
+        for r in data:
+            lines.append('| ' + ' | '.join((r[i] if i < len(r) else '') for i in keep) + ' |')
+        missing = [c for c in stage_check.OVERVIEW_COLUMNS_116 if not any(c in h for h in header)]
+        if missing:
+            lines.append('（镜头表缺列：' + '、'.join(missing) + '）')
+    _, facts = stage_check.overview_findings(card_text)
+    action_findings, action = stage_check.action_table_findings(card_text)
+    found = stage_check.deliverable_findings(card_text)
+    warnings = (result or {}).get('warnings', [])
+    errors = (result or {}).get('errors', [])
+    infos = (result or {}).get('info', [])
+    verdict = lambda problems: '过' if not problems else '没过——' + '；'.join(problems)
+    # R1
+    p = []
+    if facts['longest_single'] >= stage_check.SINGLE_RUN:
+        p.append(f"镜 {facts['single_run'][0]}–{facts['single_run'][1]} 连续 {facts['longest_single']} 行单人一句")
+    if facts['voiceless']:
+        p.append('镜 ' + '、'.join(facts['voiceless']) + ' 的画外音没写是谁的声音')
+    off_bad = [w for w in warnings if w.startswith(('W54', 'W55'))]
+    if off_bad:
+        p.append(f'Prompt 画外段没写全 {len(off_bad)} 处（W54 / W55）')
+    lines.append(f"R1 对白形状与画外：{verdict(p)}（连续单人一句最长 {facts['longest_single']} 镜；画外音 / V.O. {facts['off_lines']} 句）")
+    # R2
+    p = []
+    if facts['dialogue'] and not action['present']:
+        p.append('没有「## 台词动作表」')
+    if action['blank']:
+        p.append('台词动作表未填：句 ' + '、'.join(action['blank']))
+    if facts['no_action']:
+        p.append('镜头表「人物动作」空：镜 ' + '、'.join(facts['no_action']))
+    still = [i for i in infos if i.startswith('说话的人在动（R2）')]
+    if still:
+        p.append('Prompt 里' + still[0].split('：', 1)[1].split(' 的台词窗口')[0] + ' 没认出说话人的动作')
+    lines.append(f"R2 说话的人在动：{verdict(p)}（台词动作表 {action['rows']} 句，站定 {action['still']}，缺口 {action['gaps']}"
+                 + ('——缺口要用户定' if action['gaps'] else '') + '）')
+    # R3
+    p = []
+    if facts['no_depth']:
+        p.append('镜头表「画面深处」空：镜 ' + '、'.join(facts['no_depth']))
+    if facts['no_visible']:
+        p.append('镜头表「可见画面」空：镜 ' + '、'.join(facts['no_visible']))
+    depth = [w for w in warnings if w.startswith('W52') and '画面深处' in w]
+    if depth:
+        p.append('Prompt ' + depth[0].split(' 没写')[0].replace('W52 ', '') + ' 没写画面深处')
+    lines.append(f'R3 可见画面与画面深处：{verdict(p)}')
+    # R4
+    p = [f'{where} {hits[:3]}' for where, hits in found['marks']]
+    if any(w.startswith('W13') and '出处标记' in w for w in warnings):
+        p.append('Prompt 正文有方法 / 出处标记（W13）')
+    lines.append(f'R4 只写镜头里的事：{verdict(p)}')
+    # R5
+    p = [f'{where} {hits[:3]}' for where, hits in found['eye']]
+    if any(e.startswith('W57 眼睛的光线') for e in errors):
+        p.append('Prompt 写了眼睛的光线（W57 ERROR）')
+    lines.append(f'R5 不写眼睛的光线：{verdict(p)}')
+    return lines
 
 
 # ---------- pipelines ----------
@@ -457,6 +537,7 @@ def pipeline_s5(card, report):
     report.add('stage_check --stage s5', se, sw)
     report.notes.extend(stage_check.notes(card))
     report.notes.extend(version_line_notes(card_text=Path(card).read_text(encoding='utf-8')))
+    report.echo = echo_block(Path(card).read_text(encoding='utf-8'))
     return facts_from(card=card, camera=(ce, cw), stage=(se, sw))
 
 
@@ -479,6 +560,8 @@ def pipeline_s6(card, prompt, report):
         report.notes.append('没有给 Prompt：validate_prompt 与 camera_plan_check --prompt（C10）没跑（S6 入口可以这样；S6 后要带 Prompt 再跑）')
     report.notes.extend(version_line_notes(card_text=Path(card).read_text(encoding='utf-8'),
                                            prompt_text=Path(prompt).read_text(encoding='utf-8') if prompt else None))
+    report.echo = echo_block(Path(card).read_text(encoding='utf-8'),
+                             Path(prompt).read_text(encoding='utf-8') if prompt else None, result)
     return facts_from(card=card, prompt=prompt, result=result, camera=camera, c10_checked=bool(prompt), stage=(se, sw))
 
 

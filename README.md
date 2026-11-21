@@ -12,7 +12,7 @@ Seedance 2.5 视频 Prompt 生产 Skill：表演外化与情绪提示词、导�
 S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考资产 ▮A ▮B → S6 Prompt → S7 检查 ▮C
 ```
 
-输入是已成形的剧本场景（任何来源）、分镜或表演需求；剧本层缺口只登记不代写。纯表演测试走共用 S4 模块，不强制故事、参考图或停靠；可直接说"10秒，从愤怒到委屈，最后忍住眼泪"或"原文直出 Crying"。交付原则：对话是默认，落盘只在停靠确认后或用户明确要求时。停靠点三个：A 方案（机位表 + 镜头纵览，`check.py plan`）、B 分镜卡、C Prompt 交付（S7 八道做完后回显全文）；任何停靠点的反馈走改稿回路（定位 → 方案 → 只改受影响小节 → 变更摘要）。
+输入是已成形的剧本场景（任何来源）、分镜或表演需求；剧本层缺口只登记不代写。纯表演测试走共用 S4 模块，不强制故事、参考图或停靠；可直接说"10秒，从愤怒到委屈，最后忍住眼泪"或"原文直出 Crying"。交付原则：对话是默认，落盘只在停靠确认后或用户明确要求时。停靠点三个：A 方案（机位表 + 镜头纵览，`check.py plan`）、B 分镜卡、C Prompt 交付（S7 八道做完后回显全文）；三处回显同一版式，镜头表和 R1–R5 要求核对由 `check.py` 的回显块生成（1.16.0，`references/shot-requirements.md`）；任何停靠点的反馈走改稿回路（定位 → 方案 → 只改受影响小节 → 变更摘要）。
 
 ## 文件地图
 
@@ -26,7 +26,8 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `references/performance-record.md` | 可选：编译前记录与自动检查接口 |
 | `references/stage-4-performance.md` | S4 表演外化：设计稿 → 翻译（三段：A 层词 → 词典行 → 可见 + 声音）、基调是参数（§4.4b）、台词括号 = 声音翻译（§4.4c 第 7 条） |
 | `references/stage-5-directing-storyboard.md` | S5 导演与分镜：决策载体、走位表、机位设计（§5.1g）、变化轨（§5.1f）、镜头设计顺序（含 6a 反应镜、8a 无台词段预算）、每镜负载、镜头纵览与收口对照表（§5.11） |
-| `references/duration-rhythm.md` | 时长与节奏：clip 时长从内容推导、台词窗口 / 连续台词轨、镜长分布、无声段（最长连续无台词 ≤3 s）、变化轨、一句不跨镜（§九）、语速校准；阈值的来历与设计，码表在 `checks.md` |
+| `references/shot-requirements.md` | 镜头要求表 R1–R5：编写和检查共用一张——对白形状与画外手法、说话的人在动、画面深处、镜头交付物只写镜头里的事、不写眼睛的光线 |
+| `references/duration-rhythm.md` | 时长与节奏：clip 时长从内容推导、台词窗口 / 连续台词轨、镜长分布、无声段（最长连续无台词 ≤3 s）、变化轨、对白形状与画外写法（§九）、语速校准；阈值的来历与设计，码表在 `checks.md` |
 | `references/director-grammar.md` | S5 主参考：景别 / 运镜 / 动线 / 剪辑 / 构图 / 光 / 载体 / 类型语法，每条附一手来源与核实状态 |
 | `references/director-lenses.md` | S5 透镜：场景问题 → 作用机制 → 选择 → 边界 → 语法依据 |
 | `references/camera-vocabulary.md` | 镜头语汇：景别 / 机高 / 焦距与景深 / 运镜与终点 / 构图 / 转场 / 光 / 声音符号 |
@@ -50,13 +51,14 @@ S1 资源读取 → S2 任务识别 → S4 表演外化 → S5 分镜与参考�
 | `scripts/evidence.py` | 按编号读 `references/validation-log.md` 成片表的一行（`evidence.py 8 9`、`--grep 关键词`、`--all`）：规则文里的「证据 #n」查单条，不读整表 |
 | `scripts/session_cost.py` | 量尺（不进保护区）：读会话 .jsonl，按 message id 去重算真实调用数 / output / 缓存读取 / 上下文均值与峰值、输出构成、规则文 Read 次数、脚本跑几次与"无改动重复"、产物整篇 Write 次数；改版后用下一条 clip 的会话和上一版比 |
 | `scripts/check.py` | 一键入口（1.13.0）：`s5 <分镜卡>` / `s6 <分镜卡> [prompt]` / `qa [--sync] <qa.md>` 三个子命令只 import 上面四个脚本的 `check()` / `validate()`，合并报告按 ERROR → 成片教训类 WARN → 其余 WARN → 数字块（可直接粘贴进 QA 现行状态与第 8 道）→ INFO → 输入文件 sha256；`qa --sync` 把现行状态的机器行写回，再独立跑一遍 `qa_check`；1.14.1 起所有子命令对超过 200 字的分镜卡版本行 / Prompt E 表「版本」行给 NOTE（版本行一行制，改动叙事进 QA 历史）；1.15.0 起 `qa` 对历史单条超过 300 字、「用户已点名」超过 200 字、同名的节出现两次给 NOTE，`qa --sync` 把旧 QA 的「执行卡」机器行就地改名为「分镜检查」 |
-| `scripts/speaker_checks.py` / `layer_checks.py` | 校验模块（由 validate_prompt 调用）：W54 / W55 跨镜与画外归属；W57 A 层词边界，字典读外化词典 |
+| `scripts/speaker_checks.py` / `layer_checks.py` | 校验模块（由 validate_prompt 调用）：W54 / W55 画外段写法是否写全（1.16.0 起，R1）；W57 A 层词边界（字典读外化词典）与眼睛光线一组（R5，ERROR） |
 | `scripts/measure_clip.py` | 有成片时：切点 / 有声占比 / 语速校准 / 视觉变化谱对照 Prompt 的时间轨与变化轨（需 ffmpeg） |
 | `examples/example-01-kitchen-keys*.md` | 完整走查 + 通过校验的 Prompt |
 | `examples/example-02-one-scene-three-lenses.md` | 同一场戏三个透镜的对照，含一版通过校验的 Prompt |
 | `examples/example-03-yogurt-comedy*.md` | 喜剧走查（三拍 + 反讽落差），通过校验 |
 | `examples/example-04-parameters-fight*.md` | 同一套规则，参数卡不同：高强度外放吵架，与示例 01 对照 |
 | `examples/example-05-stairwell-letter*.md` | 导演语法走查：信息差、有动机的推近与反向跟拍、关键帧作为构图载体，通过校验 |
+| `examples/example-07-noodle-shop*.md` | 1.16 的完整分镜卡 + Prompt：台词动作表（动作出处）、镜头表（可见画面 / 画面深处 / 人物动作 / 台词）、句中切听者的画外写法；`check.py s6` 0 ERROR 0 WARN |
 | `examples/example-06-balcony-cigarette*.md` | 暧昧 / 爱情走查：凝视、距离、未完成的触碰、音乐克制，通过校验 |
 | `tests/acceptance-1.1.0/` | 1.1.0 的 review、三份调研摘要（官方文档 / 导演语法 / 台词速率 / 暧昧爱情）与验收协议 |
 | `examples/performance/acceptance.md` | 五组验收 Demo、取材/改动说明及成片观察点 |

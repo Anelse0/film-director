@@ -17,7 +17,7 @@ def read(name):
 
 class WiringTests(unittest.TestCase):
     def test_version_and_changelog(self):
-        self.assertEqual(read('VERSION').strip(), '1.15.1')
+        self.assertEqual(read('VERSION').strip(), '1.16.0')
         log = read('CHANGELOG.md')
         self.assertIn('## 1.11.0', log)
         self.assertLess(log.index('## 1.11.0'), log.index('## 1.10.0'))
@@ -30,20 +30,22 @@ class WiringTests(unittest.TestCase):
 
     def test_render_lesson_classes(self):
         from validate_prompt import RENDER_LESSON_CODES, is_render_lesson
-        self.assertIn('W54', RENDER_LESSON_CODES)
-        self.assertIn('W55', RENDER_LESSON_CODES)
+        # 1.16.0 (shot-requirements R1): W54 / W55 check off-screen write-up completeness; ordinary WARNs now.
+        self.assertNotIn('W54', RENDER_LESSON_CODES)
+        self.assertNotIn('W55', RENDER_LESSON_CODES)
         self.assertTrue(is_render_lesson('W24 最长连续无台词 7s（10-17s）> 3s'))
         self.assertFalse(is_render_lesson('W24 台词窗口外 16s（59% > 20%）'))
         self.assertFalse(is_render_lesson('W28 镜头1 4s 只承载一整句'))
 
     def test_rule_text(self):
         skill = read('SKILL.md')
-        self.assertIn('但一句不跨镜', skill)
+        self.assertIn('对话场不排成一人一句、一镜一句', skill)  # 1.16.0 rewrote 硬规则 18 (was 「但一句不跨镜」)
+        self.assertIn('画外音、旁白、V.O. 是常规手法', skill)
         self.assertIn('21. **镜头纵览与分镜卡结构检查必做。**', skill)
         self.assertIn('stage_check.py', skill)
         self.assertIn('Q04', skill)
         rhythm = read('references/duration-rhythm.md')
-        self.assertIn('3. **一句不跨镜**', rhythm)
+        self.assertIn('3. **句中可以切，画外是常规手法**', rhythm)  # 1.16.0 (was 「3. **一句不跨镜**」)
         self.assertIn('| W54 |', read('references/checks.md'))
         self.assertIn('| W55 |', read('references/checks.md'))
         self.assertIn('最长连续无台词 ≤3 s', rhythm)
@@ -53,12 +55,12 @@ class WiringTests(unittest.TestCase):
         self.assertIn('**8a 无台词段预算**', stage5)
         self.assertIn('## 5.11 分镜卡收口对照表', stage5)
         stage6 = read('references/stage-6-prompt-compiler.md')
-        self.assertIn('一句台词不分两段引号跨镜', stage6)
+        self.assertIn('**画外音、旁白、V.O.**', stage6)  # 1.16.0 (was 「一句台词不分两段引号跨镜」)
         self.assertIn('排除错误人物发声', stage6)
         stage7 = read('references/stage-7-qa-continuity.md')
         self.assertIn('3. **八道审阅**', stage7)
         self.assertIn('| 8 节奏与剪辑', stage7)
-        self.assertIn('听者替说话人开了口', stage7)
+        self.assertIn('听者替说话人开口', stage7)
         self.assertIn('Q04', stage7)
         self.assertIn('W54 / W55', read('references/stage-4-performance.md'))
         self.assertIn('**用户已点名**', read('templates/shot-card.md'))
@@ -67,14 +69,14 @@ class WiringTests(unittest.TestCase):
         self.assertIn('用户已点名', qa)
         self.assertIn('### 8 节奏与剪辑', qa)
         self.assertIn('待验证', read('references/validation-log.md'))
-        self.assertIn('画外整句镜', read('references/validation-log.md'))
+        self.assertIn('画外整句', read('references/validation-log.md'))
 
     def test_examples_with_off_screen_lines_carry_the_conditions(self):
         from validate_prompt import validate
         for name in ('examples/example-02-lens-B-haneke.prompt.md', 'examples/example-06-balcony-cigarette.prompt.md'):
             result = validate(ROOT / name)
             self.assertEqual([w for w in result['warnings'] if w.startswith('W55')], [], name)
-            self.assertTrue(any('画外整句镜' in i for i in result['info']), name)
+            self.assertTrue(any(i.startswith('画外整句') and '写法齐' in i for i in result['info']), name)
 
     def test_checkers_import(self):
         import speaker_checks  # noqa: F401

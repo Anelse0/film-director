@@ -193,7 +193,7 @@ def rhythm_checks(shots, rows, duration, metadata_text):
             if length >= cfg["整句一镜阈值"] and len(lines) == 1 \
                     and (lines[0]["end"] - lines[0]["start"]) >= length - 1e-9:
                 warns.append(f"W28 镜头{no} {length:g}s 只承载一整句（{lines[0]['speaker']}）：镜头在等句号——缩短镜长、换景别 / 机位，"
-                             f"或把反应拆成无台词的反应镜；不拆句、不把后半句放画外（duration-rhythm §九，W54）")
+                             f"或把反应拆成无台词的反应镜，或句中切听者并按 shot-requirements R1 写全（duration-rhythm §九）")
             if lines:
                 last_end = max(r["end"] for r in lines)
                 if e - last_end >= 1.0 - 1e-9:
@@ -235,7 +235,7 @@ def rhythm_checks(shots, rows, duration, metadata_text):
             prev_end = max(prev_end or 0, r["end"])
         share = silent / duration
         # 1.11.0 longest stretch without a dialogue window (lead, any gap, trail); render lesson (W24 最长连续无台词).
-        # `[实测]` evidence #10, v1.3 / v1.6: 7 s without a line, kept twice with a written reason, called out
+        # `[实测]` CHANGELOG 1.11.0, v1.3 / v1.6: 7 s without a line, kept twice with a written reason, called out
         # twice by the user ("整整 7s 无台词"); the share and the lead / trail items below stay review items.
         stretches = [(0.0, lead)] if lead > 0 else []
         prev_end = None

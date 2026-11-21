@@ -33,6 +33,13 @@ out=$($V examples/example-06-balcony-cigarette.prompt.md); rc=$?
 check "example-06 exits 0" $rc "$out"
 echo "$out" | grep -q "0 error(s), 0 warning(s)"; check "example-06 clean (romance)" $? "$(echo "$out" | tail -1)"
 
+out=$($V examples/example-07-noodle-shop.prompt.md); rc=$?
+check "example-07 exits 0" $rc "$out"
+echo "$out" | grep -q "0 error(s), 0 warning(s)"; check "example-07 clean (1.16 shot requirements, 句中切听者)" $? "$(echo "$out" | tail -1)"
+out=$(python3 scripts/check.py s6 examples/example-07-noodle-shop.md examples/example-07-noodle-shop.prompt.md); rc=$?
+check "check.py s6 example-07 exits 0" $rc "$(echo "$out" | tail -1)"
+echo "$out" | grep -q "R5 不写眼睛的光线：过"; check "check.py s6 example-07 prints the echo block (R1–R5)" $? "$(echo "$out" | grep -c '^R[1-5]')"
+
 out=$($V examples/bad-example.prompt.md); rc=$?
 [ $rc -eq 1 ]; check "bad-1 exits 1" $? "rc=$rc"
 for code in E01 E12 E05 E02 E03 E04 W06 W09 W10 W02; do

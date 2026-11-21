@@ -84,7 +84,9 @@ class StageCheckTests(unittest.TestCase):
         errors, warns = sc.check(path, 's5')
         self.assertEqual(errors, [], errors)
         self.assertEqual(warns, [], warns)
-        self.assertEqual(sc.notes(path), [])
+        # the fixture is a 1.15 card: the 1.16 slots (台词动作表, 可见画面 / 画面深处 / 人物动作) are notes, not codes
+        self.assertEqual([n for n in sc.notes(path) if not n.startswith('1.16 前的卡')], [])
+        self.assertTrue(all('不报错' in n for n in sc.notes(path)), sc.notes(path))
 
     def test_missing_mandatory_section_is_s01(self):
         errors, _ = run(card(sections=SECTIONS.replace('## 走位表\n…\n\n', '')))
@@ -183,11 +185,73 @@ class StageCheckTests(unittest.TestCase):
         _, warns = run(card(e_layer=over + '| 最长无台词上限 | 4 |\n'))
         self.assertFalse(any(w.startswith('W-C7') for w in warns), warns)
 
-    def test_off_screen_without_whole_line_is_w_c8(self):
+    def test_off_screen_half_line_is_no_longer_w_c8(self):
+        """1.16.0: 「画外没写整句」 was the ban on a line carried across a cut; the ban is withdrawn (shot-requirements R1)."""
         _, warns = run(card(overview=OVERVIEW.replace('| B 1 句画内 |', '| A 后半句画外 |')))
-        self.assertTrue(any(w.startswith('W-C8') for w in warns), warns)
-        _, warns = run(card(overview=OVERVIEW.replace('| B 1 句画内 |', '| A 1 句画外整句 |')))
         self.assertFalse(any(w.startswith('W-C8') for w in warns), warns)
+
+
+EXAMPLE_07 = (Path(__file__).resolve().parents[1] / 'examples' / 'example-07-noodle-shop.md').read_text(encoding='utf-8')
+
+
+class ShotRequirementTests(unittest.TestCase):
+    """1.16.0 — references/shot-requirements.md R1–R5 on a 1.16 card (examples/example-07-noodle-shop.md)."""
+
+    def test_the_worked_example_is_clean(self):
+        path = write(EXAMPLE_07)
+        errors, warns = sc.check(path, 's5')
+        self.assertEqual(errors, [], errors)
+        self.assertEqual(warns, [], warns)
+        self.assertEqual(sc.notes(path), [])
+
+    def test_missing_action_table_is_s01(self):
+        start, end = EXAMPLE_07.index('## 台词动作表'), EXAMPLE_07.index('## 走位表')
+        errors, _ = run(EXAMPLE_07[:start] + EXAMPLE_07[end:])
+        self.assertTrue(any(e.startswith('S01') and '台词动作表' in e for e in errors), errors)
+
+    def test_blank_source_cell_is_s01(self):
+        errors, _ = run(EXAMPLE_07.replace('| 剧本处境：在擦最后一张桌子 |', '| __ |'))
+        self.assertTrue(any(e.startswith('S01') and '句 2' in e for e in errors), errors)
+
+    def test_gap_and_standing_are_allowed_sources(self):
+        text = EXAMPLE_07.replace('| 剧本处境：在擦最后一张桌子 |', '| 缺口 |')
+        errors, _ = run(text)
+        self.assertFalse(any(e.startswith('S01') for e in errors), errors)
+        _, facts = sc.action_table_findings(text)
+        self.assertEqual((facts['gaps'], facts['still']), (1, 1))
+
+    def test_missing_overview_columns_are_c11_on_a_116_card(self):
+        text = EXAMPLE_07.replace('| 可见画面 | 画面深处 | 人物动作 |', '| 看得见 | 深处 | 动作 |')
+        errors, _ = run(text)
+        self.assertTrue(any(e.startswith('C11') and '画面深处' in e for e in errors), errors)
+
+    def test_three_single_speaker_rows_in_a_run_is_w_c8(self):
+        text = EXAMPLE_07.replace('画右前景是秋姐的背和肩，虚着 |', '门在他身后 |') \
+                         .replace('"放那儿吧。吃了没？"', '"放那儿吧。"')
+        _, warns = run(text)
+        hits = [w for w in warns if w.startswith('W-C8')]
+        self.assertTrue(hits and '连续 3 行单人一句' in hits[0], warns)
+        _, warns = run(EXAMPLE_07)
+        self.assertFalse(any(w.startswith('W-C8') for w in warns), warns)
+
+    def test_off_screen_voice_without_a_name_is_w_c8(self):
+        _, warns = run(EXAMPLE_07.replace('小北（画外音）："回老家。"', '画外音："回老家。"'))
+        self.assertTrue(any(w.startswith('W-C8') and '是谁的声音' in w for w in warns), warns)
+
+    def test_blank_action_cell_on_a_speaking_row_is_w_c6(self):
+        _, warns = run(EXAMPLE_07.replace('| 小北把保温袋放到画左的空桌上，手还搭着提手 |', '| __ |'))
+        self.assertTrue(any(w.startswith('W-C6') and '人物动作' in w and '镜3' in w for w in warns), warns)
+
+    def test_source_marks_and_eye_light_in_deliverables_are_w_c9(self):
+        _, warns = run(EXAMPLE_07.replace('- 主要事件：凳子翻到一半又放回地上', '- 主要事件：凳子翻到一半又放回地上（L4，证据 #25）'))
+        self.assertTrue(any(w.startswith('W-C9') and '出处标记' in w for w in warns), warns)
+        _, warns = run(EXAMPLE_07.replace('- 视线：秋姐的眼睛从凳子转向画右小北那边', '- 视线：秋姐的眼睛亮起来，转向画右小北那边'))
+        self.assertTrue(any(w.startswith('W-C9') and '眼睛的光线' in w for w in warns), warns)
+
+    def test_a_layer_keeps_its_analysis(self):
+        """R4 limits the deliverables, not the card: the A line, 台词动作表 and the E layer may name methods."""
+        _, warns = run(EXAMPLE_07.replace('**A 创作决策**（不进 Prompt）：峰值。', '**A 创作决策**（不进 Prompt）：峰值（L4，证据 #33）。'))
+        self.assertFalse(any(w.startswith('W-C9') for w in warns), warns)
 
     def test_missing_translation_line_is_s04(self):
         shots = SHOTS.replace(TRANSLATION, '', 1)
